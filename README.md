@@ -4,7 +4,7 @@ O Concord e um aplicativo de comunicacao leve para web, Windows, Android e iOS. 
 
 ## Estado atual
 
-**Etapa 01 - Identidade e temas em desenvolvimento.**
+**Etapa 01 - Identidade e temas em desenvolvimento, com validacao real do e-mail de recuperacao ainda pendente.**
 
 Repositorio principal: https://github.com/pedrovictorpina/concord
 
@@ -14,15 +14,16 @@ Repositorio principal: https://github.com/pedrovictorpina/concord
 - controle de captura de tela implementado no navegador;
 - frontend modular com modos sistema, claro e escuro;
 - cadastro e login preparados para Supabase Hosted;
+- perfil automatico, sessao restaurada e recuperacao de senha;
 - migration inicial de perfis e politicas RLS versionada;
-- testes de jornada com Playwright;
+- testes de jornada com Playwright e integracao remota controlada;
 - arquitetura, roadmap e processo de documentacao registrados.
 
 Consulte [docs/PROGRESSO.md](docs/PROGRESSO.md) para acompanhar as entregas.
 
 ## Executar localmente
 
-Requisitos: Node.js 20.19 ou superior e pnpm 11.19 ou superior.
+Requisitos: Node.js 22.12 ou superior e pnpm 11.19 ou superior.
 
 ```powershell
 pnpm install
@@ -38,10 +39,13 @@ pnpm check
 pnpm lint
 pnpm exec playwright install chromium
 pnpm test:e2e
+pnpm test:integration:supabase
 pnpm db:lint
 ```
 
 `pnpm db:push` aplica migrations ao projeto Supabase vinculado. Execute `pnpm supabase db push --dry-run` antes de qualquer alteracao remota.
+
+O teste de integracao Supabase cria dois usuarios QA com senhas efemeras e registra apenas os IDs de limpeza em `.qa/supabase-test-users.json`, fora do diretorio limpo pelo Playwright. Remova esses usuarios e o manifesto local ao terminar a validacao. Os quatro usuarios criados nas duas execucoes documentadas da Etapa 01 ja foram removidos.
 
 ## Documentacao
 

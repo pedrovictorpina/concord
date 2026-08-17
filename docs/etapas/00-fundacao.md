@@ -27,7 +27,7 @@ O diretorio continha apenas um repositorio Git vazio, sem commits, codigo, remot
 
 ## Dependencias
 
-- Node.js 20.19 ou superior;
+- Node.js 22.12 ou superior;
 - pnpm 11.19 ou superior;
 - navegador com permissao para captura de tela;
 - autenticacao correta no GitHub CLI para publicar.

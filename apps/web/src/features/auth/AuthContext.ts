@@ -15,13 +15,27 @@ export type AuthResult = {
   message: string
 }
 
+export type ConcordProfile = {
+  id: string
+  nickname: string
+  username: string
+  avatarUrl: string | null
+  status: 'online' | 'away' | 'busy' | 'offline'
+}
+
 export type AuthContextValue = {
   configured: boolean
   loading: boolean
+  profile: ConcordProfile | null
+  profileError: string | null
+  profileLoading: boolean
+  recoveryMode: boolean
   session: Session | null
+  requestPasswordReset: (email: string) => Promise<AuthResult>
   signIn: (credentials: AuthCredentials) => Promise<AuthResult>
   signUp: (credentials: SignUpCredentials) => Promise<AuthResult>
   signOut: () => Promise<AuthResult>
+  updatePassword: (password: string) => Promise<AuthResult>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

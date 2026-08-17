@@ -1,19 +1,21 @@
 import type { ChannelSummary } from '@concord/contracts'
 import { ThemeControls } from '../../components/theme/ThemeControls'
+import type { WorkspaceIdentity } from './workspace-types'
 
 type ChannelPanelProps = {
   activeChannel: string
   channels: ChannelSummary[]
+  identity: WorkspaceIdentity
   onChannelChange: (channelId: string) => void
   onExit: () => void
 }
 
-export function ChannelPanel({ activeChannel, channels, onChannelChange, onExit }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannel, channels, identity, onChannelChange, onExit }: ChannelPanelProps) {
   return (
     <aside className="channel-panel">
       <header className="workspace-heading">
         <div><span className="eyebrow">REDE PRIVADA</span><strong>Concord</strong></div>
-        <button type="button" aria-label="Sair da demonstracao" onClick={onExit}>×</button>
+        <button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button>
       </header>
 
       <section className="channel-group">
@@ -34,8 +36,8 @@ export function ChannelPanel({ activeChannel, channels, onChannelChange, onExit 
         <p>FREQUENCIAS DE VOZ</p>
         <button className="channel voice active" type="button"><span>◖</span>sala-da-madrugada</button>
         <div className="voice-member">
-          <span className="avatar avatar-green">PV</span>
-          <div><strong>Pedro</strong><small>ao vivo</small></div><i aria-label="Microfone ligado">⌁</i>
+          <span className="avatar avatar-green">{identity.initials}</span>
+          <div><strong>{identity.nickname}</strong><small>ao vivo</small></div><i aria-label="Microfone ligado">⌁</i>
         </div>
         <div className="voice-member muted">
           <span className="avatar avatar-amber">DC</span>
@@ -45,8 +47,8 @@ export function ChannelPanel({ activeChannel, channels, onChannelChange, onExit 
 
       <div className="workspace-theme-control"><ThemeControls compact /></div>
       <footer className="identity-strip">
-        <span className="avatar avatar-green">PV</span>
-        <div><strong>pedro</strong><small>@fundador</small></div>
+        <span className="avatar avatar-green">{identity.initials}</span>
+        <div><strong>{identity.nickname}</strong><small>@{identity.username} · {identity.connectionLabel}</small></div>
         <span className="presence-dot" aria-label="Online" />
       </footer>
     </aside>

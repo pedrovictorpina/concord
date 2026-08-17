@@ -4,13 +4,13 @@ import { useAuth } from './features/auth/useAuth'
 import { WorkspaceShell } from './features/workspace/WorkspaceShell'
 
 function App() {
-  const { loading, session, signOut } = useAuth()
+  const { loading, profile, profileError, profileLoading, session, signOut } = useAuth()
   const [demoMode, setDemoMode] = useState(false)
 
-  if (loading) {
+  if (loading || (session && profileLoading)) {
     return (
       <main className="app-loading" aria-live="polite">
-        <span>D</span>
+        <span>C</span>
         <p>Sintonizando identidade...</p>
       </main>
     )
@@ -22,7 +22,30 @@ function App() {
       setDemoMode(false)
     }
 
-    return <WorkspaceShell onExit={exitWorkspace} />
+    const metadataNickname = session?.user.user_metadata.nickname
+    const fallbackNickname = typeof metadataNickname === 'string' && metadataNickname.trim()
+      ? metadataNickname.trim()
+      : session?.user.email?.split('@')[0] || 'usuario'
+    const nickname = demoMode ? 'Pedro' : profile?.nickname || fallbackNickname
+    const username = demoMode ? 'fundador' : profile?.username || fallbackNickname.toLowerCase()
+    const initials = nickname
+      .split(/\s+/)
+      .slice(0, 2)
+      .map((part) => part[0])
+      .join('')
+      .toUpperCase()
+
+    return (
+      <WorkspaceShell
+        identity={{
+          nickname,
+          username,
+          initials,
+          connectionLabel: demoMode ? 'demonstracao local' : profileError ? 'perfil em contingencia' : 'identidade sincronizada',
+        }}
+        onExit={exitWorkspace}
+      />
+    )
   }
 
   return <AuthScreen onExplore={() => setDemoMode(true)} />

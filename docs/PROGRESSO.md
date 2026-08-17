@@ -13,7 +13,7 @@
 
 ## Proxima acao
 
-Validar cadastro, login, logout, perfil automatico e politicas RLS com uma conta de teste controlada.
+Validar a entrega e o retorno do link de recuperacao com um e-mail acessivel. O redirecionamento local ja esta permitido no Supabase e os usuarios QA temporarios desta rodada foram removidos.
 
 Branch atual: `codex/etapa-01-identidade-temas`.
 
@@ -42,3 +42,9 @@ Branch atual: `codex/etapa-01-identidade-temas`.
 - migration inicial aplicada e schema remoto aprovado no lint;
 - confirmacao de e-mail desativada para permitir entrada imediata no MVP;
 - repositorio GitHub renomeado para `pedrovictorpina/concord`, preservando historico e PR.
+- perfil autenticado e identificador unico conectados ao workspace;
+- recuperacao e atualizacao de senha implementadas no cliente;
+- seis jornadas Playwright aprovadas;
+- integracao remota aprovou cadastro, trigger de perfil, login, troca de senha e isolamento RLS com dois usuarios por execucao;
+- URL `http://localhost:5173/**` adicionada e verificada na lista de redirecionamentos permitidos do Supabase;
+- quatro usuarios QA das duas execucoes de integracao foram removidos por UUID, com zero registros restantes em `auth.users` e `public.profiles`;

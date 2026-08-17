@@ -43,15 +43,17 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 | Tema claro mantem contraste e hierarquia | Visual | `/` -> aparencia -> claro |
 | Tema escuro preserva identidade inicial | Visual | `/` -> aparencia -> escuro |
 | Login e cadastro usam componentes compartilhados | Revisao/visual | `/` -> alternar entrar/criar conta |
+| Recuperacao solicita link e permite nova senha | Playwright/integracao | `/` -> esqueci minha senha -> link recebido |
 | Configuracao ausente nao quebra a aplicacao | Manual | executar sem `.env` |
-| Migration cria perfil e RLS | SQL/integracao | Supabase -> aplicar migrations -> testes de politica |
+| Migration cria perfil e RLS | Integracao remota | `pnpm test:integration:supabase` |
+| Perfil automatico aparece no workspace | Integracao/visual | cadastrar -> entrar -> barra de identidade |
 | Workspace continua navegavel em demonstracao | Playwright/manual | `/` -> explorar demonstracao |
 | Autenticacao nao cria rolagem horizontal no celular | Playwright | viewport `390 x 844` -> `/` |
 
 ## Riscos
 
 - confirmacao de e-mail esta intencionalmente desligada apenas para o MVP;
-- a jornada completa de cadastro deve usar uma conta de teste controlada, sem deixar usuarios ficticios permanentes;
+- testes remotos criam usuarios QA que precisam ser removidos pelo manifesto persistente em `.qa`; os quatro usuarios desta rodada foram removidos e a ausencia em `auth.users` e `public.profiles` foi verificada;
 - o projeto Supabase esta em uma organizacao separada por causa do limite gratuito de dois projetos por conta;
 - familias iOS e neo-brutalismo ficam registradas como extensoes futuras, nao implementadas nesta etapa.
 
@@ -59,7 +61,8 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 
 - `pnpm check`: aprovado;
 - `pnpm lint`: aprovado;
-- `pnpm test:e2e`: 5 testes aprovados no Chromium;
+- `pnpm test:e2e`: 6 testes aprovados no Chromium;
+- `pnpm test:integration:supabase`: cadastro, trigger de perfil, login, troca de senha e RLS aprovados;
 - seguimento dinamico do modo claro/escuro do dispositivo: aprovado;
 - persistencia da preferencia no `localStorage`: aprovada;
 - formulario de cadastro inicial sem mutacao remota: aprovado;
@@ -68,8 +71,12 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 - `supabase db push --dry-run`: banco remoto sincronizado;
 - `supabase db lint --linked --level warning`: nenhum erro de schema;
 - confirmacao de e-mail desativada e persistida no painel do Supabase;
+- identidade do workspace derivada do perfil autenticado, com contingencia pelos metadados da sessao;
+- fluxo de solicitacao e atualizacao de senha implementado com evento `PASSWORD_RECOVERY`;
+- redirecionamento local `http://localhost:5173/**` permitido e verificado na configuracao de Auth do Supabase;
+- quatro usuarios QA removidos apos a integracao, com consultas de verificacao retornando zero usuarios e zero perfis remanescentes;
 - demonstracao, envio local de mensagem e viewport movel: aprovados;
 - inspecao visual dos modos [sistema](../evidencias/01-identidade-tema-sistema.png), [claro](../evidencias/01-identidade-tema-claro.png) e [workspace claro](../evidencias/01-workspace-tema-claro.png): aprovada;
-- cadastro, login, logout e comportamento das politicas RLS com uma conta controlada: pendentes.
+- entrega real do e-mail e retorno pelo link de recuperacao: pendentes de validacao com um endereco acessivel.
 
 Os testes ficam em `tests/e2e/identity-and-themes.spec.ts` e iniciam o Vite automaticamente em uma porta isolada.

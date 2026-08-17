@@ -18,10 +18,12 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Migration inicial versionada no repositorio
 - [ ] Edge Functions versionadas no repositorio
 - [x] Arquitetura de temas e modos sistema/claro/escuro
-- [ ] Cadastro por nickname, e-mail e senha
-- [ ] Login, logout e recuperacao de senha
-- [ ] Perfil e identificador unico
-- [ ] Politicas RLS e testes de autorizacao
+- [x] Cadastro por nickname, e-mail e senha
+- [x] Login, logout e restauracao de sessao
+- [x] Recuperacao e atualizacao de senha no cliente
+- [x] Perfil e identificador unico
+- [x] Politicas RLS e testes de autorizacao
+- [ ] Validacao do link de recuperacao com e-mail real
 
 ## Etapa 02 - Comunidades e texto
 

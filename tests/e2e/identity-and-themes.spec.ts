@@ -36,6 +36,18 @@ test.describe('identidade e temas', () => {
     await expect(page.getByRole('button', { name: 'CRIAR IDENTIDADE' })).toBeEnabled()
   })
 
+  test('abre e fecha o fluxo de recuperação de senha', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Esqueci minha senha' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Reative seu sinal.' })).toBeVisible()
+    await expect(page.getByLabel('E-mail')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'ENVIAR LINK SEGURO' })).toBeEnabled()
+
+    await page.getByRole('button', { name: 'Voltar para o login' }).click()
+    await expect(page.getByRole('heading', { name: 'Bom ter você de volta.' })).toBeVisible()
+  })
+
   test('abre a demonstração e envia uma mensagem local', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
