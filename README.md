@@ -4,7 +4,7 @@ O Darkcord e um aplicativo de comunicacao leve para web, Windows, Android e iOS.
 
 ## Estado atual
 
-**Etapa 00 - Fundacao publicada.**
+**Etapa 01 - Identidade e temas em desenvolvimento.**
 
 Repositorio principal: https://github.com/pedrovictorpina/darkcord
 
@@ -12,6 +12,10 @@ Repositorio principal: https://github.com/pedrovictorpina/darkcord
 - cliente web React/TypeScript criado;
 - prototipo responsivo e navegavel;
 - controle de captura de tela implementado no navegador;
+- frontend modular com modos sistema, claro e escuro;
+- cadastro e login preparados para Supabase Hosted;
+- migration inicial de perfis e politicas RLS versionada;
+- testes de jornada com Playwright;
 - arquitetura, roadmap e processo de documentacao registrados.
 
 Consulte [docs/PROGRESSO.md](docs/PROGRESSO.md) para acompanhar as entregas.
@@ -32,6 +36,8 @@ Abra `http://localhost:5173`.
 ```powershell
 pnpm check
 pnpm lint
+pnpm exec playwright install chromium
+pnpm test:e2e
 ```
 
 ## Documentacao
@@ -43,6 +49,8 @@ pnpm lint
 - [Decisoes de arquitetura](docs/decisoes/0001-stack-multiplataforma.md)
 - [Infraestrutura gerenciada](docs/decisoes/0002-infraestrutura-gerenciada.md)
 - [Modo custo zero](docs/decisoes/0003-modo-custo-zero.md)
+- [Arquitetura de temas](docs/decisoes/0004-arquitetura-de-temas.md)
+- [Etapa 01 - Identidade e temas](docs/etapas/01-identidade-temas.md)
 
 ## Organizacao planejada
 

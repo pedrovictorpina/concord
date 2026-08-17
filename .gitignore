@@ -8,6 +8,8 @@ dist/
 *.local
 *.log
 coverage/
+playwright-report/
+test-results/
 .idea/
 .vscode/*
 !.vscode/extensions.json

@@ -15,7 +15,9 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 ## Etapa 01 - Identidade
 
 - [ ] Projeto Supabase Hosted e ambientes
-- [ ] Migrations e Edge Functions versionadas no repositorio
+- [x] Migration inicial versionada no repositorio
+- [ ] Edge Functions versionadas no repositorio
+- [x] Arquitetura de temas e modos sistema/claro/escuro
 - [ ] Cadastro por nickname, e-mail e senha
 - [ ] Login, logout e recuperacao de senha
 - [ ] Perfil e identificador unico

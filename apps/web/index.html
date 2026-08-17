@@ -5,7 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0a0c0b" />
     <meta name="description" content="Darkcord: texto, voz e tela compartilhada sem peso desnecessario." />
-    <title>Darkcord // Alpha 00</title>
+    <title>Darkcord // Alpha 01</title>
+    <script>
+      (() => {
+        const key = 'darkcord.theme.v1'
+        let colorMode = 'system'
+        try {
+          const stored = JSON.parse(localStorage.getItem(key) || '{}')
+          if (['system', 'light', 'dark'].includes(stored.colorMode)) colorMode = stored.colorMode
+        } catch { /* usa o dispositivo */ }
+        const resolved = colorMode === 'system'
+          ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+          : colorMode
+        document.documentElement.dataset.styleTheme = 'darkcord'
+        document.documentElement.dataset.colorMode = resolved
+        document.documentElement.style.colorScheme = resolved
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
