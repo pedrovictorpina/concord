@@ -1,5 +1,5 @@
 {
-  "name": "@darkcord/web",
+  "name": "@concord/web",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@darkcord/contracts": "workspace:*",
+    "@concord/contracts": "workspace:*",
     "@supabase/supabase-js": "^2.112.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

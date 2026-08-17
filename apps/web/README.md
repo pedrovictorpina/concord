@@ -1,6 +1,6 @@
-# @darkcord/web
+# @concord/web
 
-Cliente web React/TypeScript do Darkcord.
+Cliente web React/TypeScript do Concord.
 
 ## Comandos
 

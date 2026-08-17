@@ -1,4 +1,4 @@
-import type { ChannelSummary } from '@darkcord/contracts'
+import type { ChannelSummary } from '@concord/contracts'
 import { ThemeControls } from '../../components/theme/ThemeControls'
 
 type ChannelPanelProps = {
@@ -12,7 +12,7 @@ export function ChannelPanel({ activeChannel, channels, onChannelChange, onExit 
   return (
     <aside className="channel-panel">
       <header className="workspace-heading">
-        <div><span className="eyebrow">REDE PRIVADA</span><strong>Darkcord</strong></div>
+        <div><span className="eyebrow">REDE PRIVADA</span><strong>Concord</strong></div>
         <button type="button" aria-label="Sair da demonstracao" onClick={onExit}>×</button>
       </header>
 
@@ -39,7 +39,7 @@ export function ChannelPanel({ activeChannel, channels, onChannelChange, onExit 
         </div>
         <div className="voice-member muted">
           <span className="avatar avatar-amber">DC</span>
-          <div><strong>Darkcord Bot</strong><small>monitorando</small></div><i aria-label="Silenciado">×</i>
+          <div><strong>Concord Bot</strong><small>monitorando</small></div><i aria-label="Silenciado">×</i>
         </div>
       </section>
 

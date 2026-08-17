@@ -1,12 +1,12 @@
-# Darkcord
+# Concord
 
-O Darkcord e um aplicativo de comunicacao leve para web, Windows, Android e iOS. O produto combina servidores, amizades, canais de texto, voz e compartilhamento de tela sem tentar reproduzir toda a complexidade do Discord.
+O Concord e um aplicativo de comunicacao leve para web, Windows, Android e iOS. O produto combina servidores, amizades, canais de texto, voz e compartilhamento de tela sem tentar reproduzir toda a complexidade do Discord.
 
 ## Estado atual
 
 **Etapa 01 - Identidade e temas em desenvolvimento.**
 
-Repositorio principal: https://github.com/pedrovictorpina/darkcord
+Repositorio principal: https://github.com/pedrovictorpina/concord
 
 - monorepo pnpm configurado;
 - cliente web React/TypeScript criado;
@@ -50,12 +50,13 @@ pnpm test:e2e
 - [Infraestrutura gerenciada](docs/decisoes/0002-infraestrutura-gerenciada.md)
 - [Modo custo zero](docs/decisoes/0003-modo-custo-zero.md)
 - [Arquitetura de temas](docs/decisoes/0004-arquitetura-de-temas.md)
+- [Nome Concord](docs/decisoes/0005-nome-concord.md)
 - [Etapa 01 - Identidade e temas](docs/etapas/01-identidade-temas.md)
 
 ## Organizacao planejada
 
 ```text
-darkcord/
+concord/
 |-- apps/
 |   |-- web/          React + Vite
 |   |-- desktop/      Electron (etapa futura)

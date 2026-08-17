@@ -5,14 +5,14 @@
 
 ## Contexto
 
-O Darkcord devera oferecer familias visuais bastante diferentes, como uma interpretacao iOS e uma versao neo-brutalista. Trocar somente cores nao e suficiente: tipografia, raios, sombras, densidade e movimento tambem mudam.
+O Concord devera oferecer familias visuais bastante diferentes, como uma interpretacao iOS e uma versao neo-brutalista. Trocar somente cores nao e suficiente: tipografia, raios, sombras, densidade e movimento tambem mudam.
 
 ## Decisao
 
 Separar familia de estilo e modo de cor. O React mantem a preferencia e aplica atributos no elemento raiz; CSS define tokens semanticos para cada combinacao.
 
 ```text
-styleTheme: darkcord | ios | neo-brutalism | ...
+styleTheme: concord | ios | neo-brutalism | ...
 colorMode: system | light | dark
 resolvedColorMode: light | dark
 ```

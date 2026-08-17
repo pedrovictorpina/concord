@@ -5,7 +5,7 @@
 
 ## Contexto
 
-O Darkcord nao tera equipe ou maquinas dedicadas para operar banco, WebSockets, armazenamento e servidores de midia. Ainda assim, autenticacao, persistencia, eventos em tempo real e um SFU sao necessarios para o produto funcionar com seguranca.
+O Concord nao tera equipe ou maquinas dedicadas para operar banco, WebSockets, armazenamento e servidores de midia. Ainda assim, autenticacao, persistencia, eventos em tempo real e um SFU sao necessarios para o produto funcionar com seguranca.
 
 ## Decisao
 

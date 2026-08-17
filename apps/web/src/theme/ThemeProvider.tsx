@@ -5,7 +5,7 @@ import { defaultStyleTheme } from './theme-registry'
 import { colorModes } from './theme-types'
 import type { ColorMode, ResolvedColorMode, StyleThemeId } from './theme-types'
 
-const STORAGE_KEY = 'darkcord.theme.v1'
+const STORAGE_KEY = 'concord.theme.v1'
 
 type StoredTheme = {
   styleTheme: StyleThemeId

@@ -13,7 +13,7 @@
 
 ## Proxima acao
 
-Criar o projeto Supabase Hosted na conta pessoal, aplicar a migration versionada e validar cadastro, login, sessao e RLS contra o ambiente remoto.
+Vincular o CLI ao projeto Concord no Supabase, aplicar a migration versionada e validar cadastro, login, sessao e RLS contra o ambiente remoto.
 
 Branch atual: `codex/etapa-01-identidade-temas`.
 
@@ -31,9 +31,10 @@ Branch atual: `codex/etapa-01-identidade-temas`.
 - build, lint e interacoes essenciais validados no navegador;
 - publicacao bloqueada preventivamente porque a sessao GitHub ativa pertence a outra conta.
 - conta pessoal `pedrovictorpina` autenticada sem remover a conta corporativa;
-- repositorio privado criado em `pedrovictorpina/darkcord`.
+- repositorio privado criado em `pedrovictorpina/darkcord` e posteriormente renomeado para `pedrovictorpina/concord`;
 - frontend separado em modulos de identidade, workspace e temas;
 - modos sistema, claro e escuro implementados com preferencia persistente;
 - camada de Auth Supabase e migration de perfis preparadas;
 - suite Playwright adicionada com cinco jornadas aprovadas no Chromium;
-- integracao remota permanece pendente para preservar o limite entre codigo e credenciais.
+- projeto Supabase Concord configurado localmente e conexao de Auth validada sem versionar credenciais;
+- produto renomeado de Darkcord para Concord em codigo, pacotes, documentacao e infraestrutura.

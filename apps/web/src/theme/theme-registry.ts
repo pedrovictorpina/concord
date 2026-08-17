@@ -1,11 +1,11 @@
 import type { StyleThemeDefinition, StyleThemeId } from './theme-types'
 
-export const defaultStyleTheme: StyleThemeId = 'darkcord'
+export const defaultStyleTheme: StyleThemeId = 'concord'
 
 export const styleThemes: readonly StyleThemeDefinition[] = [
   {
-    id: 'darkcord',
-    label: 'Darkcord Signal',
+    id: 'concord',
+    label: 'Concord Signal',
     description: 'Central de radio industrial com sinal verde e ambar.',
     available: true,
   },

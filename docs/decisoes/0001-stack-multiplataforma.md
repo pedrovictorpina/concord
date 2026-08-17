@@ -5,7 +5,7 @@
 
 ## Contexto
 
-O Darkcord precisa funcionar na web, Windows, Android e iOS. O produto depende de comunicacao em tempo real, microfone, compartilhamento de tela e audio do sistema. Flutter foi descartado por preferencia do responsavel pelo produto.
+O Concord precisa funcionar na web, Windows, Android e iOS. O produto depende de comunicacao em tempo real, microfone, compartilhamento de tela e audio do sistema. Flutter foi descartado por preferencia do responsavel pelo produto.
 
 ## Decisao
 

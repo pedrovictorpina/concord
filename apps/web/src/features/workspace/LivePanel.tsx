@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { VoicePreferences } from '@darkcord/contracts'
+import type { VoicePreferences } from '@concord/contracts'
 import { useScreenShare } from './useScreenShare'
 
 export function LivePanel() {

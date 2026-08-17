@@ -40,7 +40,7 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
   return (
     <main className="auth-shell">
       <section className="auth-story" aria-labelledby="auth-title">
-        <div className="auth-brand"><span>D</span><strong>DARKCORD</strong><small>ALPHA 01</small></div>
+        <div className="auth-brand"><span>C</span><strong>CONCORD</strong><small>ALPHA 01</small></div>
         <div className="auth-story-copy">
           <span className="eyebrow">IDENTIDADE / SINAL PRIVADO</span>
           <h1 id="auth-title">Entre.<br />Fale.<br /><em>Permaneça.</em></h1>
@@ -152,7 +152,7 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
 
           <footer className="auth-theme-note">
             <span>ESTILO ATIVO</span>
-            <strong>Darkcord Signal</strong>
+            <strong>Concord Signal</strong>
             <small>iOS e neo-brutalismo serão adicionados pelo registro de temas.</small>
           </footer>
         </div>

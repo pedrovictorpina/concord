@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Criar a base de identidade do Darkcord e refatorar o cliente web para aceitar familias de estilo independentes dos modos claro e escuro.
+Criar a base de identidade do Concord e refatorar o cliente web para aceitar familias de estilo independentes dos modos claro e escuro.
 
 ## Solicitado
 
@@ -28,7 +28,7 @@ O cliente era um prototipo funcional concentrado em `App.tsx` e `App.css`, com c
 
 O sistema separa duas dimensoes:
 
-1. `styleTheme`: linguagem visual completa, como `darkcord`, `ios` ou `neo-brutalism`.
+1. `styleTheme`: linguagem visual completa, como `concord`, `ios` ou `neo-brutalism`.
 2. `colorMode`: `system`, `light` ou `dark`.
 
 Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`, `--radius-control`). Uma nova familia visual fornece seus tokens sem exigir condicionais nos componentes.
@@ -43,7 +43,7 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 | Tema claro mantem contraste e hierarquia | Visual | `/` -> aparencia -> claro |
 | Tema escuro preserva identidade inicial | Visual | `/` -> aparencia -> escuro |
 | Login e cadastro usam componentes compartilhados | Revisao/visual | `/` -> alternar entrar/criar conta |
-| Configuracao ausente nao quebra a aplicacao | Playwright/manual | executar sem `.env` |
+| Configuracao ausente nao quebra a aplicacao | Manual | executar sem `.env` |
 | Migration cria perfil e RLS | SQL/integracao | Supabase -> aplicar migrations -> testes de politica |
 | Workspace continua navegavel em demonstracao | Playwright/manual | `/` -> explorar demonstracao |
 | Autenticacao nao cria rolagem horizontal no celular | Playwright | viewport `390 x 844` -> `/` |
@@ -62,9 +62,10 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 - `pnpm test:e2e`: 5 testes aprovados no Chromium;
 - seguimento dinamico do modo claro/escuro do dispositivo: aprovado;
 - persistencia da preferencia no `localStorage`: aprovada;
-- cadastro sem configuracao remota: falha controlada e mensagem orientativa aprovada;
+- formulario de cadastro inicial sem mutacao remota: aprovado;
+- configuracao Supabase carregada e resposta real de Auth recebida: aprovada;
 - demonstracao, envio local de mensagem e viewport movel: aprovados;
 - inspecao visual dos modos [sistema](../evidencias/01-identidade-tema-sistema.png), [claro](../evidencias/01-identidade-tema-claro.png) e [workspace claro](../evidencias/01-workspace-tema-claro.png): aprovada;
-- Auth real, migration e RLS: pendentes da criacao do projeto Supabase Hosted.
+- criacao real de usuario, migration e RLS: pendentes da aplicacao da migration no projeto Concord.
 
 Os testes ficam em `tests/e2e/identity-and-themes.spec.ts` e iniciam o Vite automaticamente em uma porta isolada.

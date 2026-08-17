@@ -1,4 +1,4 @@
-import type { ChannelSummary } from '@darkcord/contracts'
+import type { ChannelSummary } from '@concord/contracts'
 
 export type LocalMessage = {
   id: number
@@ -17,7 +17,7 @@ export const channels: ChannelSummary[] = [
 export const initialMessages: LocalMessage[] = [
   {
     id: 1,
-    author: 'Darkcord Relay',
+    author: 'Concord Relay',
     time: 'agora',
     body: 'Fundacao sincronizada. O primeiro sinal da rede esta no ar.',
     system: true,

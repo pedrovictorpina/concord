@@ -5,7 +5,7 @@
 
 ## Contexto
 
-O desenvolvimento e o primeiro piloto do Darkcord devem operar com custo mensal zero. Voz e compartilhamento de tela consomem minutos e transferencia de dados, portanto o produto precisa limitar uso deliberadamente em vez de depender apenas da boa vontade dos usuarios.
+O desenvolvimento e o primeiro piloto do Concord devem operar com custo mensal zero. Voz e compartilhamento de tela consomem minutos e transferencia de dados, portanto o produto precisa limitar uso deliberadamente em vez de depender apenas da boa vontade dos usuarios.
 
 ## Decisao
 

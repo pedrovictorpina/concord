@@ -1,4 +1,4 @@
-:root[data-style-theme='darkcord'][data-color-mode='dark'] {
+:root[data-style-theme='concord'][data-color-mode='dark'] {
   --color-canvas: #070908;
   --color-surface: #0d100f;
   --color-surface-raised: #121614;
@@ -21,7 +21,7 @@
   --texture-opacity: .018;
 }
 
-:root[data-style-theme='darkcord'][data-color-mode='light'] {
+:root[data-style-theme='concord'][data-color-mode='light'] {
   --color-canvas: #e8ebe5;
   --color-surface: #f2f4ef;
   --color-surface-raised: #fbfcf8;
@@ -44,7 +44,7 @@
   --texture-opacity: .032;
 }
 
-:root[data-style-theme='darkcord'] {
+:root[data-style-theme='concord'] {
   --font-body: Bahnschrift, 'Aptos Narrow', 'Trebuchet MS', sans-serif;
   --font-display: Bahnschrift, Impact, sans-serif;
   --font-mono: Consolas, 'Courier New', monospace;

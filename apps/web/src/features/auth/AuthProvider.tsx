@@ -66,7 +66,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         options: { data: { nickname } },
       })
       if (error) return { ok: false, message: translateAuthError(error.message) }
-      return { ok: true, message: 'Conta criada. Bem-vindo ao Darkcord.' }
+      return { ok: true, message: 'Conta criada. Bem-vindo ao Concord.' }
     },
     signOut: async (): Promise<AuthResult> => {
       if (!supabase) return notConfigured

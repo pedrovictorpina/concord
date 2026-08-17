@@ -5,6 +5,7 @@ test.describe('identidade e temas', () => {
     await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/')
 
+    await expect(page).toHaveTitle('Concord // Alpha 01')
     await expect(page.locator('html')).toHaveAttribute('data-color-mode', 'light')
     await expect(page.getByRole('button', { name: 'Sistema' })).toHaveAttribute('aria-pressed', 'true')
 
@@ -21,20 +22,18 @@ test.describe('identidade e temas', () => {
     await expect(page.locator('html')).toHaveAttribute('data-color-mode', 'light')
     await expect(page.getByRole('button', { name: 'Claro' })).toHaveAttribute('aria-pressed', 'true')
 
-    await expect.poll(() => page.evaluate(() => localStorage.getItem('darkcord.theme.v1')))
+    await expect.poll(() => page.evaluate(() => localStorage.getItem('concord.theme.v1')))
       .toContain('"colorMode":"light"')
   })
 
-  test('exibe o cadastro inicial e informa quando o Supabase não está configurado', async ({ page }) => {
+  test('exibe os campos do cadastro inicial', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('tab', { name: 'Criar conta' }).click()
 
-    await page.getByLabel('Nickname').fill('Pedro')
-    await page.getByLabel('E-mail').fill('pedro@example.com')
-    await page.getByLabel('Senha').fill('SenhaTeste123')
-    await page.getByRole('button', { name: 'CRIAR IDENTIDADE' }).click()
-
-    await expect(page.getByRole('status')).toContainText('Supabase ainda nao configurado')
+    await expect(page.getByLabel('Nickname')).toBeVisible()
+    await expect(page.getByLabel('E-mail')).toBeVisible()
+    await expect(page.getByLabel('Senha')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'CRIAR IDENTIDADE' })).toBeEnabled()
   })
 
   test('abre a demonstração e envia uma mensagem local', async ({ page }) => {
