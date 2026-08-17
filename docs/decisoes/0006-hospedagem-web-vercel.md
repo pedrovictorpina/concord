@@ -39,6 +39,15 @@ O dominio inicial de producao e `https://concord-web-pi.vercel.app`. Branches e 
 - cadastro, sessao, entrega do e-mail, troca real de senha e novo login foram aprovados no ambiente publico;
 - a conta e o perfil temporarios usados no teste foram removidos ao final.
 
+## Publicacao da Etapa 01
+
+- o PR #1 foi integrado na `main` pelo merge commit `3df79ff`;
+- o deploy de producao `dpl_Hue2goUXh6yAq6h7cwBJKX3foTyp` ficou Ready e publicou o Concord Alpha 01;
+- o dominio principal respondeu HTTP 200 e as jornadas de tema, demonstracao e mensagem local foram aprovadas;
+- o Site URL do Supabase passou a usar `https://concord-web-pi.vercel.app`;
+- `https://concord-web-pi.vercel.app/**` foi adicionado aos redirecionamentos permitidos;
+- a verificacao de runtime da Vercel nao encontrou erros depois da publicacao.
+
 ## Consequencias
 
 - pushes na `main` atualizam producao automaticamente;

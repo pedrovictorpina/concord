@@ -83,6 +83,10 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 - conta temporaria do teste real removida, com consultas retornando zero em `auth.users` e `public.profiles`;
 - demonstracao, envio local de mensagem e viewport movel: aprovados;
 - inspecao visual dos modos [sistema](../evidencias/01-identidade-tema-sistema.png), [claro](../evidencias/01-identidade-tema-claro.png) e [workspace claro](../evidencias/01-workspace-tema-claro.png): aprovada;
-- entrega real do e-mail e retorno pelo link de recuperacao: aprovados no Preview Vercel.
+- entrega real do e-mail e retorno pelo link de recuperacao: aprovados no Preview Vercel;
+- Etapa 01 integrada pelo PR #1 e publicada em `https://concord-web-pi.vercel.app`;
+- producao aprovada com HTTP 200, configuracao Supabase, tema, demonstracao e mensagem local;
+- Site URL e redirecionamento de producao persistidos no Supabase;
+- nenhum erro de runtime encontrado na Vercel apos o deploy.
 
 Os testes ficam em `tests/e2e/identity-and-themes.spec.ts` e iniciam o Vite automaticamente em uma porta isolada.

@@ -5,7 +5,7 @@
 | Etapa | Estado | Ultima atualizacao |
 | --- | --- | --- |
 | 00 - Fundacao | Concluida e publicada | 2026-08-17 |
-| 01 - Identidade e temas | Concluida em Preview | 2026-08-17 |
+| 01 - Identidade e temas | Concluida e publicada | 2026-08-17 |
 | 02 - Comunidades e texto | Nao iniciada | - |
 | 03 - Voz e compartilhamento | Nao iniciada | - |
 | 04 - Aplicativos | Nao iniciada | - |
@@ -13,9 +13,9 @@
 
 ## Proxima acao
 
-Revisar o PR #1 e, apos autorizacao explicita, fazer o merge para publicar a Etapa 01 em producao e iniciar a Etapa 02.
+Planejar a Etapa 02, com contratos e criterios de aceite para amigos, servidores, canais e mensagens de texto.
 
-Branch atual: `codex/etapa-01-identidade-temas`.
+Branch atual: `main`.
 
 ## Historico
 
@@ -57,3 +57,8 @@ Branch atual: `codex/etapa-01-identidade-temas`.
 - precedencia da tela de nova senha sobre o workspace corrigida apos o teste real revelar o desvio;
 - conta temporaria `Pedro QA` removida, com zero registros restantes em `auth.users` e `public.profiles`;
 - Edge Functions adiadas para a Etapa 03, quando serao usadas para emitir tokens seguros do LiveKit.
+- PR #1 aprovado e integrado na `main` pelo merge commit `3df79ff`;
+- deploy de producao `dpl_Hue2goUXh6yAq6h7cwBJKX3foTyp` concluido como Ready;
+- dominio `https://concord-web-pi.vercel.app` validado com HTTP 200, configuracao Supabase, tema e demonstracao funcional;
+- Site URL do Supabase alterado para o dominio de producao e retorno `https://concord-web-pi.vercel.app/**` permitido;
+- varredura de runtime da Vercel nao encontrou erros apos a publicacao.
