@@ -34,6 +34,8 @@ const mapProfile = (row: {
   status: row.status,
 })
 
+const hasRecoveryQuery = () => new URL(window.location.href).searchParams.has('recovery')
+
 const clearRecoveryQuery = () => {
   const url = new URL(window.location.href)
   if (!url.searchParams.has('recovery')) return
@@ -87,6 +89,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     void client.auth.getSession().then(async ({ data }) => {
       if (mounted) {
         setSession(data.session)
+        setRecoveryMode(hasRecoveryQuery() && Boolean(data.session))
         await loadProfile(data.session?.user.id ?? null)
         setLoading(false)
       }

@@ -4,7 +4,7 @@ import { useAuth } from './features/auth/useAuth'
 import { WorkspaceShell } from './features/workspace/WorkspaceShell'
 
 function App() {
-  const { loading, profile, profileError, profileLoading, session, signOut } = useAuth()
+  const { loading, profile, profileError, profileLoading, recoveryMode, session, signOut } = useAuth()
   const [demoMode, setDemoMode] = useState(false)
 
   if (loading || (session && profileLoading)) {
@@ -14,6 +14,10 @@ function App() {
         <p>Sintonizando identidade...</p>
       </main>
     )
+  }
+
+  if (recoveryMode) {
+    return <AuthScreen onExplore={() => setDemoMode(true)} />
   }
 
   if (session || demoMode) {
