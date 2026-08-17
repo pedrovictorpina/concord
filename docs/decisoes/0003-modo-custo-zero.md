@@ -5,7 +5,7 @@
 
 ## Contexto
 
-O desenvolvimento e o primeiro piloto do Darkcord devem operar com custo mensal zero. Voz e compartilhamento de tela consomem minutos e transferencia de dados, portanto o produto precisa limitar uso deliberadamente em vez de depender apenas da boa vontade dos usuarios.
+O desenvolvimento e o primeiro piloto do Concord devem operar com custo mensal zero. Voz e compartilhamento de tela consomem minutos e transferencia de dados, portanto o produto precisa limitar uso deliberadamente em vez de depender apenas da boa vontade dos usuarios.
 
 ## Decisao
 
@@ -42,6 +42,7 @@ Fontes:
 
 - o piloto pode ficar temporariamente sem voz/tela quando a franquia acabar;
 - Supabase pode pausar depois de inatividade;
+- o projeto Concord pode usar uma organizacao Supabase separada quando a conta principal atingir o limite gratuito de projetos;
 - 1080p e grupos maiores ficam adiados;
 - os limites precisam ser aplicados no backend, nao apenas escondidos na interface;
 - nenhuma promessa de custo zero sera feita para uma operacao publica em escala.

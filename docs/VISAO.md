@@ -2,7 +2,7 @@
 
 ## Proposito
 
-O Darkcord deve oferecer um lugar simples e confiavel para pequenos grupos conversarem por texto e voz, com compartilhamento de tela quando precisarem colaborar ou jogar juntos.
+O Concord deve oferecer um lugar simples e confiavel para pequenos grupos conversarem por texto e voz, com compartilhamento de tela quando precisarem colaborar ou jogar juntos.
 
 ## Publico inicial
 
@@ -44,4 +44,4 @@ O Darkcord deve oferecer um lugar simples e confiavel para pequenos grupos conve
 
 ## Identidade provisoria
 
-Darkcord e um codinome. A direcao visual inicial e uma central de radio noturna: grafite profundo, paineis densos, sinal verde e detalhes em ambar. Ela evita copiar o roxo, a tipografia e a composicao visual do Discord.
+Concord e o nome atual do produto. A direcao visual inicial e uma central de radio noturna: grafite profundo, paineis densos, sinal verde e detalhes em ambar. Ela evita copiar o roxo, a tipografia e a composicao visual do Discord.

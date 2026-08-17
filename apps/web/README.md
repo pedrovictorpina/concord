@@ -1,6 +1,6 @@
-# @darkcord/web
+# @concord/web
 
-Cliente web React/TypeScript do Darkcord.
+Cliente web React/TypeScript do Concord.
 
 ## Comandos
 
@@ -10,6 +10,12 @@ Execute a partir da raiz do monorepo:
 pnpm dev
 pnpm check
 pnpm lint
+pnpm test:e2e
+pnpm test:integration:supabase
 ```
+
+Copie `.env.example` para `.env.local` quando o projeto Supabase estiver disponivel. Nunca versione chaves de ambiente.
+
+A recuperacao de senha usa `VITE_AUTH_REDIRECT_URL` ou, quando ausente, a origem atual com `?recovery=1`. A URL precisa constar na lista de redirecionamentos permitidos do Supabase.
 
 A captura de tela usa a API nativa do navegador e funciona apenas em contexto seguro (`https` ou `localhost`). O envio para outros participantes sera conectado ao LiveKit Cloud na Etapa 03.

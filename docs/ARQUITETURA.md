@@ -13,9 +13,15 @@
 | Eventos | Supabase Realtime | Mensagens, presenca e indicadores temporarios |
 | Midia | LiveKit | Voz e compartilhamento de tela via WebRTC/SFU |
 
+## Temas da interface
+
+A interface usa tokens semanticos e separa familia visual de modo de cor. O tema `concord` oferece claro e escuro; o modo padrao `system` acompanha `prefers-color-scheme`. Novas familias, como iOS e neo-brutalismo, entram pelo registro de temas sem alterar a logica dos componentes.
+
+Detalhes e consequencias estao no [ADR 0004](decisoes/0004-arquitetura-de-temas.md).
+
 ## Infraestrutura gerenciada
 
-O Darkcord nao operara servidores proprios no MVP. Isso nao elimina o backend: transfere a operacao para provedores gerenciados.
+O Concord nao operara servidores proprios no MVP. Isso nao elimina o backend: transfere a operacao para provedores gerenciados.
 
 | Necessidade | Servico gerenciado |
 | --- | --- |

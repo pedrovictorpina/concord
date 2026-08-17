@@ -1,30 +1,67 @@
-:root {
-  font-family: Bahnschrift, 'Aptos Narrow', 'Trebuchet MS', sans-serif;
-  color: #d8ded9;
-  background: #070908;
+@import './theme/themes/concord.css';
+
+* { box-sizing: border-box; }
+
+html,
+body,
+#root {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-canvas);
+  font-family: var(--font-body);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  --ink: #070908;
-  --panel: #0d100f;
-  --line: #232925;
-  --line-soft: #191e1b;
-  --text: #d8ded9;
-  --muted: #707a74;
-  --signal: #b9f227;
-  --signal-dark: #19250d;
-  --amber: #f6a941;
-  --danger: #f06452;
+  transition: color var(--motion-normal), background var(--motion-normal);
 }
 
-* { box-sizing: border-box; }
-html, body, #root { min-width: 320px; min-height: 100%; margin: 0; }
-body {
-  min-height: 100vh;
-  overflow: hidden;
-  background: radial-gradient(circle at 75% 15%, rgba(185, 242, 39, .035), transparent 32%), var(--ink);
+button,
+input,
+select {
+  font: inherit;
 }
-button, input { font: inherit; }
-button { color: inherit; }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
-::selection { color: var(--ink); background: var(--signal); }
+
+button { border: 0; color: inherit; cursor: pointer; }
+button:focus-visible,
+input:focus-visible,
+select:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+::selection { color: var(--color-accent-contrast); background: var(--color-accent); }
+
+.app-loading {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  place-items: center;
+  gap: var(--space-4);
+  color: var(--color-text-muted);
+  background: var(--color-canvas);
+}
+
+.app-loading span {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-items: center;
+  border-radius: var(--radius-control);
+  color: var(--color-accent-contrast);
+  background: var(--color-accent);
+  font-family: var(--font-mono);
+  font-weight: 800;
+}
+
+.app-loading p { margin: 0; font: var(--font-label); letter-spacing: .12em; text-transform: uppercase; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

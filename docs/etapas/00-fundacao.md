@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Transformar a ideia do Darkcord em um repositorio executavel, documentado e pronto para evoluir em entregas pequenas.
+Transformar a ideia do Concord em um repositorio executavel, documentado e pronto para evoluir em entregas pequenas.
 
 ## Solicitado
 
@@ -27,7 +27,7 @@ O diretorio continha apenas um repositorio Git vazio, sem commits, codigo, remot
 
 ## Dependencias
 
-- Node.js 20.19 ou superior;
+- Node.js 22.12 ou superior;
 - pnpm 11.19 ou superior;
 - navegador com permissao para captura de tela;
 - autenticacao correta no GitHub CLI para publicar.
@@ -61,6 +61,6 @@ O diretorio continha apenas um repositorio Git vazio, sem commits, codigo, remot
 | Troca de canal, envio local e silenciar microfone | Aprovado no navegador automatizado |
 | Captura de tela | Implementada; seletor nativo exige QA manual pelo usuario |
 | Layout desktop | Aprovado visualmente em 1264 x 633 |
-| Repositorio privado e identidade Git | Aprovado em `pedrovictorpina/darkcord` |
+| Repositorio privado e identidade Git | Aprovado em `pedrovictorpina/concord` |
 
 Evidencia visual: [cliente web da fundacao](../evidencias/00-fundacao-desktop.png).

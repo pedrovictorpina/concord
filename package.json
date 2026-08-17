@@ -1,14 +1,25 @@
 {
-  "name": "darkcord",
+  "name": "concord",
   "version": "0.0.0",
   "private": true,
   "description": "Comunicacao leve por texto, voz e compartilhamento de tela.",
   "packageManager": "pnpm@11.19.0",
-  "engines": { "node": ">=20.19.0" },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
-    "dev": "pnpm --filter @darkcord/web dev",
-    "build": "pnpm --filter @darkcord/web build",
-    "check": "pnpm --filter @darkcord/web build",
-    "lint": "pnpm --filter @darkcord/web lint"
+    "dev": "pnpm --filter @concord/web dev",
+    "build": "pnpm --filter @concord/web build",
+    "check": "pnpm --filter @concord/web build",
+    "lint": "pnpm --filter @concord/web lint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:integration:supabase": "pnpm --filter @concord/web test:integration:supabase",
+    "db:push": "supabase db push",
+    "db:lint": "supabase db lint --linked --level warning"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "supabase": "^2.114.0"
   }
 }

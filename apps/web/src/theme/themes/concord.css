@@ -1,0 +1,68 @@
+:root[data-style-theme='concord'][data-color-mode='dark'] {
+  --color-canvas: #070908;
+  --color-surface: #0d100f;
+  --color-surface-raised: #121614;
+  --color-surface-sunken: #090c0a;
+  --color-border: #252c27;
+  --color-border-soft: #1a201c;
+  --color-text: #dce3dd;
+  --color-text-strong: #f2f6f2;
+  --color-text-muted: #747f77;
+  --color-text-faint: #465049;
+  --color-accent: #b9f227;
+  --color-accent-hover: #cafb4c;
+  --color-accent-contrast: #0a0d09;
+  --color-accent-soft: #19250d;
+  --color-warning: #f6a941;
+  --color-danger: #f06452;
+  --color-success: #8fd51f;
+  --color-overlay: rgba(7, 9, 8, .82);
+  --shadow-panel: 0 24px 80px rgba(0, 0, 0, .42);
+  --texture-opacity: .018;
+}
+
+:root[data-style-theme='concord'][data-color-mode='light'] {
+  --color-canvas: #e8ebe5;
+  --color-surface: #f2f4ef;
+  --color-surface-raised: #fbfcf8;
+  --color-surface-sunken: #dde2da;
+  --color-border: #bdc6be;
+  --color-border-soft: #d3d9d3;
+  --color-text: #28322b;
+  --color-text-strong: #101813;
+  --color-text-muted: #5f6d63;
+  --color-text-faint: #8d9990;
+  --color-accent: #527900;
+  --color-accent-hover: #456700;
+  --color-accent-contrast: #f8ffe8;
+  --color-accent-soft: #d9e9b4;
+  --color-warning: #a76000;
+  --color-danger: #b53d30;
+  --color-success: #4f7800;
+  --color-overlay: rgba(232, 235, 229, .86);
+  --shadow-panel: 0 22px 60px rgba(43, 56, 46, .16);
+  --texture-opacity: .032;
+}
+
+:root[data-style-theme='concord'] {
+  --font-body: Bahnschrift, 'Aptos Narrow', 'Trebuchet MS', sans-serif;
+  --font-display: Bahnschrift, Impact, sans-serif;
+  --font-mono: Consolas, 'Courier New', monospace;
+  --font-label: 700 9px/1.2 var(--font-mono);
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 18px;
+  --radius-control: 5px;
+  --radius-panel: 0px;
+  --border-width: 1px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --motion-fast: 160ms;
+  --motion-normal: 260ms;
+}
