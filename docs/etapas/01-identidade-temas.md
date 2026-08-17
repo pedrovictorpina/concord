@@ -56,6 +56,7 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 - testes remotos criam usuarios QA que precisam ser removidos pelo manifesto persistente em `.qa`; os quatro usuarios desta rodada foram removidos e a ausencia em `auth.users` e `public.profiles` foi verificada;
 - o projeto Supabase esta em uma organizacao separada por causa do limite gratuito de dois projetos por conta;
 - familias iOS e neo-brutalismo ficam registradas como extensoes futuras, nao implementadas nesta etapa.
+- Edge Functions nao sao necessarias para identidade e foram adiadas para a Etapa 03, junto da emissao segura de tokens do LiveKit.
 
 ## Validacoes
 
@@ -74,9 +75,14 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 - identidade do workspace derivada do perfil autenticado, com contingencia pelos metadados da sessao;
 - fluxo de solicitacao e atualizacao de senha implementado com evento `PASSWORD_RECOVERY`;
 - redirecionamento local `http://localhost:5173/**` permitido e verificado na configuracao de Auth do Supabase;
+- redirecionamento do Preview Vercel permitido e verificado na configuracao de Auth do Supabase;
+- Preview publico da branch carregado e validado com a configuracao real do Supabase;
 - quatro usuarios QA removidos apos a integracao, com consultas de verificacao retornando zero usuarios e zero perfis remanescentes;
+- e-mail real de recuperacao recebido no Outlook, link aberto, senha atualizada e novo login aprovado;
+- tela de nova senha priorizada sobre o workspace autenticado e preservada ao recarregar `?recovery=1`;
+- conta temporaria do teste real removida, com consultas retornando zero em `auth.users` e `public.profiles`;
 - demonstracao, envio local de mensagem e viewport movel: aprovados;
 - inspecao visual dos modos [sistema](../evidencias/01-identidade-tema-sistema.png), [claro](../evidencias/01-identidade-tema-claro.png) e [workspace claro](../evidencias/01-workspace-tema-claro.png): aprovada;
-- entrega real do e-mail e retorno pelo link de recuperacao: pendentes de validacao com um endereco acessivel.
+- entrega real do e-mail e retorno pelo link de recuperacao: aprovados no Preview Vercel.
 
 Os testes ficam em `tests/e2e/identity-and-themes.spec.ts` e iniciam o Vite automaticamente em uma porta isolada.

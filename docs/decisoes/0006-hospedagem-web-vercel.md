@@ -31,6 +31,14 @@ O dominio inicial de producao e `https://concord-web-pi.vercel.app`. Branches e 
 - o redeploy da `main` ficou Ready em 11 segundos;
 - o dominio de producao respondeu HTTP 200 e carregou o cliente da Etapa 00.
 
+## Validacao do Preview da Etapa 01
+
+- a branch `codex/etapa-01-identidade-temas` gerou um Preview Ready;
+- o alias estavel `https://concord-web-git-codex-etapa-01-128aa4-pedrovictorpinas-projects.vercel.app` carregou a Etapa 01 com as variaveis do Supabase;
+- o alias foi permitido no Supabase com `/**` para aceitar o retorno da recuperacao;
+- cadastro, sessao, entrega do e-mail, troca real de senha e novo login foram aprovados no ambiente publico;
+- a conta e o perfil temporarios usados no teste foram removidos ao final.
+
 ## Consequencias
 
 - pushes na `main` atualizam producao automaticamente;

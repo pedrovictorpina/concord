@@ -16,14 +16,13 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 
 - [x] Projeto Supabase Hosted e ambiente local
 - [x] Migration inicial versionada no repositorio
-- [ ] Edge Functions versionadas no repositorio
 - [x] Arquitetura de temas e modos sistema/claro/escuro
 - [x] Cadastro por nickname, e-mail e senha
 - [x] Login, logout e restauracao de sessao
 - [x] Recuperacao e atualizacao de senha no cliente
 - [x] Perfil e identificador unico
 - [x] Politicas RLS e testes de autorizacao
-- [ ] Validacao do link de recuperacao com e-mail real
+- [x] Validacao do link de recuperacao com e-mail real
 
 ## Etapa 02 - Comunidades e texto
 
@@ -36,6 +35,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 
 ## Etapa 03 - Voz e compartilhamento
 
+- [ ] Edge Functions versionadas para emissao segura de tokens
 - [ ] Projeto LiveKit Cloud e emissao segura de tokens
 - [ ] Entrada e saida de canais de voz
 - [ ] Silenciar microfone, audio e volume individual
