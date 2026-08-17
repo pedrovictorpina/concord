@@ -1,0 +1,14 @@
+{
+  "name": "darkcord",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Comunicacao leve por texto, voz e compartilhamento de tela.",
+  "packageManager": "pnpm@11.19.0",
+  "engines": { "node": ">=20.19.0" },
+  "scripts": {
+    "dev": "pnpm --filter @darkcord/web dev",
+    "build": "pnpm --filter @darkcord/web build",
+    "check": "pnpm --filter @darkcord/web build",
+    "lint": "pnpm --filter @darkcord/web lint"
+  }
+}

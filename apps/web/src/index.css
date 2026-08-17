@@ -1,0 +1,30 @@
+:root {
+  font-family: Bahnschrift, 'Aptos Narrow', 'Trebuchet MS', sans-serif;
+  color: #d8ded9;
+  background: #070908;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --ink: #070908;
+  --panel: #0d100f;
+  --line: #232925;
+  --line-soft: #191e1b;
+  --text: #d8ded9;
+  --muted: #707a74;
+  --signal: #b9f227;
+  --signal-dark: #19250d;
+  --amber: #f6a941;
+  --danger: #f06452;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { min-width: 320px; min-height: 100%; margin: 0; }
+body {
+  min-height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(circle at 75% 15%, rgba(185, 242, 39, .035), transparent 32%), var(--ink);
+}
+button, input { font: inherit; }
+button { color: inherit; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+::selection { color: var(--ink); background: var(--signal); }

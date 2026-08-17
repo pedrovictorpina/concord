@@ -1,0 +1,15 @@
+# @darkcord/web
+
+Cliente web React/TypeScript do Darkcord.
+
+## Comandos
+
+Execute a partir da raiz do monorepo:
+
+```powershell
+pnpm dev
+pnpm check
+pnpm lint
+```
+
+A captura de tela usa a API nativa do navegador e funciona apenas em contexto seguro (`https` ou `localhost`). O envio para outros participantes sera conectado ao LiveKit Cloud na Etapa 03.
