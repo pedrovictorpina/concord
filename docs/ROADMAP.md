@@ -10,7 +10,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Validar captura de tela no navegador
 - [x] Definir processo de documentacao
 - [x] Definir modo de operacao com custo zero
-- [ ] Publicar o repositorio na conta GitHub pessoal
+- [x] Publicar o repositorio na conta GitHub pessoal
 
 ## Etapa 01 - Identidade
 

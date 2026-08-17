@@ -4,7 +4,9 @@ O Darkcord e um aplicativo de comunicacao leve para web, Windows, Android e iOS.
 
 ## Estado atual
 
-**Etapa 00 - Fundacao concluida localmente.**
+**Etapa 00 - Fundacao publicada.**
+
+Repositorio principal: https://github.com/pedrovictorpina/darkcord
 
 - monorepo pnpm configurado;
 - cliente web React/TypeScript criado;

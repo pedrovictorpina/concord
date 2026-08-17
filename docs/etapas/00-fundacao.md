@@ -61,5 +61,6 @@ O diretorio continha apenas um repositorio Git vazio, sem commits, codigo, remot
 | Troca de canal, envio local e silenciar microfone | Aprovado no navegador automatizado |
 | Captura de tela | Implementada; seletor nativo exige QA manual pelo usuario |
 | Layout desktop | Aprovado visualmente em 1264 x 633 |
+| Repositorio privado e identidade Git | Aprovado em `pedrovictorpina/darkcord` |
 
 Evidencia visual: [cliente web da fundacao](../evidencias/00-fundacao-desktop.png).

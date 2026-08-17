@@ -4,7 +4,7 @@
 
 | Etapa | Estado | Ultima atualizacao |
 | --- | --- | --- |
-| 00 - Fundacao | Concluida localmente; publicacao pendente | 2026-08-17 |
+| 00 - Fundacao | Concluida e publicada | 2026-08-17 |
 | 01 - Identidade | Nao iniciada | - |
 | 02 - Comunidades e texto | Nao iniciada | - |
 | 03 - Voz e compartilhamento | Nao iniciada | - |
@@ -13,7 +13,7 @@
 
 ## Proxima acao
 
-Autenticar o GitHub CLI na conta pessoal informada, publicar a Etapa 00 e iniciar a Etapa 01 em uma branch propria.
+Iniciar a Etapa 01 em uma branch propria: projeto Supabase Hosted, migrations e fluxo de identidade.
 
 ## Historico
 
@@ -28,3 +28,5 @@ Autenticar o GitHub CLI na conta pessoal informada, publicar a Etapa 00 e inicia
 - cliente web inicial implementado;
 - build, lint e interacoes essenciais validados no navegador;
 - publicacao bloqueada preventivamente porque a sessao GitHub ativa pertence a outra conta.
+- conta pessoal `pedrovictorpina` autenticada sem remover a conta corporativa;
+- repositorio privado criado em `pedrovictorpina/darkcord`.
