@@ -9,7 +9,7 @@ O Concord nao tera equipe ou maquinas dedicadas para operar banco, WebSockets, a
 
 ## Decisao
 
-Usar Supabase Hosted para Auth, Postgres, Realtime, Storage e Edge Functions; LiveKit Cloud para voz e compartilhamento de tela; hospedagem estatica/CDN para o cliente web; GitHub para codigo e artefatos.
+Usar Supabase Hosted para Auth, Postgres, Realtime, Storage e Edge Functions; LiveKit Cloud para voz e compartilhamento de tela; Vercel para hospedagem estatica/CDN do cliente web; GitHub para codigo e artefatos.
 
 Uma Edge Function autenticada emitira tokens LiveKit curtos depois de verificar a participacao e as permissoes do usuario no canal. Chaves administrativas permanecerao somente nos cofres de segredos dos provedores.
 

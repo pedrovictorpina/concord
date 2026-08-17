@@ -8,6 +8,8 @@ O Concord e um aplicativo de comunicacao leve para web, Windows, Android e iOS. 
 
 Repositorio principal: https://github.com/pedrovictorpina/concord
 
+Cliente web publicado: https://concord-web-pi.vercel.app
+
 - monorepo pnpm configurado;
 - cliente web React/TypeScript criado;
 - prototipo responsivo e navegavel;
@@ -58,6 +60,7 @@ O teste de integracao Supabase cria dois usuarios QA com senhas efemeras e regis
 - [Modo custo zero](docs/decisoes/0003-modo-custo-zero.md)
 - [Arquitetura de temas](docs/decisoes/0004-arquitetura-de-temas.md)
 - [Nome Concord](docs/decisoes/0005-nome-concord.md)
+- [Hospedagem web na Vercel](docs/decisoes/0006-hospedagem-web-vercel.md)
 - [Etapa 01 - Identidade e temas](docs/etapas/01-identidade-temas.md)
 
 ## Organizacao planejada

@@ -13,7 +13,7 @@
 
 ## Proxima acao
 
-Validar a entrega e o retorno do link de recuperacao com um e-mail acessivel. O redirecionamento local ja esta permitido no Supabase e os usuarios QA temporarios desta rodada foram removidos.
+Gerar e validar o Preview Vercel do PR #1, permitir sua URL no Supabase e testar a entrega e o retorno do link de recuperacao com um e-mail acessivel.
 
 Branch atual: `codex/etapa-01-identidade-temas`.
 
@@ -48,3 +48,6 @@ Branch atual: `codex/etapa-01-identidade-temas`.
 - integracao remota aprovou cadastro, trigger de perfil, login, troca de senha e isolamento RLS com dois usuarios por execucao;
 - URL `http://localhost:5173/**` adicionada e verificada na lista de redirecionamentos permitidos do Supabase;
 - quatro usuarios QA das duas execucoes de integracao foram removidos por UUID, com zero registros restantes em `auth.users` e `public.profiles`;
+- projeto `concord-web` criado na Vercel com variaveis Supabase em Production e Preview;
+- configuracao inicial incorreta em `packages/contracts` diagnosticada e corrigida para Vite em `apps/web`, com build `pnpm build` e saida `dist`;
+- redeploy da `main` aprovado em 11 segundos e dominio `https://concord-web-pi.vercel.app` validado com HTTP 200;
