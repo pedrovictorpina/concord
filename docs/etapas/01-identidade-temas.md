@@ -21,7 +21,7 @@ O cliente era um prototipo funcional concentrado em `App.tsx` e `App.css`, com c
 - React 19 e Vite 8 ja instalados;
 - `@supabase/supabase-js` no cliente web;
 - Playwright para jornadas de interface reproduziveis;
-- projeto Supabase Free para a integracao remota;
+- projeto Concord no Supabase Free, vinculado pelo CLI;
 - `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` configuradas apenas no ambiente.
 
 ## Arquitetura da interface
@@ -50,9 +50,9 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 
 ## Riscos
 
-- o projeto remoto Supabase ainda precisa ser criado na conta pessoal;
-- confirmacao de e-mail precisa ser desligada no painel do projeto;
-- testes reais de Auth e RLS dependem das chaves publicas do projeto;
+- confirmacao de e-mail esta intencionalmente desligada apenas para o MVP;
+- a jornada completa de cadastro deve usar uma conta de teste controlada, sem deixar usuarios ficticios permanentes;
+- o projeto Supabase esta em uma organizacao separada por causa do limite gratuito de dois projetos por conta;
 - familias iOS e neo-brutalismo ficam registradas como extensoes futuras, nao implementadas nesta etapa.
 
 ## Validacoes
@@ -64,8 +64,12 @@ Componentes consomem apenas tokens semanticos (`--color-surface`, `--color-text`
 - persistencia da preferencia no `localStorage`: aprovada;
 - formulario de cadastro inicial sem mutacao remota: aprovado;
 - configuracao Supabase carregada e resposta real de Auth recebida: aprovada;
+- migration `20260817170000_create_profiles.sql` aplicada ao projeto Concord: aprovada;
+- `supabase db push --dry-run`: banco remoto sincronizado;
+- `supabase db lint --linked --level warning`: nenhum erro de schema;
+- confirmacao de e-mail desativada e persistida no painel do Supabase;
 - demonstracao, envio local de mensagem e viewport movel: aprovados;
 - inspecao visual dos modos [sistema](../evidencias/01-identidade-tema-sistema.png), [claro](../evidencias/01-identidade-tema-claro.png) e [workspace claro](../evidencias/01-workspace-tema-claro.png): aprovada;
-- criacao real de usuario, migration e RLS: pendentes da aplicacao da migration no projeto Concord.
+- cadastro, login, logout e comportamento das politicas RLS com uma conta controlada: pendentes.
 
 Os testes ficam em `tests/e2e/identity-and-themes.spec.ts` e iniciam o Vite automaticamente em uma porta isolada.

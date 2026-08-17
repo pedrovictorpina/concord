@@ -38,7 +38,10 @@ pnpm check
 pnpm lint
 pnpm exec playwright install chromium
 pnpm test:e2e
+pnpm db:lint
 ```
+
+`pnpm db:push` aplica migrations ao projeto Supabase vinculado. Execute `pnpm supabase db push --dry-run` antes de qualquer alteracao remota.
 
 ## Documentacao
 

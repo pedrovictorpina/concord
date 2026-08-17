@@ -13,7 +13,7 @@
 
 ## Proxima acao
 
-Vincular o CLI ao projeto Concord no Supabase, aplicar a migration versionada e validar cadastro, login, sessao e RLS contra o ambiente remoto.
+Validar cadastro, login, logout, perfil automatico e politicas RLS com uma conta de teste controlada.
 
 Branch atual: `codex/etapa-01-identidade-temas`.
 
@@ -38,3 +38,7 @@ Branch atual: `codex/etapa-01-identidade-temas`.
 - suite Playwright adicionada com cinco jornadas aprovadas no Chromium;
 - projeto Supabase Concord configurado localmente e conexao de Auth validada sem versionar credenciais;
 - produto renomeado de Darkcord para Concord em codigo, pacotes, documentacao e infraestrutura.
+- Supabase CLI autenticado na organizacao do Concord e projeto remoto vinculado;
+- migration inicial aplicada e schema remoto aprovado no lint;
+- confirmacao de e-mail desativada para permitir entrada imediata no MVP;
+- repositorio GitHub renomeado para `pedrovictorpina/concord`, preservando historico e PR.
