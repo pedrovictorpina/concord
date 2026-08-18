@@ -10,7 +10,7 @@ type CommunityWorkspaceOptions = {
 
 type ServerMembershipRow = {
   role: ServerSummary['role']
-  servers: Array<{ id: string; name: string; description: string }> | null
+  servers: { id: string; name: string; description: string } | null
 }
 
 type MessageRow = {
@@ -83,7 +83,7 @@ export function useCommunityWorkspace({ demoMode, userId }: CommunityWorkspaceOp
     }
 
     const nextServers = ((data ?? []) as unknown as ServerMembershipRow[])
-      .flatMap((membership) => membership.servers?.map((server) => ({ ...server, role: membership.role })) ?? [])
+      .flatMap((membership) => membership.servers ? [{ ...membership.servers, role: membership.role }] : [])
     setServers(nextServers)
     setActiveServerId((current) => nextServers.some((server) => server.id === current) ? current : nextServers[0]?.id ?? null)
   }, [userId])
