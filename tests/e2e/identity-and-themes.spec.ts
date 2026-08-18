@@ -48,11 +48,11 @@ test.describe('identidade e temas', () => {
     await expect(page.getByRole('heading', { name: 'Bom ter você de volta.' })).toBeVisible()
   })
 
-  test('abre a demonstração e envia uma mensagem local', async ({ page }) => {
+  test('abre a demonstração da comunidade e envia uma mensagem local', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
 
-    await expect(page.getByRole('heading', { name: /Um sinal/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: /Concord\. Em sintonia\./ })).toBeVisible()
     await page.getByRole('textbox', { name: 'Mensagem' }).fill('Temas funcionando')
     await page.getByRole('textbox', { name: 'Mensagem' }).press('Enter')
     await expect(page.getByText('Temas funcionando')).toBeVisible()

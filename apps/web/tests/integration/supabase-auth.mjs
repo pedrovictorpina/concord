@@ -128,6 +128,99 @@ try {
   const { data: anonymousProfiles, error: anonymousReadError } = await anonymousClient.from('profiles').select('id').limit(1)
   assert(!anonymousReadError && anonymousProfiles?.length === 0, 'RLS deve ocultar perfis de usuarios anonimos.')
 
+  const { data: server, error: serverError } = await clientA
+    .from('servers')
+    .insert({ owner_id: accountA.userId, name: `Servidor QA ${runId}`, description: 'Validacao remota da etapa 02.' })
+    .select('id, name')
+    .single()
+  assert(!serverError && server, `O proprietario deve conseguir criar um servidor. ${serverError?.message ?? ''}`)
+
+  const { data: ownerMembership, error: ownerMembershipError } = await clientA
+    .from('server_members')
+    .select('role')
+    .eq('server_id', server.id)
+    .eq('user_id', accountA.userId)
+    .single()
+  assert(!ownerMembershipError && ownerMembership?.role === 'owner', 'A criacao do servidor deve incluir o proprietario como membro.')
+
+  const { data: defaultChannel, error: defaultChannelError } = await clientA
+    .from('channels')
+    .select('id, name, kind')
+    .eq('server_id', server.id)
+    .eq('name', 'geral')
+    .single()
+  assert(!defaultChannelError && defaultChannel?.kind === 'text', 'A criacao do servidor deve incluir o canal de texto geral.')
+
+  const { data: blockedServerRead, error: blockedServerReadError } = await clientB
+    .from('servers')
+    .select('id')
+    .eq('id', server.id)
+  assert(!blockedServerReadError && blockedServerRead?.length === 0, 'Nao membro nao deve visualizar o servidor.')
+
+  const { error: addMemberError } = await clientA
+    .from('server_members')
+    .insert({ server_id: server.id, user_id: accountB.userId })
+  assert(!addMemberError, 'O proprietario deve conseguir adicionar um membro.')
+
+  const { data: visibleServer, error: visibleServerError } = await clientB
+    .from('servers')
+    .select('id')
+    .eq('id', server.id)
+    .single()
+  assert(!visibleServerError && visibleServer?.id === server.id, 'Membro deve visualizar o servidor.')
+
+  const realtimeMessage = new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('Realtime nao entregou a mensagem do canal a tempo.')), 10000)
+    const realtimeChannel = clientB
+      .channel(`qa-messages-${runId}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `channel_id=eq.${defaultChannel.id}` }, (payload) => {
+        clearTimeout(timeout)
+        void clientB.removeChannel(realtimeChannel)
+        resolve(payload.new)
+      })
+      .subscribe(async (status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          clearTimeout(timeout)
+          void clientB.removeChannel(realtimeChannel)
+          reject(new Error(`Realtime nao conseguiu assinar o canal: ${status}.`))
+          return
+        }
+        if (status !== 'SUBSCRIBED') return
+        const { error: messageError } = await clientA.from('messages').insert({
+          channel_id: defaultChannel.id,
+          author_id: accountA.userId,
+          body: 'Mensagem QA em tempo real.',
+        })
+        if (messageError) {
+          clearTimeout(timeout)
+          void clientB.removeChannel(realtimeChannel)
+          reject(messageError)
+        }
+      })
+  })
+  const receivedMessage = await realtimeMessage
+  assert(receivedMessage?.body === 'Mensagem QA em tempo real.', 'Membro deve receber mensagem pelo Realtime.')
+
+  const { data: request, error: requestError } = await clientA
+    .from('friend_requests')
+    .insert({ sender_id: accountA.userId, recipient_id: accountB.userId })
+    .select('id')
+    .single()
+  assert(!requestError && request, 'Usuario deve conseguir enviar solicitacao de amizade.')
+
+  const { error: acceptError } = await clientB
+    .from('friend_requests')
+    .update({ status: 'accepted' })
+    .eq('id', request.id)
+  assert(!acceptError, 'Destinatario deve conseguir aceitar solicitacao de amizade.')
+
+  const { data: friendship, error: friendshipError } = await clientA
+    .from('friendships')
+    .select('id')
+    .or(`user_a_id.eq.${accountA.userId},user_b_id.eq.${accountA.userId}`)
+    .single()
+  assert(!friendshipError && friendship, 'Aceitar solicitacao deve criar a amizade canonica.')
+
   await clientA.auth.signOut()
   const { data: signedInAgain, error: signInError } = await clientA.auth.signInWithPassword({
     email: accountA.email,
@@ -151,10 +244,13 @@ try {
     projectRef,
     usersCreated: currentRunUsers.length,
     usersPendingCleanup: createdUsers.length,
-    checks: ['signup', 'profile-trigger', 'login', 'password-update', 'authenticated-read', 'own-update', 'foreign-update-blocked', 'anonymous-read-blocked'],
+    checks: ['signup', 'profile-trigger', 'login', 'password-update', 'authenticated-read', 'own-update', 'foreign-update-blocked', 'anonymous-read-blocked', 'server-create', 'owner-membership', 'default-channel', 'non-member-server-blocked', 'member-server-read', 'realtime-message', 'friend-request', 'friendship-accept'],
     cleanupManifest: '.qa/supabase-test-users.json',
   }))
 } finally {
   persistManifest()
   await Promise.allSettled([clientA.auth.signOut(), clientB.auth.signOut()])
+  clientA.realtime.disconnect()
+  clientB.realtime.disconnect()
+  anonymousClient.realtime.disconnect()
 }

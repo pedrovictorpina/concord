@@ -8,6 +8,23 @@ export type ChannelSummary = {
   kind: ChannelKind
 }
 
+export type ServerSummary = {
+  id: string
+  name: string
+  description: string
+  role: 'owner' | 'member'
+}
+
+export type MessageSummary = {
+  id: string
+  channelId: string
+  authorId: string
+  authorNickname: string
+  body: string
+  createdAt: string
+  editedAt: string | null
+}
+
 export type VoicePreferences = {
   microphoneEnabled: boolean
   outputEnabled: boolean
