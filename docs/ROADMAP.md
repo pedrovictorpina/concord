@@ -62,6 +62,8 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Seletor de qualidade automatica, alta, media e baixa antes da transmissao
 - [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS
 - [ ] Reconexao e encerramento automatico
+- [ ] Oferecer reconexao ao canal de voz depois de recarregar a pagina
+- [ ] Supressao de ruido, cancelamento de eco e teste de microfone nas preferencias de voz
 - [ ] Aplicar restrições de moderação também no servidor de mídia LiveKit
 
 ## Etapa 04 - Aplicativos

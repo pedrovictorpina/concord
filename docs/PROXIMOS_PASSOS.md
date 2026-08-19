@@ -69,6 +69,33 @@ Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a 
 - Teste: Playwright no modo demonstração para abertura, navegação por teclado e fechamento.
 - QA: clicar no nome do servidor → conferir os itens por cargo (dono, moderador, membro).
 
+### 4.6 Reconectar a voz depois de recarregar
+
+- Hoje: recarregar a pagina derruba a chamada sem deixar rastro. `useVoiceSession` guarda o alvo
+  em estado do React, entao o canal, o servidor e a propria conexao somem no reload.
+- Implementacao restante: lembrar o ultimo canal de voz em `sessionStorage` e, ao voltar,
+  perguntar se a pessoa quer reconectar em vez de entrar sozinho; expirar a oferta depois de
+  alguns minutos e limpar o registro quando a saida for explicita.
+- Criterio de aceite: recarregar durante uma chamada oferece a reconexao, e recusar nao deixa
+  resto de estado.
+- Teste: Playwright no modo demonstracao para a oferta; integracao com duas contas para a volta
+  real ao canal.
+- QA: entrar em voz -> recarregar -> aceitar -> conferir que a outra conta ve a volta.
+
+### 4.7 Supressao de ruido no microfone
+
+- Hoje: o microfone e publicado com as opcoes padrao do navegador. Nao ha ajuste na interface nem
+  teste de microfone.
+- Implementacao restante: controle de supressao de ruido, cancelamento de eco e ganho automatico
+  nas preferencias de voz, aplicado na publicacao do microfone; medidor para testar a captura.
+  A supressao usada e a do proprio navegador (`noiseSuppression` do getUserMedia) - filtros de
+  terceiros como o Krisp do Discord sao licenciados e ficam fora do modo custo zero.
+- Criterio de aceite: alternar a supressao muda a captura sem derrubar a chamada, e a escolha
+  sobrevive a proxima entrada em um canal.
+- Teste: Playwright para o controle e a persistencia; conferencia manual do efeito no audio.
+- QA: entrar em voz -> abrir preferencias de voz -> alternar supressao -> falar com ruido de fundo
+  e confirmar com a outra conta.
+
 ## 5. Aplicativos nativos
 
 - Windows: Electron, instalador, atualização e áudio de sistema quando suportado.
