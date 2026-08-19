@@ -48,6 +48,7 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
   const [nickname, setNickname] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [keepSession, setKeepSession] = useState(true)
   const [passwordConfirmation, setPasswordConfirmation] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [feedback, setFeedback] = useState<{ ok: boolean; message: string } | null>(null)
@@ -68,7 +69,7 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
     if (formMode === 'sign-up') {
       result = await signUp({ email: email.trim(), nickname: nickname.trim(), password })
     } else if (formMode === 'sign-in') {
-      result = await signIn({ email: email.trim(), password })
+      result = await signIn({ email: email.trim(), password, keepSession })
     } else if (formMode === 'forgot-password') {
       result = await requestPasswordReset(email.trim())
     } else {
@@ -214,9 +215,19 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
               ) : null}
 
               {formMode === 'sign-in' ? (
-                <button className="auth-secondary-action" type="button" onClick={() => changeMode('forgot-password')}>
-                  Esqueci minha senha
-                </button>
+                <div className="auth-login-options">
+                  <label className="auth-keep-session">
+                    <input
+                      checked={keepSession}
+                      type="checkbox"
+                      onChange={(event) => setKeepSession(event.target.checked)}
+                    />
+                    <span>Manter conectado</span>
+                  </label>
+                  <button className="auth-secondary-action" type="button" onClick={() => changeMode('forgot-password')}>
+                    Esqueci minha senha
+                  </button>
+                </div>
               ) : null}
 
               {feedback ? (
@@ -246,8 +257,8 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
 
           <footer className="auth-theme-note">
             <span>ESTILO ATIVO</span>
-            <strong>Concord Signal</strong>
-            <small>iOS e neo-brutalismo serão adicionados pelo registro de temas.</small>
+            <strong>Concord Neo</strong>
+            <small>O modo do dispositivo continua ativo; novos estilos entram pelo registro de temas.</small>
           </footer>
         </div>
       </section>

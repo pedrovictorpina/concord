@@ -41,6 +41,7 @@ function App() {
 
     return (
       <WorkspaceShell
+        demoMode={demoMode}
         identity={{
           nickname,
           username,
@@ -48,6 +49,7 @@ function App() {
           connectionLabel: demoMode ? 'demonstracao local' : profileError ? 'perfil em contingencia' : 'identidade sincronizada',
         }}
         onExit={exitWorkspace}
+        userId={session?.user.id}
       />
     )
   }

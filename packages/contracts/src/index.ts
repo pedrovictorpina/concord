@@ -8,6 +8,44 @@ export type ChannelSummary = {
   kind: ChannelKind
 }
 
+export type ServerSummary = {
+  id: string
+  name: string
+  description: string
+  role: 'owner' | 'member'
+}
+
+export type MessageSummary = {
+  id: string
+  channelId: string
+  authorId: string
+  authorNickname: string
+  body: string
+  createdAt: string
+  editedAt: string | null
+}
+
+export type PersonSummary = {
+  id: string
+  nickname: string
+  username: string
+}
+
+export type FriendRequestSummary = {
+  id: string
+  direction: 'received' | 'sent'
+  person: PersonSummary
+  status: 'pending' | 'accepted' | 'declined' | 'cancelled'
+}
+
+export type ServerInviteSummary = {
+  id: string
+  serverId: string
+  serverName: string
+  sender: PersonSummary
+  status: 'pending' | 'accepted' | 'declined'
+}
+
 export type VoicePreferences = {
   microphoneEnabled: boolean
   outputEnabled: boolean

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { isSupabaseConfigured, supabase } from '../../lib/supabase'
+import { isSupabaseConfigured, setKeepSession, supabase } from '../../lib/supabase'
 import { AuthContext } from './AuthContext'
 import type { AuthCredentials, AuthResult, ConcordProfile, SignUpCredentials } from './AuthContext'
 
@@ -132,8 +132,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
       if (error) return { ok: false, message: translateAuthError(error.message) }
       return { ok: true, message: 'Se o e-mail estiver cadastrado, enviaremos as instrucoes de recuperacao.' }
     },
-    signIn: async ({ email, password }: AuthCredentials): Promise<AuthResult> => {
+    signIn: async ({ email, password, keepSession = true }: AuthCredentials): Promise<AuthResult> => {
       if (!supabase) return notConfigured
+      setKeepSession(keepSession)
       const { error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) return { ok: false, message: translateAuthError(error.message) }
       return { ok: true, message: 'Sessao iniciada.' }

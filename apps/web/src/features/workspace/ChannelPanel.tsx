@@ -1,28 +1,30 @@
-import type { ChannelSummary } from '@concord/contracts'
+import type { ChannelSummary, ServerSummary } from '@concord/contracts'
 import { ThemeControls } from '../../components/theme/ThemeControls'
 import type { WorkspaceIdentity } from './workspace-types'
 
 type ChannelPanelProps = {
-  activeChannel: string
+  activeChannelId: string | null
   channels: ChannelSummary[]
   identity: WorkspaceIdentity
   onChannelChange: (channelId: string) => void
   onExit: () => void
+  onOpenPeople: () => void
+  server: ServerSummary | null
 }
 
-export function ChannelPanel({ activeChannel, channels, identity, onChannelChange, onExit }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, channels, identity, onChannelChange, onExit, onOpenPeople, server }: ChannelPanelProps) {
   return (
     <aside className="channel-panel">
       <header className="workspace-heading">
-        <div><span className="eyebrow">REDE PRIVADA</span><strong>Concord</strong></div>
-        <button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button>
+        <div><span className="eyebrow">SERVIDOR PRIVADO</span><strong>{server?.name ?? 'Concord'}</strong></div>
+        <div className="workspace-actions"><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
       </header>
 
       <section className="channel-group">
         <p>TRANSMISSOES DE TEXTO</p>
         {channels.filter((channel) => channel.kind === 'text').map((channel) => (
           <button
-            className={activeChannel === channel.id ? 'channel active' : 'channel'}
+            className={activeChannelId === channel.id ? 'channel active' : 'channel'}
             key={channel.id}
             type="button"
             onClick={() => onChannelChange(channel.id)}
@@ -34,7 +36,9 @@ export function ChannelPanel({ activeChannel, channels, identity, onChannelChang
 
       <section className="channel-group voice-group">
         <p>FREQUENCIAS DE VOZ</p>
-        <button className="channel voice active" type="button"><span>◖</span>sala-da-madrugada</button>
+        {channels.filter((channel) => channel.kind === 'voice').map((channel) => (
+          <button className="channel voice" key={channel.id} type="button"><span>◖</span>{channel.name}</button>
+        ))}
         <div className="voice-member">
           <span className="avatar avatar-green">{identity.initials}</span>
           <div><strong>{identity.nickname}</strong><small>ao vivo</small></div><i aria-label="Microfone ligado">⌁</i>

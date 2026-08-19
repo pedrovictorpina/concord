@@ -86,7 +86,10 @@
 .auth-card input { width: 100%; padding: 14px 15px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); outline: 0; color: var(--color-text); background: var(--color-surface-sunken); transition: border-color var(--motion-fast), box-shadow var(--motion-fast); }
 .auth-card input::placeholder { color: var(--color-text-faint); }
 .auth-card input:focus { border-color: var(--color-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent); }
-.auth-secondary-action { justify-self: end; margin-top: calc(var(--space-2) * -1); padding: 0; color: var(--color-text-muted); background: transparent; font-size: var(--font-size-xs); text-decoration: underline; text-underline-offset: 3px; }
+.auth-login-options { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: calc(var(--space-2) * -1); }
+.auth-keep-session { display: inline-flex !important; grid-template-columns: auto 1fr; align-items: center; gap: var(--space-2); color: var(--color-text-muted); cursor: pointer; font-size: var(--font-size-xs); }
+.auth-keep-session input { width: 14px; height: 14px; margin: 0; accent-color: var(--color-accent); }
+.auth-secondary-action { justify-self: end; padding: 0; color: var(--color-text-muted); background: transparent; font-size: var(--font-size-xs); text-decoration: underline; text-underline-offset: 3px; }
 .auth-secondary-action:hover { color: var(--color-accent); }
 
 .auth-feedback { margin: 0; padding: var(--space-3); border-left: 3px solid var(--color-danger); color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 8%, transparent); font-size: var(--font-size-sm); }

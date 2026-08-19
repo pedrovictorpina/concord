@@ -6,16 +6,16 @@
 | --- | --- | --- |
 | 00 - Fundacao | Concluida e publicada | 2026-08-17 |
 | 01 - Identidade e temas | Concluida e publicada | 2026-08-17 |
-| 02 - Comunidades e texto | Nao iniciada | - |
+| 02 - Comunidades e texto | Em andamento | 2026-08-18 |
 | 03 - Voz e compartilhamento | Nao iniciada | - |
 | 04 - Aplicativos | Nao iniciada | - |
 | 05 - Qualidade e lancamento | Nao iniciada | - |
 
 ## Proxima acao
 
-Planejar a Etapa 02, com contratos e criterios de aceite para amigos, servidores, canais e mensagens de texto.
+Validar o Preview de amizades e convites e decidir se a Etapa 02 segue para moderacao ou para voz e compartilhamento.
 
-Branch atual: `main`.
+Branch atual: `codex/etapa-02-comunidades-texto`.
 
 ## Historico
 
@@ -62,3 +62,20 @@ Branch atual: `main`.
 - dominio `https://concord-web-pi.vercel.app` validado com HTTP 200, configuracao Supabase, tema e demonstracao funcional;
 - Site URL do Supabase alterado para o dominio de producao e retorno `https://concord-web-pi.vercel.app/**` permitido;
 - varredura de runtime da Vercel nao encontrou erros apos a publicacao.
+
+### 2026-08-18
+
+- primeiro recorte da Etapa 02 implementado: comunidades privadas, membros, canal inicial `#geral`, mensagens persistentes e Realtime;
+- migrations de comunidades e mensagens aplicadas ao Supabase, incluindo o ajuste de RLS que permite retornar o servidor criado;
+- integracao remota aprovou criacao, isolamento por RLS, associacao de membro, Realtime e amizade aceita;
+- seis jornadas Playwright, typecheck, lint e verificacao de migrations aprovados;
+- dez contas temporarias de QA e seus dados dependentes foram removidos no Supabase; a verificacao retornou zero registros em `auth.users` e `public.profiles`.
+
+### 2026-08-19
+
+- interface de amizades entregue: busca por `@identificador`, pedidos recebidos, aceite e lista de amigos;
+- convites diretos para servidores implementados com aceite explicito antes de criar a membresia;
+- migration de convites aplicada ao Supabase e aprovada no lint;
+- integracao remota aprovou envio e aceite de convite, incluindo a criacao segura de membro;
+- seis jornadas Playwright, build e lint aprovados;
+- quatro contas temporarias de QA e seus dados dependentes foram removidos; a verificacao retornou zero registros em `auth.users` e `public.profiles`.

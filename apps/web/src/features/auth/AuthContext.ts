@@ -4,6 +4,7 @@ import type { Session } from '@supabase/supabase-js'
 export type AuthCredentials = {
   email: string
   password: string
+  keepSession?: boolean
 }
 
 export type SignUpCredentials = AuthCredentials & {
