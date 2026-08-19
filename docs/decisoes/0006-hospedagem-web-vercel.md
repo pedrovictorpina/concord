@@ -48,6 +48,21 @@ O dominio inicial de producao e `https://concord-web-pi.vercel.app`. Branches e 
 - `https://concord-web-pi.vercel.app/**` foi adicionado aos redirecionamentos permitidos;
 - a verificacao de runtime da Vercel nao encontrou erros depois da publicacao.
 
+## Autor do commit e deploys bloqueados
+
+No plano Hobby a Vercel so constroi commits cujo autor Git pertence a conta dona do projeto. Um
+commit de outra identidade aparece no GitHub como check `Vercel: failure` com a descricao
+`Deployment was blocked`, com build de 0 ms e sem log — nao e erro de codigo, e o deploy nem
+comeca. O erro do `vercel redeploy` nesse caso e `This deployment can not be redeployed. Please
+try again from a fresh commit.`
+
+Aconteceu na integracao do PR #5: o merge feito pelo `gh` autenticado como `syg-pedro` gerou o
+merge commit `c8b064d` com autor `pedro.v@sygecom.com.br`, e a producao ficou parada na versao
+anterior. A saida foi um commit novo na `main` com a identidade `pedrovictorpina`.
+
+Ao integrar PRs, confira `git log -1 --format='%an <%ae>'` antes: os commits que chegam na `main`
+precisam ser da identidade dona da conta Vercel.
+
 ## Consequencias
 
 - pushes na `main` atualizam producao automaticamente;
