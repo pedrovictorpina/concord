@@ -147,4 +147,5 @@ Branch atual: `main`.
 - remover sem banir passou a existir (`remove_server_member`), e moderador agora administra canais tambem na interface, direito que o RLS (`can_manage_channels`) ja concedia.
 - convidar deixou de exigir amizade: o dialogo busca perfis no banco por apelido ou identificador parcial e mostra uma secao de outras pessoas convidaveis. Antes a busca so filtrava a lista de amigos ja carregada, e quem nao era amigo so podia ser convidado pelo dono, digitando o identificador exato em outro dialogo.
 - moderador passou a convidar e a gerar links (migration `20260819235500_allow_moderator_invites.sql`), o link ganhou validade e limite de usos na criacao, e o convidado ve o nome do servidor antes de aceitar, via `inspect_server_invite_link`, que existia no banco e nao era usada.
+- clicar em um canal de voz passou a entrar na chamada direto, como no Discord. Antes abria a tela do canal e ainda exigia o botao `Entrar na chamada de voz`, que agora so aparece quando a conexao nao aconteceu.
 

@@ -78,7 +78,6 @@ test.describe('identidade e temas', () => {
     await expect(page.locator('.voice-member')).toHaveCount(0)
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'sala-da-madrugada' })).toBeVisible()
-    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const voiceLayout = await page.locator('.app-shell').evaluate((app) => {
@@ -187,7 +186,6 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
-    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
@@ -214,7 +212,6 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
-    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
