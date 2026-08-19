@@ -4,15 +4,17 @@ import type { WorkspaceIdentity } from './workspace-types'
 
 type ChannelPanelProps = {
   activeChannelId: string | null
+  activeVoiceChannelId: string | null
   channels: ChannelSummary[]
   identity: WorkspaceIdentity
   onChannelChange: (channelId: string) => void
+  onVoiceChannelChange: (channelId: string) => void
   onExit: () => void
   onOpenPeople: () => void
   server: ServerSummary | null
 }
 
-export function ChannelPanel({ activeChannelId, channels, identity, onChannelChange, onExit, onOpenPeople, server }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, identity, onChannelChange, onVoiceChannelChange, onExit, onOpenPeople, server }: ChannelPanelProps) {
   return (
     <aside className="channel-panel">
       <header className="workspace-heading">
@@ -37,7 +39,7 @@ export function ChannelPanel({ activeChannelId, channels, identity, onChannelCha
       <section className="channel-group voice-group">
         <p>FREQUENCIAS DE VOZ</p>
         {channels.filter((channel) => channel.kind === 'voice').map((channel) => (
-          <button className="channel voice" key={channel.id} type="button"><span>◖</span>{channel.name}</button>
+          <button className={activeVoiceChannelId === channel.id ? 'channel voice active' : 'channel voice'} key={channel.id} type="button" onClick={() => onVoiceChannelChange(channel.id)}><span>◖</span>{channel.name}</button>
         ))}
         <div className="voice-member">
           <span className="avatar avatar-green">{identity.initials}</span>

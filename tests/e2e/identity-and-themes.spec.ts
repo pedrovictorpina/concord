@@ -66,6 +66,14 @@ test.describe('identidade e temas', () => {
     await page.getByRole('textbox', { name: 'Mensagem' }).press('Enter')
     await expect(page.getByText('Temas funcionando')).toBeVisible()
 
+    await page.getByRole('button', { name: 'sala-da-madrugada' }).click()
+    await expect(page.getByText('SALA-DA-MADRUGADA', { exact: true })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Compartilhar tela' })).toBeEnabled()
+    await page.getByRole('button', { name: 'Compartilhar tela' }).click()
+    await expect(page.getByRole('dialog', { name: 'Qualidade da transmissao' })).toBeVisible()
+    await expect(page.getByRole('button', { name: /Automatica/ })).toBeVisible()
+    await page.getByRole('button', { name: 'Fechar seletor de qualidade' }).click()
+
     await page.getByRole('button', { name: 'Amigos e convites' }).click()
     await expect(page.getByRole('heading', { name: 'Pessoas em sintonia.' })).toBeVisible()
     await page.getByRole('button', { name: 'Fechar pessoas e convites' }).click()

@@ -209,10 +209,24 @@ button { border: 0; cursor: pointer; }
 .capture-label { position: absolute; top: 12px; left: 12px; padding: 4px 6px; color: var(--color-accent-contrast); background: var(--color-accent); font: 7px var(--font-mono); }
 .share-error { margin: 0 18px 10px; color: var(--color-danger); font: 9px/1.4 var(--font-mono); }
 
+.live-actions { display: grid; gap: 7px; margin: 0 18px; }
+.live-actions .share-button { margin: 0; }
 .share-button { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 0 18px; padding: 11px; border: var(--border-width) solid var(--color-accent); color: var(--color-accent); background: var(--color-accent-soft); font: 10px var(--font-mono); letter-spacing: .8px; transition: var(--motion-fast) ease; }
 .share-button:hover { color: var(--color-accent-contrast); background: var(--color-accent); }
 .share-button.stop { color: var(--color-danger); border-color: var(--color-danger); background: color-mix(in srgb, var(--color-danger) 8%, transparent); }
 .share-button.stop:hover { color: var(--color-accent-contrast); background: var(--color-danger); }
+.leave-voice { padding: 8px; border: var(--border-width) solid var(--color-border); color: var(--color-text-muted); background: var(--color-surface-sunken); font: 8px var(--font-mono); letter-spacing: .7px; }
+.leave-voice:hover { color: var(--color-danger); border-color: var(--color-danger); }
+
+.quality-picker { margin: 12px 18px 0; padding: 12px; border: var(--border-width) solid var(--color-border); background: var(--color-surface-raised); box-shadow: var(--shadow-panel); }
+.quality-picker header { display: flex; align-items: center; justify-content: space-between; color: var(--color-text); font: var(--font-label); letter-spacing: .8px; }
+.quality-picker header button { padding: 0; color: var(--color-text-muted); background: transparent; font: 20px/1 var(--font-mono); }
+.quality-picker > p { margin: 8px 0 10px; color: var(--color-text-muted); font-size: 10px; line-height: 1.45; }
+.quality-picker > div { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.quality-picker > div button { display: grid; gap: 3px; padding: 9px; border: var(--border-width) solid var(--color-border); color: var(--color-text); background: var(--color-surface-sunken); text-align: left; }
+.quality-picker > div button.active, .quality-picker > div button:hover { border-color: var(--color-accent); background: var(--color-accent-soft); }
+.quality-picker strong { font: var(--font-label); letter-spacing: .6px; }
+.quality-picker small { color: var(--color-text-muted); font-size: 8px; line-height: 1.35; }
 
 .quality-panel { display: grid; gap: 14px; margin: 22px 18px; padding: 16px 0; border-block: var(--border-width) solid var(--color-border-soft); }
 .quality-panel div { display: flex; justify-content: space-between; color: var(--color-text-faint); font: 8px var(--font-mono); letter-spacing: .7px; }

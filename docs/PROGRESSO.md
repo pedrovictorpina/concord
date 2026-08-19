@@ -7,13 +7,13 @@
 | 00 - Fundacao | Concluida e publicada | 2026-08-17 |
 | 01 - Identidade e temas | Concluida e publicada | 2026-08-17 |
 | 02 - Comunidades e texto | Em andamento | 2026-08-18 |
-| 03 - Voz e compartilhamento | Nao iniciada | - |
+| 03 - Voz e compartilhamento | Em andamento | 2026-08-19 |
 | 04 - Aplicativos | Nao iniciada | - |
 | 05 - Qualidade e lancamento | Nao iniciada | - |
 
 ## Proxima acao
 
-Validar o Preview de amizades e convites e decidir se a Etapa 02 segue para moderacao ou para voz e compartilhamento.
+Configurar o projeto LiveKit Cloud e os tres segredos da Edge Function para validar voz e compartilhamento real.
 
 Branch atual: `codex/etapa-02-comunidades-texto`.
 
@@ -79,3 +79,5 @@ Branch atual: `codex/etapa-02-comunidades-texto`.
 - integracao remota aprovou envio e aceite de convite, incluindo a criacao segura de membro;
 - seis jornadas Playwright, build e lint aprovados;
 - quatro contas temporarias de QA e seus dados dependentes foram removidos; a verificacao retornou zero registros em `auth.users` e `public.profiles`.
+- Etapa 03 iniciada: canal de voz padrao, cliente LiveKit carregado sob demanda e Edge Function segura versionada;
+- ativacao remota pendente da criacao do projeto LiveKit Cloud e de tres segredos no Supabase.

@@ -37,13 +37,14 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 
 ## Etapa 03 - Voz e compartilhamento
 
-- [ ] Edge Functions versionadas para emissao segura de tokens
-- [ ] Projeto LiveKit Cloud e emissao segura de tokens
-- [ ] Entrada e saida de canais de voz
-- [ ] Silenciar microfone, audio e volume individual
-- [ ] Compartilhar tela ou janela
+- [x] Edge Function versionada para emissao segura de tokens
+- [ ] Configurar projeto LiveKit Cloud e segredos no Supabase
+- [x] Entrada e saida de canais de voz
+- [x] Silenciar microfone
+- [x] Compartilhar tela ou janela
 - [ ] Audio do sistema no Windows
-- [ ] Perfis de 720p/1080p e 15/30 FPS
+- [x] Seletor de qualidade automatica, alta, media e baixa antes da transmissao
+- [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS
 - [ ] Reconexao e encerramento automatico
 
 ## Etapa 04 - Aplicativos
