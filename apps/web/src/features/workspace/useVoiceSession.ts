@@ -87,11 +87,14 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
   const join = useCallback(async (next: VoiceTarget) => {
     if (connecting || target?.channelId === next.channelId) return
     setConnecting(true)
-    const connected = demoMode
-      ? await new Promise<boolean>((resolve) => window.setTimeout(() => resolve(true), 250))
-      : await liveRoom.join(next.channelId, { microphone: !microphoneDisabled })
-    if (connected) setTarget(next)
-    setConnecting(false)
+    try {
+      const connected = demoMode
+        ? await new Promise<boolean>((resolve) => window.setTimeout(() => resolve(true), 250))
+        : await liveRoom.join(next.channelId, { microphone: !microphoneDisabled })
+      if (connected) setTarget(next)
+    } finally {
+      setConnecting(false)
+    }
   }, [connecting, demoMode, liveRoom, microphoneDisabled, target])
 
   const leave = useCallback(() => {

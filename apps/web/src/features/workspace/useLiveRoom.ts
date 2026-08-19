@@ -56,15 +56,28 @@ export function useLiveRoom() {
     if (roomRef.current) leave()
 
     setError('')
-    const { data, error: tokenError } = await supabase.functions.invoke<LiveKitToken>('livekit-token', {
-      body: { channelId },
-    })
-    if (tokenError || !data) {
+
+    let data: LiveKitToken | null = null
+    try {
+      const response = await supabase.functions.invoke<LiveKitToken>('livekit-token', { body: { channelId } })
+      if (response.error || !response.data) throw response.error ?? new Error('resposta vazia do livekit-token')
+      data = response.data
+    } catch (caught) {
+      console.error('[voz] falha ao autorizar entrada no canal', caught)
       setError('Nao foi possivel autorizar sua entrada no canal de voz.')
       return false
     }
 
-    const { Room, RoomEvent, Track } = await import('livekit-client')
+    let client: typeof import('livekit-client')
+    try {
+      client = await import('livekit-client')
+    } catch (caught) {
+      console.error('[voz] falha ao carregar o cliente de midia', caught)
+      setError('Nao foi possivel carregar a voz. Atualize a pagina e tente de novo.')
+      return false
+    }
+
+    const { Room, RoomEvent, Track } = client
     const room = new Room({ adaptiveStream: true })
     const sync = () => {
       setParticipants([room.localParticipant, ...room.remoteParticipants.values()].map(describeParticipant))
@@ -101,9 +114,10 @@ export function useLiveRoom() {
 
     try {
       await room.connect(data.serverUrl, data.token)
-    } catch {
+    } catch (caught) {
+      console.error('[voz] falha ao conectar na sala', caught)
       room.disconnect()
-      setError('Nao foi possivel conectar ao canal de voz.')
+      setError('Nao foi possivel conectar ao canal de voz. Verifique sua conexao e tente de novo.')
       return false
     }
 
@@ -112,11 +126,16 @@ export function useLiveRoom() {
     sync()
 
     if (options.microphone) {
-      try {
-        await room.localParticipant.setMicrophoneEnabled(true)
-        setMicrophoneEnabled(true)
-      } catch {
-        setError('Permissao de microfone negada. Voce entrou sem audio.')
+      if (!navigator.mediaDevices) {
+        setError('Seu navegador so libera o microfone em conexoes seguras. Voce entrou sem audio.')
+      } else {
+        try {
+          await room.localParticipant.setMicrophoneEnabled(true)
+          setMicrophoneEnabled(true)
+        } catch (caught) {
+          console.error('[voz] falha ao publicar o microfone', caught)
+          setError('Permissao de microfone negada. Voce entrou sem audio.')
+        }
       }
       sync()
     }
@@ -138,7 +157,8 @@ export function useLiveRoom() {
     try {
       await room.localParticipant.setMicrophoneEnabled(nextValue)
       setMicrophoneEnabled(nextValue)
-    } catch {
+    } catch (caught) {
+      console.error('[voz] falha ao alternar o microfone', caught)
       setError('Permissao de microfone negada ou indisponivel.')
     }
   }, [microphoneEnabled])
@@ -154,7 +174,8 @@ export function useLiveRoom() {
         { degradationPreference: 'maintain-resolution', simulcast: true },
       )
       if (publication?.track) setScreenTrack(publication.track)
-    } catch {
+    } catch (caught) {
+      console.error('[voz] falha ao compartilhar a tela', caught)
       setError('Captura cancelada. Nenhuma tela foi compartilhada.')
     }
   }, [])
