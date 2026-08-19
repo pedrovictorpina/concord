@@ -61,10 +61,10 @@ Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a 
 - Teste: integração cobrindo leitura por não membro nos dois estados.
 - QA: criar servidor público → sair da conta → entrar com outra → localizar e entrar sem convite.
 
-### 4.5 Menu do servidor na setinha ao lado do nome
+### 4.5 Menu do servidor na setinha ao lado do nome — FEITO em 19/08/2026
 
-- Hoje: já existe um menu no `⌄` ao lado do nome do servidor, com convidar, configurações e criar canal de texto ou voz.
-- Implementação restante: levar para esse menu o que hoje só está na central de configurações — cargos e permissões, notificações do servidor, privacidade, marcar como lido e sair do servidor —, e deixar o alvo de clique claro no cabeçalho, como no menu do Discord usado como referência.
+- Entregue: o cabeçalho inteiro virou o gatilho do menu (nome + seta), e o menu reúne convidar pessoas, configurações do servidor, cargos e permissões, criar canal de texto ou voz (dono e moderador), silenciar ou reativar notificações, marcar como lido e sair do servidor. A linha de apoio mostra o papel de quem está lendo.
+- Restante: privacidade do servidor depende do item 4.4.
 - Critério de aceite: as ações do servidor ficam alcançáveis pelo cabeçalho, e cada item some para quem não tem o cargo necessário.
 - Teste: Playwright no modo demonstração para abertura, navegação por teclado e fechamento.
 - QA: clicar no nome do servidor → conferir os itens por cargo (dono, moderador, membro).

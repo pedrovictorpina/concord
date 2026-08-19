@@ -140,3 +140,6 @@ Branch atual: `main`.
 - home reescrita no formato do Discord: coluna de conversas (`HomeSidebar`) com busca, atalhos de Amigos e Solicitacoes, lista de mensagens diretas e rodape de identidade; centro com as abas Disponivel, Todos, Pendente e Adicionar amigo, busca e acoes por pessoa; coluna `Ativo agora` com quem esta em chamada.
 - presenca online passou a existir: `useFriendPresence` publica estado e canal de voz atual em um canal Realtime unico e alimenta as bolinhas de status, a aba Disponivel e o `Ativo agora`. `PersonSummary` ganhou `avatarUrl`, entao amigos, pedidos, convites e membros exibem foto real.
 - validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (21/21, com as jornadas de home reescritas).
+- menu do servidor saiu da setinha isolada e passou a ocupar o cabecalho inteiro: nome, papel de quem le e seta abrem o mesmo menu, agora com convidar pessoas, configuracoes, cargos e permissoes, criar canal, silenciar, marcar como lido e sair do servidor. Antes o menu tinha tres itens e o resto so existia na central de configuracoes.
+- criar canal deixou de ser exclusivo do dono na interface: moderador ja podia pelo RLS (`can_manage_channels`) e agora ve os mesmos atalhos.
+

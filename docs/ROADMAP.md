@@ -46,7 +46,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [ ] Convidar pessoa que ainda nao e amiga, com busca de perfis no proprio dialogo
 - [ ] Nao lidas por canal revisadas: leitura confiavel, badge por servidor e mencao sem falso positivo
 - [ ] Servidor publico ou privado, com descoberta de servidores publicos
-- [ ] Menu do servidor no cabecalho com cargos, notificacoes, privacidade e sair do servidor
+- [x] Menu do servidor no cabecalho com cargos, notificacoes, marcar como lido e sair do servidor
 
 ## Etapa 03 - Voz e compartilhamento
 

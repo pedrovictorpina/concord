@@ -67,6 +67,12 @@ button { border: 0; cursor: pointer; }
 .workspace-heading strong { display: block; margin-top: 3px; font-size: 19px; letter-spacing: -.4px; }
 .workspace-actions { display: flex; gap: 8px; }
 .workspace-heading button { color: var(--color-text-muted); background: transparent; font-size: 18px; }
+.workspace-heading .server-menu-trigger { display: grid; flex: 1; gap: 2px; min-width: 0; padding: 6px 8px; border-radius: var(--radius-control); color: var(--color-text); background: transparent; text-align: left; }
+.workspace-heading .server-menu-trigger:hover { background: var(--color-surface-raised); }
+.workspace-heading .server-menu-trigger strong { display: flex; align-items: center; gap: 6px; overflow: hidden; font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-heading .server-menu-trigger i { color: var(--color-text-muted); font-style: normal; }
+.workspace-heading .server-menu-trigger[data-state='open'] { background: var(--color-surface-raised); }
+.server-menu-content .danger { color: var(--color-danger); }
 .server-menu-trigger { color: var(--color-text-muted); background: transparent; font: 15px var(--font-mono); }
 .server-menu-trigger:hover, .server-menu-trigger[data-state='open'] { color: var(--color-accent); }
 .server-menu-content { z-index: 40; display: grid; width: 218px; padding: 7px; border: var(--border-width) solid var(--color-border); background: var(--color-surface-raised); box-shadow: var(--shadow-panel); }

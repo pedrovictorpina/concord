@@ -23,25 +23,54 @@ type ChannelPanelProps = {
   onCloseMobile: () => void
   onChannelChange: (channelId: string) => void
   onCreateChannel: (kind: ChannelSummary['kind']) => void
+  onLeaveServer: () => void
+  onMarkServerRead: () => void
   onOpenInvite: () => void
+  onOpenPermissions: () => void
   onOpenServerSettings: () => void
+  onToggleMuted: () => void
   onVoiceChannelChange: (channelId: string) => void
   onOpenPeople: () => void
   server: ServerSummary | null
+  serverMuted: boolean
   unreadByChannel: Record<string, { count: number; mentioned: boolean }>
   voiceParticipantsByChannel: Record<string, VoiceParticipant[]>
 }
 
-export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, connectedVoiceChannelId, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onOpenInvite, onOpenServerSettings, onVoiceChannelChange, onOpenPeople, server, unreadByChannel, voiceParticipantsByChannel }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, connectedVoiceChannelId, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onLeaveServer, onMarkServerRead, onOpenInvite, onOpenPermissions, onOpenServerSettings, onToggleMuted, onVoiceChannelChange, onOpenPeople, server, serverMuted, unreadByChannel, voiceParticipantsByChannel }: ChannelPanelProps) {
+  const canManage = server?.role === 'owner' || server?.role === 'moderator'
+
   return (
     <aside className={mobileOpen ? 'channel-panel mobile-open' : 'channel-panel'}>
       <header className="workspace-heading">
-        <div><span className="eyebrow">SERVIDOR PRIVADO</span><strong>{server?.name ?? 'Concord'}</strong></div>
-        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><Hint label="Convidar amigos"><button type="button" aria-label="Convidar amigos" onClick={onOpenInvite}>⊕</button></Hint><Hint label="Amigos e convites recebidos"><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button></Hint><DropdownMenu.Root><DropdownMenu.Trigger aria-label="Abrir menu do servidor" className="server-menu-trigger">⌄</DropdownMenu.Trigger><DropdownMenu.Portal><DropdownMenu.Content align="end" className="server-menu-content" sideOffset={10}><DropdownMenu.Item onSelect={onOpenInvite}>Convidar amigos</DropdownMenu.Item><DropdownMenu.Item onSelect={onOpenServerSettings}>Configurações do servidor</DropdownMenu.Item>{server?.role === 'owner' ? <><DropdownMenu.Item onSelect={() => onCreateChannel('text')}>Criar canal de texto</DropdownMenu.Item><DropdownMenu.Item onSelect={() => onCreateChannel('voice')}>Criar canal de voz</DropdownMenu.Item></> : null}</DropdownMenu.Content></DropdownMenu.Portal></DropdownMenu.Root></div>
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger aria-label="Abrir menu do servidor" className="server-menu-trigger">
+            <span className="eyebrow">{server?.role === 'owner' ? 'VOCÊ É O DONO' : server?.role === 'moderator' ? 'VOCÊ MODERA' : 'SERVIDOR'}</span>
+            <strong>{server?.name ?? 'Concord'}<i aria-hidden="true">⌄</i></strong>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content align="start" className="server-menu-content" sideOffset={10}>
+              <DropdownMenu.Item onSelect={onOpenInvite}>Convidar pessoas</DropdownMenu.Item>
+              <DropdownMenu.Item onSelect={onOpenServerSettings}>Configurações do servidor</DropdownMenu.Item>
+              <DropdownMenu.Item onSelect={onOpenPermissions}>Cargos e permissões</DropdownMenu.Item>
+              {canManage ? <>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Item onSelect={() => onCreateChannel('text')}>Criar canal de texto</DropdownMenu.Item>
+                <DropdownMenu.Item onSelect={() => onCreateChannel('voice')}>Criar canal de voz</DropdownMenu.Item>
+              </> : null}
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item onSelect={onToggleMuted}>{serverMuted ? 'Reativar notificações' : 'Silenciar servidor'}</DropdownMenu.Item>
+              <DropdownMenu.Item onSelect={onMarkServerRead}>Marcar como lido</DropdownMenu.Item>
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item className="danger" onSelect={onLeaveServer}>Sair do servidor</DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><Hint label="Convidar amigos"><button type="button" aria-label="Convidar amigos" onClick={onOpenInvite}>⊕</button></Hint><Hint label="Amigos e convites recebidos"><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button></Hint></div>
       </header>
 
       <section className="channel-group">
-        <p>TRANSMISSOES DE TEXTO{server?.role === 'owner' ? <Hint label="Adicionar canal de texto"><button className="channel-add" type="button" aria-label="Adicionar canal de texto" onClick={() => onCreateChannel('text')}>+</button></Hint> : null}</p>
+        <p>TRANSMISSOES DE TEXTO{canManage ? <Hint label="Adicionar canal de texto"><button className="channel-add" type="button" aria-label="Adicionar canal de texto" onClick={() => onCreateChannel('text')}>+</button></Hint> : null}</p>
         {channels.filter((channel) => channel.kind === 'text').map((channel) => (
           <button
             className={activeChannelId === channel.id ? 'channel active' : 'channel'}
@@ -55,7 +84,7 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
       </section>
 
       <section className="channel-group voice-group">
-        <p>FREQUENCIAS DE VOZ{server?.role === 'owner' ? <Hint label="Adicionar canal de voz"><button className="channel-add" type="button" aria-label="Adicionar canal de voz" onClick={() => onCreateChannel('voice')}>+</button></Hint> : null}</p>
+        <p>FREQUENCIAS DE VOZ{canManage ? <Hint label="Adicionar canal de voz"><button className="channel-add" type="button" aria-label="Adicionar canal de voz" onClick={() => onCreateChannel('voice')}>+</button></Hint> : null}</p>
         {channels.filter((channel) => channel.kind === 'voice').map((channel) => {
           const participants = voiceParticipantsByChannel[channel.id] ?? []
           const channelClasses = ['channel', 'voice']
