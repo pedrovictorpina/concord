@@ -11,14 +11,18 @@ type LiveKitToken = {
 
 export function useLiveRoom(channelId: string | null) {
   const roomRef = useRef<Room | null>(null)
+  const audioElementsRef = useRef<HTMLAudioElement[]>([])
   const [connected, setConnected] = useState(false)
   const [error, setError] = useState('')
   const [microphoneEnabled, setMicrophoneEnabled] = useState(false)
+  const [outputEnabled, setOutputEnabled] = useState(true)
   const [screenTrack, setScreenTrack] = useState<LocalTrack | RemoteTrack | null>(null)
 
   const disconnect = useCallback(() => {
     roomRef.current?.disconnect()
     roomRef.current = null
+    audioElementsRef.current.forEach((element) => element.remove())
+    audioElementsRef.current = []
     setConnected(false)
     setMicrophoneEnabled(false)
     setScreenTrack(null)
@@ -46,7 +50,12 @@ export function useLiveRoom(channelId: string | null) {
       if (publication.source === Track.Source.ScreenShare && track.kind === Track.Kind.Video) {
         setScreenTrack(track as RemoteTrack)
       }
-      if (track.kind === Track.Kind.Audio) document.body.append(track.attach())
+      if (track.kind === Track.Kind.Audio) {
+        const audio = track.attach() as HTMLAudioElement
+        audio.muted = !outputEnabled
+        audioElementsRef.current.push(audio)
+        document.body.append(audio)
+      }
     })
     room.on(RoomEvent.TrackUnsubscribed, (track) => {
       track.detach().forEach((element) => element.remove())
@@ -64,7 +73,13 @@ export function useLiveRoom(channelId: string | null) {
       setError('Nao foi possivel conectar ao canal de voz.')
       return false
     }
-  }, [channelId, disconnect])
+  }, [channelId, disconnect, outputEnabled])
+
+  const toggleOutput = useCallback(() => {
+    const nextValue = !outputEnabled
+    audioElementsRef.current.forEach((element) => { element.muted = !nextValue })
+    setOutputEnabled(nextValue)
+  }, [outputEnabled])
 
   const toggleMicrophone = useCallback(async () => {
     if (!roomRef.current && !(await join())) return
@@ -105,9 +120,11 @@ export function useLiveRoom(channelId: string | null) {
     error,
     join,
     microphoneEnabled,
+    outputEnabled,
     screenTrack,
     startScreenShare,
     stopScreenShare,
     toggleMicrophone,
+    toggleOutput,
   }
 }

@@ -32,6 +32,12 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Convites para servidores
 - [x] Canais de texto
 - [x] Mensagens em tempo real
+- [x] Administração de canais de texto e voz pelo proprietário
+- [x] Configurações de perfil, servidor, temas e silenciamento individual
+- [x] Upload de foto de perfil no Supabase Storage
+- [x] Convites para servidor por link revogável
+- [x] Contadores persistentes de mensagens não lidas e menções
+- [x] Cargos de moderador e permissões básicas por canal
 - [ ] Edicao, exclusao e respostas
 - [ ] Cargos e moderacao basica
 
@@ -49,12 +55,13 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 
 ## Etapa 04 - Aplicativos
 
+- [x] Base PWA instalável para web e desktop
 - [ ] Electron para Windows
 - [ ] Instalador e atualizacao do Windows
 - [ ] React Native/Expo para Android e iOS
 - [ ] MediaProjection no Android
 - [ ] ReplayKit Broadcast Extension no iOS
-- [ ] Notificacoes e links de convite
+- [ ] Notificacoes push (depende de VAPID e aplicativos instaláveis)
 
 ## Etapa 05 - Qualidade e lancamento
 

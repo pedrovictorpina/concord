@@ -12,7 +12,17 @@ export type ServerSummary = {
   id: string
   name: string
   description: string
-  role: 'owner' | 'member'
+  role: 'owner' | 'moderator' | 'member'
+}
+
+export type ServerMemberRole = ServerSummary['role']
+
+export type ChannelPermission = {
+  channelId: string
+  role: Exclude<ServerMemberRole, 'owner'>
+  canRead: boolean
+  canWrite: boolean
+  canSpeak: boolean
 }
 
 export type MessageSummary = {

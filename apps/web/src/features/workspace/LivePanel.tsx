@@ -81,7 +81,7 @@ export function LivePanel({ demoMode, voiceChannel }: LivePanelProps) {
       </section>
       <footer className="voice-controls">
         <button className={demoMode ? (preferences.microphoneEnabled ? '' : 'disabled') : (liveRoom.microphoneEnabled ? '' : 'disabled')} disabled={!demoMode && !voiceChannel} type="button" onClick={() => demoMode ? toggleDemoPreference('microphoneEnabled') : void liveRoom.toggleMicrophone()}><span>{demoMode ? (preferences.microphoneEnabled ? '⌁' : '×') : (liveRoom.microphoneEnabled ? '⌁' : '×')}</span>{demoMode ? (preferences.microphoneEnabled ? 'MIC ATIVO' : 'MIC MUDO') : (liveRoom.microphoneEnabled ? 'MIC ATIVO' : 'LIGAR MIC')}</button>
-        <button className={preferences.outputEnabled ? '' : 'disabled'} disabled={!demoMode} type="button" onClick={() => toggleDemoPreference('outputEnabled')}><span>{preferences.outputEnabled ? '◖' : '×'}</span>{preferences.outputEnabled ? 'AUDIO ATIVO' : 'SEM AUDIO'}</button>
+        <button className={demoMode ? (preferences.outputEnabled ? '' : 'disabled') : (liveRoom.outputEnabled ? '' : 'disabled')} disabled={!demoMode && !liveRoom.connected} type="button" onClick={() => demoMode ? toggleDemoPreference('outputEnabled') : liveRoom.toggleOutput()}><span>{demoMode ? (preferences.outputEnabled ? '◖' : '×') : (liveRoom.outputEnabled ? '◖' : '×')}</span>{demoMode ? (preferences.outputEnabled ? 'AUDIO ATIVO' : 'SEM AUDIO') : (liveRoom.outputEnabled ? 'AUDIO ATIVO' : 'AUDIO MUDO')}</button>
       </footer>
     </aside>
   )

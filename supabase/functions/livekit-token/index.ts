@@ -35,11 +35,21 @@ Deno.serve(async (request) => {
 
   const { data: membership } = await admin
     .from('server_members')
-    .select('user_id')
+    .select('user_id, role')
     .eq('server_id', channel.server_id)
     .eq('user_id', user.id)
     .maybeSingle()
   if (!membership) return new Response('Sem permissao para este canal.', { status: 403, headers: corsHeaders })
+
+  if (membership.role !== 'owner') {
+    const { data: permissions } = await admin
+      .from('channel_permissions')
+      .select('role, can_speak')
+      .eq('channel_id', channel.id)
+    if ((permissions ?? []).length > 0 && !permissions?.some((permission) => permission.role === membership.role && permission.can_speak)) {
+      return new Response('Sem permissao para falar neste canal.', { status: 403, headers: corsHeaders })
+    }
+  }
 
   const { data: profile } = await admin.from('profiles').select('nickname').eq('id', user.id).maybeSingle()
   const accessToken = new AccessToken(Deno.env.get('LIVEKIT_API_KEY')!, Deno.env.get('LIVEKIT_API_SECRET')!, {

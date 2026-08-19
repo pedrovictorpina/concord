@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { PropsWithChildren } from 'react'
 import { ThemeContext } from './ThemeContext'
-import { defaultStyleTheme } from './theme-registry'
+import { defaultStyleTheme, styleThemes } from './theme-registry'
 import { colorModes } from './theme-types'
 import type { ColorMode, ResolvedColorMode, StyleThemeId } from './theme-types'
 
@@ -22,7 +22,10 @@ const readStoredTheme = (): StoredTheme => {
       ? (parsed.colorMode as ColorMode)
       : 'system'
 
-    return { styleTheme: defaultStyleTheme, colorMode }
+    const styleTheme = styleThemes.some((theme) => theme.id === parsed.styleTheme)
+      ? parsed.styleTheme as StyleThemeId
+      : defaultStyleTheme
+    return { styleTheme, colorMode }
   } catch {
     return { styleTheme: defaultStyleTheme, colorMode: 'system' }
   }

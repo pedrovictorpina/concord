@@ -163,6 +163,30 @@ export function AuthProvider({ children }: PropsWithChildren) {
       clearRecoveryQuery()
       return { ok: true, message: 'Senha atualizada. Sua identidade esta segura.' }
     },
+    updateProfile: async ({ nickname, username, avatarUrl }: Pick<ConcordProfile, 'nickname' | 'username' | 'avatarUrl'>): Promise<AuthResult> => {
+      if (!supabase || !session) return notConfigured
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ nickname: nickname.trim(), username: username.trim().toLowerCase(), avatar_url: avatarUrl?.trim() || null })
+        .eq('id', session.user.id)
+        .select('id, nickname, username, avatar_url, status')
+        .single()
+      if (error || !data) return { ok: false, message: 'Nao foi possivel atualizar o perfil. Verifique o identificador escolhido.' }
+      setProfile(mapProfile(data))
+      return { ok: true, message: 'Perfil atualizado.' }
+    },
+    uploadAvatar: async (file: File) => {
+      if (!supabase || !session) return notConfigured
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 2 * 1024 * 1024) {
+        return { ok: false, message: 'Use uma imagem JPG, PNG ou WEBP de até 2 MB.' }
+      }
+      const extension = file.type.split('/')[1]
+      const path = `${session.user.id}/avatar.${extension}`
+      const { error } = await supabase.storage.from('avatars').upload(path, file, { cacheControl: '3600', contentType: file.type, upsert: true })
+      if (error) return { ok: false, message: 'Não foi possível enviar a foto.' }
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+      return { ok: true, message: 'Foto enviada.', url: `${data.publicUrl}?v=${Date.now()}` }
+    },
   }), [loading, profile, profileError, profileLoading, recoveryMode, session])
 
   return <AuthContext value={value}>{children}</AuthContext>

@@ -79,6 +79,28 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Fechar pessoas e convites' }).click()
   })
 
+  test('administra canais e preferências pela central de configurações', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Abrir configurações' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Configurações.' })).toBeVisible()
+    await page.getByRole('button', { name: 'Tema', exact: true }).click()
+    await page.getByRole('dialog', { name: 'Configurações.' }).getByLabel('Estilo').selectOption('ios')
+    await expect(page.locator('html')).toHaveAttribute('data-style-theme', 'ios')
+
+    await page.getByRole('button', { name: 'Canais' }).click()
+    await page.getByLabel('Nome do canal').fill('planejamento')
+    await page.getByLabel('Tipo').selectOption('voice')
+    await page.getByRole('button', { name: 'CRIAR CANAL' }).click()
+    await expect(page.getByText('◖ planejamento')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Notificações' }).click()
+    await page.getByLabel('Silenciar servidor').check()
+    await expect(page.getByText('Servidor silenciado.')).toBeVisible()
+    await page.getByRole('button', { name: 'Fechar configurações' }).click()
+  })
+
   test('mantém a autenticação utilizável em viewport móvel', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
@@ -91,5 +113,12 @@ test.describe('identidade e temas', () => {
       scrollWidth: document.documentElement.scrollWidth,
     }))
     expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth)
+  })
+
+  test('expõe o manifesto para instalação como PWA', async ({ page }) => {
+    await page.goto('/')
+    await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/manifest.webmanifest')
+    const manifest = await page.request.get('/manifest.webmanifest')
+    expect(manifest.ok()).toBeTruthy()
   })
 })

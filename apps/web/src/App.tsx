@@ -4,7 +4,7 @@ import { useAuth } from './features/auth/useAuth'
 import { WorkspaceShell } from './features/workspace/WorkspaceShell'
 
 function App() {
-  const { loading, profile, profileError, profileLoading, recoveryMode, session, signOut } = useAuth()
+  const { loading, profile, profileError, profileLoading, recoveryMode, session, signOut, updateProfile, uploadAvatar } = useAuth()
   const [demoMode, setDemoMode] = useState(false)
 
   if (loading || (session && profileLoading)) {
@@ -43,12 +43,16 @@ function App() {
       <WorkspaceShell
         demoMode={demoMode}
         identity={{
+          avatarUrl: demoMode ? null : profile?.avatarUrl || null,
           nickname,
           username,
           initials,
           connectionLabel: demoMode ? 'demonstracao local' : profileError ? 'perfil em contingencia' : 'identidade sincronizada',
         }}
         onExit={exitWorkspace}
+        onUpdateProfile={demoMode ? undefined : updateProfile}
+        onUploadAvatar={demoMode ? undefined : uploadAvatar}
+        inviteCode={demoMode ? null : new URL(window.location.href).searchParams.get('invite')}
         userId={session?.user.id}
       />
     )

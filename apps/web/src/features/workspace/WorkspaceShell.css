@@ -83,6 +83,8 @@ button { border: 0; cursor: pointer; }
 }
 
 .channel span { color: var(--color-text-faint); font: 15px var(--font-mono); }
+.channel-badge { display: grid; min-width: 16px; height: 16px; margin-left: auto; padding: 0 4px; place-items: center; border-radius: 9px; color: var(--color-accent-contrast) !important; background: var(--color-accent); font: 8px var(--font-mono) !important; }
+.channel-badge.mention { color: var(--color-accent-contrast) !important; background: var(--color-danger); }
 .channel:hover { color: var(--color-text); background: var(--color-surface-raised); }
 .channel.active { color: var(--color-text-strong); background: linear-gradient(90deg, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent); }
 .channel.active span { color: var(--color-accent); }
@@ -97,6 +99,7 @@ button { border: 0; cursor: pointer; }
 .voice-member.muted { opacity: .55; }
 
 .avatar { display: grid; width: 29px; height: 29px; flex: 0 0 29px; place-items: center; border: var(--border-width) solid var(--color-border); border-radius: 50%; font: 9px var(--font-mono); }
+.avatar-photo { object-fit: cover; background: var(--color-surface-sunken); }
 .avatar-green { color: var(--color-accent); border-color: color-mix(in srgb, var(--color-accent) 42%, transparent); background: var(--color-accent-soft); }
 .avatar-amber { color: var(--color-warning); border-color: color-mix(in srgb, var(--color-warning) 42%, transparent); background: color-mix(in srgb, var(--color-warning) 10%, var(--color-surface-raised)); }
 .avatar-signal { color: var(--color-accent-contrast); border-color: var(--color-accent); border-radius: var(--radius-control); background: var(--color-accent); }
@@ -144,6 +147,8 @@ button { border: 0; cursor: pointer; }
 .message time { color: var(--color-text-faint); font: 8px var(--font-mono); }
 .message em { padding: 2px 4px; color: var(--color-accent-contrast); background: var(--color-accent); font: normal 7px var(--font-mono); }
 .message p { margin: 4px 0 0; color: var(--color-text-muted); font-size: 13px; line-height: 1.5; }
+.link-preview { display: grid; gap: 3px; max-width: 320px; margin-top: 8px; padding: 10px; border-left: 3px solid var(--color-accent); color: var(--color-text); background: var(--color-surface-raised); text-decoration: none; font-size: 10px; }
+.link-preview span { color: var(--color-text-muted); }
 .message.system p { color: var(--color-text); }
 
 .composer { display: flex; align-items: center; gap: 10px; margin: 10px 24px 20px; padding: 6px 8px; border: var(--border-width) solid var(--color-border); background: var(--color-surface-raised); }
@@ -179,6 +184,49 @@ button { border: 0; cursor: pointer; }
 .dialog-submit:disabled { cursor: wait; opacity: .65; }
 .dialog-feedback { margin: -4px 0 0; color: var(--color-danger); font: 10px var(--font-mono); }
 .people-dialog { width: min(100%, 520px); max-height: calc(100vh - 40px); overflow-y: auto; }
+.settings-dialog { width: min(100%, 800px); max-height: calc(100vh - 40px); overflow-y: auto; }
+.settings-layout { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 22px; margin-top: 20px; }
+.settings-nav { display: grid; align-content: start; gap: 3px; padding-right: 14px; border-right: var(--border-width) solid var(--color-border-soft); }
+.settings-nav button { padding: 9px 8px; color: var(--color-text-muted); background: transparent; text-align: left; font: var(--font-label); letter-spacing: .6px; }
+.settings-nav button.active, .settings-nav button:hover { color: var(--color-accent); background: var(--color-accent-soft); }
+.settings-content { min-width: 0; }
+.settings-content h3 { margin: 0 0 7px; color: var(--color-text-strong); font-size: 18px; }
+.settings-content > section > p, .settings-content form > p { margin: 0 0 19px; color: var(--color-text-muted); font-size: 11px; line-height: 1.55; }
+.settings-content form { display: grid; gap: 13px; }
+.settings-content label { display: grid; gap: 6px; color: var(--color-text-muted); font: 9px var(--font-mono); letter-spacing: .6px; }
+.settings-content input, .settings-content textarea, .settings-content select { width: 100%; padding: 10px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); outline: none; color: var(--color-text); background: var(--color-surface-sunken); font: 12px var(--font-body); }
+.settings-content textarea { min-height: 76px; resize: vertical; }
+.settings-content input:focus, .settings-content textarea:focus, .settings-content select:focus { border-color: var(--color-accent); }
+.settings-content .dialog-submit { margin-top: 3px; }
+.dialog-text-button { padding: 5px 0; color: var(--color-text-muted); background: transparent; font: 8px var(--font-mono); letter-spacing: .7px; text-align: left; }
+.avatar-preview { width: 54px; height: 54px; object-fit: cover; border: var(--border-width) solid var(--color-border); border-radius: 50%; }
+.settings-channel-list { display: grid; gap: 6px; margin-top: 18px; }
+.settings-channel-list > div { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 9px; border: var(--border-width) solid var(--color-border-soft); color: var(--color-text-muted); font: 10px var(--font-mono); }
+.settings-channel-list aside { display: flex; gap: 7px; }
+.settings-channel-list button { color: var(--color-accent); background: transparent; font: 8px var(--font-mono); }
+.settings-channel-list button:last-child { color: var(--color-danger); }
+.settings-toggle { display: flex !important; align-items: center; justify-content: space-between; padding: 12px; border: var(--border-width) solid var(--color-border); background: var(--color-surface-sunken); }
+.settings-toggle span { display: grid; gap: 3px; color: var(--color-text); font: 11px var(--font-body); letter-spacing: 0; }
+.settings-toggle small { color: var(--color-text-muted); font-size: 9px; }
+.settings-toggle input { width: 18px; height: 18px; accent-color: var(--color-accent); }
+.permission-card { display: grid; gap: 4px; padding: 12px; border-left: 3px solid var(--color-accent); background: var(--color-accent-soft); }
+.permission-card + .permission-card { margin-top: 9px; border-left-color: var(--color-border); background: var(--color-surface-sunken); }
+.permission-card strong { font: var(--font-label); letter-spacing: .7px; }
+.permission-card span { color: var(--color-text-muted); font-size: 10px; }
+.settings-subtitle { margin: 22px 0 8px; color: var(--color-text-faint); font: var(--font-label); letter-spacing: .8px; }
+.role-row { display: flex !important; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: var(--border-width) solid var(--color-border-soft); }
+.role-row span { display: grid; color: var(--color-text); font: 11px var(--font-body); letter-spacing: 0; }
+.role-row small { color: var(--color-text-faint); font: 8px var(--font-mono); }
+.role-row select { width: 120px; padding: 7px; }
+.channel-permission-row { display: grid; gap: 8px; margin-top: 10px; padding: 10px; border: var(--border-width) solid var(--color-border-soft); }
+.channel-permission-row > strong { font: var(--font-label); letter-spacing: .6px; }
+.channel-permission-row > div { display: flex; align-items: center; gap: 9px; color: var(--color-text-muted); font: 9px var(--font-mono); }
+.channel-permission-row label { display: flex !important; align-items: center; gap: 4px; font-size: 8px !important; }
+.channel-permission-row input { width: 13px; height: 13px; padding: 0; accent-color: var(--color-accent); }
+.invite-links { display: grid; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: var(--border-width) solid var(--color-border-soft); }
+.invite-links strong { font: var(--font-label); letter-spacing: .7px; }
+.invite-links > div { display: flex; justify-content: space-between; color: var(--color-text-faint); font: 8px var(--font-mono); }
+.invite-links > div button { color: var(--color-danger); background: transparent; font: 8px var(--font-mono); }
 .people-form { margin-top: 20px; }
 .people-form + .people-form, .people-list { margin-top: 18px; padding-top: 18px; border-top: var(--border-width) solid var(--color-border-soft); }
 .dialog-submit.subdued { color: var(--color-accent); background: var(--color-accent-soft); }
@@ -262,6 +310,10 @@ button { border: 0; cursor: pointer; }
   .composer > span { display: none; }
   .live-panel { right: 10px; bottom: 10px; width: calc(100vw - 78px); }
   .screen-stage, .screen-stage video { min-height: 160px; }
+  .settings-dialog { padding: 24px 18px; }
+  .settings-layout { grid-template-columns: 1fr; gap: 16px; }
+  .settings-nav { grid-template-columns: repeat(3, 1fr); padding: 0 0 10px; border-right: 0; border-bottom: var(--border-width) solid var(--color-border-soft); }
+  .settings-nav button { text-align: center; font-size: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

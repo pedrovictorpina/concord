@@ -37,6 +37,8 @@ export type AuthContextValue = {
   signUp: (credentials: SignUpCredentials) => Promise<AuthResult>
   signOut: () => Promise<AuthResult>
   updatePassword: (password: string) => Promise<AuthResult>
+  updateProfile: (profile: Pick<ConcordProfile, 'nickname' | 'username' | 'avatarUrl'>) => Promise<AuthResult>
+  uploadAvatar: (file: File) => Promise<{ ok: boolean; message: string; url?: string }>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)
