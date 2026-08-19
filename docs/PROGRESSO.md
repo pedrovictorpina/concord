@@ -7,15 +7,15 @@
 | 00 - Fundacao | Concluida e publicada | 2026-08-17 |
 | 01 - Identidade e temas | Concluida e publicada | 2026-08-17 |
 | 02 - Comunidades e texto | Em andamento | 2026-08-18 |
-| 03 - Voz e compartilhamento | Nao iniciada | - |
+| 03 - Voz e compartilhamento | Em andamento | 2026-08-19 |
 | 04 - Aplicativos | Nao iniciada | - |
 | 05 - Qualidade e lancamento | Nao iniciada | - |
 
 ## Proxima acao
 
-Validar o Preview de amizades e convites e decidir se a Etapa 02 segue para moderacao ou para voz e compartilhamento.
+Aplicar a migration de preferências e validar a administração do servidor com uma conta autenticada.
 
-Branch atual: `codex/etapa-02-comunidades-texto`.
+Branch atual: `codex/etapa-03-voz-tela`.
 
 ## Historico
 
@@ -79,3 +79,14 @@ Branch atual: `codex/etapa-02-comunidades-texto`.
 - integracao remota aprovou envio e aceite de convite, incluindo a criacao segura de membro;
 - seis jornadas Playwright, build e lint aprovados;
 - quatro contas temporarias de QA e seus dados dependentes foram removidos; a verificacao retornou zero registros em `auth.users` e `public.profiles`.
+- Etapa 03 iniciada: canal de voz padrao, cliente LiveKit carregado sob demanda e Edge Function segura versionada;
+- ativacao remota pendente da criacao do projeto LiveKit Cloud e de tres segredos no Supabase.
+- central de configurações adicionada: perfil, URL de avatar, temas, servidor, canais, notificações e permissões simples;
+- proprietário agora administra múltiplos canais de texto e voz; membros permanecem sem acesso administrativo;
+- silenciamento individual por servidor, contadores locais de não lidas/menções e controle de áudio recebido foram implementados;
+- temas iOS Glass e Brutal Signal foram adicionados ao registro persistente;
+- convites por link foram registrados como próximo item, com aceite explícito e revogação obrigatórios.
+- migration de administração aplicada: links revogáveis, leitura persistente, cargos de moderador, permissões de canal e bucket de avatars;
+- upload de avatar, aceite explícito de convite por link e controles de cargo/permissão foram implementados;
+- notificações push permanecem bloqueadas até existir chave VAPID e cliente instalável em HTTPS.
+- manifesto e service worker adicionados para permitir instalação como PWA em navegadores compatíveis.

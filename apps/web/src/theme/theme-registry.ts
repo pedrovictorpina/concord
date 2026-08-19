@@ -9,4 +9,16 @@ export const styleThemes: readonly StyleThemeDefinition[] = [
     description: 'Neo-brutalismo em indigo, amarelo e alto contraste.',
     available: true,
   },
+  {
+    id: 'ios',
+    label: 'iOS Glass',
+    description: 'Superfícies translúcidas, cantos suaves e acentos azuis.',
+    available: true,
+  },
+  {
+    id: 'brutal',
+    label: 'Brutal Signal',
+    description: 'Blocos fortes, bordas retas e amarelo de alta energia.',
+    available: true,
+  },
 ]

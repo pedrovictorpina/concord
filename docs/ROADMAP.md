@@ -32,28 +32,36 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Convites para servidores
 - [x] Canais de texto
 - [x] Mensagens em tempo real
+- [x] Administração de canais de texto e voz pelo proprietário
+- [x] Configurações de perfil, servidor, temas e silenciamento individual
+- [x] Upload de foto de perfil no Supabase Storage
+- [x] Convites para servidor por link revogável
+- [x] Contadores persistentes de mensagens não lidas e menções
+- [x] Cargos de moderador e permissões básicas por canal
 - [ ] Edicao, exclusao e respostas
 - [ ] Cargos e moderacao basica
 
 ## Etapa 03 - Voz e compartilhamento
 
-- [ ] Edge Functions versionadas para emissao segura de tokens
-- [ ] Projeto LiveKit Cloud e emissao segura de tokens
-- [ ] Entrada e saida de canais de voz
-- [ ] Silenciar microfone, audio e volume individual
-- [ ] Compartilhar tela ou janela
+- [x] Edge Function versionada para emissao segura de tokens
+- [ ] Configurar projeto LiveKit Cloud e segredos no Supabase
+- [x] Entrada e saida de canais de voz
+- [x] Silenciar microfone
+- [x] Compartilhar tela ou janela
 - [ ] Audio do sistema no Windows
-- [ ] Perfis de 720p/1080p e 15/30 FPS
+- [x] Seletor de qualidade automatica, alta, media e baixa antes da transmissao
+- [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS
 - [ ] Reconexao e encerramento automatico
 
 ## Etapa 04 - Aplicativos
 
+- [x] Base PWA instalável para web e desktop
 - [ ] Electron para Windows
 - [ ] Instalador e atualizacao do Windows
 - [ ] React Native/Expo para Android e iOS
 - [ ] MediaProjection no Android
 - [ ] ReplayKit Broadcast Extension no iOS
-- [ ] Notificacoes e links de convite
+- [ ] Notificacoes push (depende de VAPID e aplicativos instaláveis)
 
 ## Etapa 05 - Qualidade e lancamento
 

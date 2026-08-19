@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { screenShareQualities } from './screen-quality'
+import type { ScreenShareQuality } from './screen-quality'
 
 export function useScreenShare() {
   const streamRef = useRef<MediaStream | null>(null)
@@ -11,7 +13,7 @@ export function useScreenShare() {
     setStream(null)
   }, [])
 
-  const start = useCallback(async () => {
+  const start = useCallback(async (quality: ScreenShareQuality = 'automatic') => {
     setError('')
     if (!navigator.mediaDevices?.getDisplayMedia) {
       setError('Este navegador nao oferece captura de tela.')
@@ -19,12 +21,9 @@ export function useScreenShare() {
     }
 
     try {
+      const resolution = screenShareQualities[quality].resolution
       const nextStream = await navigator.mediaDevices.getDisplayMedia({
-        video: {
-          width: { ideal: 1280, max: 1280 },
-          height: { ideal: 720, max: 720 },
-          frameRate: { ideal: 15, max: 15 },
-        },
+        video: { width: { ideal: resolution.width }, height: { ideal: resolution.height }, frameRate: { ideal: resolution.frameRate } },
         audio: true,
       })
 

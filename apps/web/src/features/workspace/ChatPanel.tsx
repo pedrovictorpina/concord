@@ -18,6 +18,8 @@ const formatTime = (value: string) => new Intl.DateTimeFormat('pt-BR', {
   minute: '2-digit',
 }).format(new Date(value))
 
+const firstUrl = (body: string) => body.match(/https?:\/\/[^\s]+/)?.[0]
+
 export function ChatPanel({ activeChannel, identity, loading, messages, onSendMessage, server, userId }: ChatPanelProps) {
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
@@ -75,6 +77,7 @@ export function ChatPanel({ activeChannel, identity, loading, messages, onSendMe
             <div>
               <header><strong>{message.authorNickname}</strong><time>{formatTime(message.createdAt)}</time>{message.editedAt ? <em>EDITADA</em> : null}</header>
               <p>{message.body}</p>
+              {firstUrl(message.body) ? <a className="link-preview" href={firstUrl(message.body)} rel="noreferrer" target="_blank"><strong>{new URL(firstUrl(message.body)!).hostname}</strong><span>Abrir link em nova aba ↗</span></a> : null}
             </div>
           </article>
         ))}

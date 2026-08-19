@@ -151,6 +151,30 @@ try {
     .single()
   assert(!defaultChannelError && defaultChannel?.kind === 'text', 'A criacao do servidor deve incluir o canal de texto geral.')
 
+  const { data: voiceChannel, error: voiceChannelError } = await clientA
+    .from('channels')
+    .select('id, name, kind')
+    .eq('server_id', server.id)
+    .eq('name', 'voz')
+    .single()
+  assert(!voiceChannelError && voiceChannel?.kind === 'voice', 'A criacao do servidor deve incluir o canal de voz.')
+
+  const { data: liveKitToken, error: liveKitTokenError } = await clientA.functions.invoke('livekit-token', {
+    body: { channelId: voiceChannel.id },
+  })
+  if (liveKitTokenError) {
+    const detail = 'context' in liveKitTokenError && liveKitTokenError.context instanceof Response
+      ? await liveKitTokenError.context.text()
+      : liveKitTokenError.message
+    throw new Error(`Emissao LiveKit falhou: ${detail}`)
+  }
+  assert(!liveKitTokenError && liveKitToken?.serverUrl && liveKitToken?.token, 'Membro deve receber token LiveKit temporario.')
+
+  const { error: blockedLiveKitTokenError } = await clientB.functions.invoke('livekit-token', {
+    body: { channelId: voiceChannel.id },
+  })
+  assert(blockedLiveKitTokenError, 'Nao membro nao pode receber token LiveKit.')
+
   const { data: blockedServerRead, error: blockedServerReadError } = await clientB
     .from('servers')
     .select('id')
@@ -272,7 +296,7 @@ try {
     projectRef,
     usersCreated: currentRunUsers.length,
     usersPendingCleanup: createdUsers.length,
-    checks: ['signup', 'profile-trigger', 'login', 'password-update', 'authenticated-read', 'own-update', 'foreign-update-blocked', 'anonymous-read-blocked', 'server-create', 'owner-membership', 'default-channel', 'non-member-server-blocked', 'member-server-read', 'realtime-message', 'friend-request', 'friendship-accept', 'server-invite', 'server-invite-accept'],
+    checks: ['signup', 'profile-trigger', 'login', 'password-update', 'authenticated-read', 'own-update', 'foreign-update-blocked', 'anonymous-read-blocked', 'server-create', 'owner-membership', 'default-channel', 'default-voice-channel', 'livekit-token', 'livekit-token-non-member-blocked', 'non-member-server-blocked', 'member-server-read', 'realtime-message', 'friend-request', 'friendship-accept', 'server-invite', 'server-invite-accept'],
     cleanupManifest: '.qa/supabase-test-users.json',
   }))
 } finally {
