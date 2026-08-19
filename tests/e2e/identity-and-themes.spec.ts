@@ -92,6 +92,19 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Fechar pessoas e convites' }).click()
   })
 
+  test('encerra a sessão pelas configurações', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await expect(page.getByRole('button', { name: 'Sair do Concord' })).toHaveCount(0)
+
+    await page.getByRole('button', { name: 'Abrir configurações' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Configurações.' })
+    await expect(dialog.getByRole('heading', { name: 'Sessão' })).toBeVisible()
+    await dialog.getByRole('button', { name: 'SAIR DA DEMONSTRAÇÃO' }).click()
+
+    await expect(page.getByRole('button', { name: 'Explorar demonstração local' })).toBeVisible()
+  })
+
   test('convida amigos para o servidor pelo atalho do cabeçalho', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()

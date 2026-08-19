@@ -15,6 +15,8 @@ type SettingsDialogProps = {
   initialChannelKind?: ChannelSummary['kind']
   initialTab?: SettingsTab
   onClose: () => void
+  onExit: () => void
+  exitLabel: string
   onDeleteChannel: (channelId: string) => Promise<Result>
   onDeleteServer: () => Promise<Result>
   onSaveChannel: (channel: { id?: string; name: string; kind: ChannelSummary['kind'] }) => Promise<Result>
@@ -54,7 +56,7 @@ const settingsTabs: ReadonlyArray<readonly [SettingsTab, string]> = [
   ['permissions', 'Permissões'],
 ]
 
-export function SettingsDialog({ channels, identity, initialChannelKind = 'text', initialTab = 'profile', onClose, onDeleteChannel, onDeleteServer, onSaveChannel, onSaveProfile, onSaveServer, onSetMuted, onUploadAvatar, channelPermissions, inviteLinks, members, onCreateInviteLink, onRevokeInviteLink, onSaveChannelPermissions, onSetMemberRole, categories, onCreateCategory, onLeaveServer, onMarkServerRead, onModerateMember, onSaveServerNickname, onSelectServer, server, servers, serverMuted, userId }: SettingsDialogProps) {
+export function SettingsDialog({ channels, exitLabel, identity, initialChannelKind = 'text', initialTab = 'profile', onClose, onExit, onDeleteChannel, onDeleteServer, onSaveChannel, onSaveProfile, onSaveServer, onSetMuted, onUploadAvatar, channelPermissions, inviteLinks, members, onCreateInviteLink, onRevokeInviteLink, onSaveChannelPermissions, onSetMemberRole, categories, onCreateCategory, onLeaveServer, onMarkServerRead, onModerateMember, onSaveServerNickname, onSelectServer, server, servers, serverMuted, userId }: SettingsDialogProps) {
   const [tab, setTab] = useState<SettingsTab>(initialTab)
   const [nickname, setNickname] = useState(identity.nickname)
   const [username, setUsername] = useState(identity.username)
@@ -139,6 +141,7 @@ export function SettingsDialog({ channels, identity, initialChannelKind = 'text'
               {avatarUrl ? <img className="avatar-preview" src={avatarUrl} alt="Prévia da foto de perfil" /> : null}
               <button className="dialog-submit" type="submit" disabled={submitting || !onSaveProfile}>SALVAR PERFIL</button>
             </form> : null}
+            {tab === 'profile' ? <section className="settings-session"><h4 className="settings-subtitle">Sessão</h4><p>Encerrar a sessão apaga a identidade guardada neste navegador.</p><button className="dialog-text-button danger" type="button" onClick={onExit}>{exitLabel}</button></section> : null}
             {tab === 'appearance' ? <section><h3>Seu tema</h3><p>O modo sistema acompanha a preferência do dispositivo.</p><ThemeControls /></section> : null}
             {tab === 'servers' ? <section><h3>Gerenciar servidores</h3><p>Escolha um servidor para administrar suas configurações.</p><div className="settings-server-list">{servers.map((item) => <div key={item.id}><span><strong>{item.name}</strong><small>{item.role === 'owner' ? 'Proprietário' : item.role === 'moderator' ? 'Moderador' : 'Membro'}</small></span><button type="button" onClick={() => onSelectServer(item.id)}>GERENCIAR</button></div>)}</div></section> : null}
             {tab === 'server' ? <form onSubmit={submitServer}>

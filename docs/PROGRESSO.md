@@ -124,3 +124,4 @@ Branch atual: `main`.
 - mensagem de erro ao gerar link deixou de dizer "somente o proprietario" quando o caso real era falta de sessao.
 - titulos de dialogo com quebra de linha ganharam espaco explicito: o nome acessivel saia grudado ("Convidarpara Concord."), o que o leitor de tela anunciava errado.
 - modo demonstracao ganhou um segundo amigo que nao e membro do servidor, para exercitar os dois estados da lista de convite.
+- encerrar sessao saiu do cabecalho da lista de canais para a aba Perfil das configuracoes, em uma secao Sessao com o motivo explicito. O `x` no cabecalho ficava ao lado das acoes do servidor, convidava ao clique acidental e nao existia na tela inicial de mensagens; as configuracoes sao alcancaveis pela barra de servidores e pela barra movel em qualquer tela. O rotulo acompanha o contexto: SAIR DA CONTA quando autenticado, SAIR DA DEMONSTRACAO no modo local.
