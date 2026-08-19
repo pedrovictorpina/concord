@@ -79,6 +79,18 @@ test.describe('identidade e temas', () => {
     await expect(page.getByRole('heading', { name: 'sala-da-madrugada' })).toBeVisible()
     await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
+
+    const voiceLayout = await page.locator('.app-shell').evaluate((app) => {
+      const appBox = app.getBoundingClientRect()
+      const flowChildren = Array.from(app.children).filter((child) => {
+        const style = getComputedStyle(child)
+        return style.display !== 'none' && style.position !== 'fixed'
+      })
+      const contentBottom = Math.max(...flowChildren.map((child) => child.getBoundingClientRect().bottom))
+      return { appHeight: appBox.height, contentHeight: contentBottom - appBox.top }
+    })
+    expect(voiceLayout.contentHeight).toBeCloseTo(voiceLayout.appHeight, 0)
+
     await expect(page.getByRole('button', { name: 'TELA' })).toBeEnabled()
     await expect(page.locator('.voice-member')).toContainText('conectado')
     await expect(page.getByText('Concord Bot')).toHaveCount(0)
