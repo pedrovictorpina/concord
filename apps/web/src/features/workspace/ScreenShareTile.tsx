@@ -35,7 +35,7 @@ export function ScreenShareTile({ focused, onToggleFocus, share }: ScreenShareTi
   return (
     <li className={focused ? 'voice-stage-share focused' : 'voice-stage-share'}>
       <video ref={videoRef} autoPlay muted playsInline />
-      <span className="capture-label">{author.toUpperCase()} · TRANSMITINDO</span>
+      <span className="capture-label">{author.toUpperCase()} · TRANSMITINDO{share.hasAudio ? ' · COM SOM' : ''}</span>
       <div className="voice-stage-share-actions">
         <button
           aria-label={focused ? `Voltar ${author} para a grade` : `Destacar a tela de ${author}`}

@@ -40,8 +40,16 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
   const screenShares = useMemo<ScreenShareView[]>(() => {
     if (!demoMode) return liveRoom.screenShares
     if (!demoShare.stream) return []
-    return [{ id: 'demo-screen', nickname: identity.nickname, isLocal: true, track: null, stream: demoShare.stream }]
-  }, [demoMode, demoShare.stream, identity.nickname, liveRoom.screenShares])
+    return [{
+      id: 'demo-screen',
+      participantId: userId ?? 'demo-user',
+      nickname: identity.nickname,
+      isLocal: true,
+      hasAudio: demoShare.stream.getAudioTracks().length > 0,
+      track: null,
+      stream: demoShare.stream,
+    }]
+  }, [demoMode, demoShare.stream, identity.nickname, liveRoom.screenShares, userId])
 
   const sharing = screenShares.some((share) => share.isLocal)
 
@@ -162,12 +170,15 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
   }, [demoMode, demoShare, liveRoom])
 
   return {
+    audioBlocked: demoMode ? false : liveRoom.audioBlocked,
     connectedChannelId,
     connecting,
+    enableAudioPlayback: liveRoom.enableAudioPlayback,
     error,
     join,
     leave,
     microphoneEnabled,
+    notice: demoMode ? '' : liveRoom.notice,
     outputEnabled,
     participantsByChannel,
     screenShares,

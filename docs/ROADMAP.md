@@ -41,6 +41,11 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Mensagens privadas entre amigos confirmados
 - [x] Moderacao basica: banimento, timeout e restricoes de microfone/audio
 - [ ] Edicao, exclusao e respostas
+- [ ] Cargos e permissoes pela lista de membros, com transferencia de propriedade
+- [ ] Convidar pessoa que ainda nao e amiga, com busca de perfis no proprio dialogo
+- [ ] Nao lidas por canal revisadas: leitura confiavel, badge por servidor e mencao sem falso positivo
+- [ ] Servidor publico ou privado, com descoberta de servidores publicos
+- [ ] Menu do servidor no cabecalho com cargos, notificacoes, privacidade e sair do servidor
 
 ## Etapa 03 - Voz e compartilhamento
 
@@ -52,7 +57,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Silenciar microfone
 - [x] Compartilhar tela ou janela
 - [x] Assistir varias telas ao mesmo tempo, com destaque e tela cheia por transmissao
-- [ ] Audio do sistema no Windows
+- [ ] Audio do sistema no Windows (captura publicada junto com a tela; falta validar com duas contas)
 - [x] Seletor de qualidade automatica, alta, media e baixa antes da transmissao
 - [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS
 - [ ] Reconexao e encerramento automatico

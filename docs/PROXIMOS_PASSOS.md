@@ -25,7 +25,51 @@ Esta lista é a referência operacional do Concord. Ela separa o que já está p
 - Teste: teste manual em PWA instalado e teste automatizado do cálculo de limites.
 - QA: configurações → Notificações → permitir; iniciar transmissão de teste até o limite configurado.
 
-## 4. Aplicativos nativos
+## 4. Administração, acesso e notificações do servidor
+
+Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a tarefa ser a lacuna real e não uma reimplementação.
+
+### 4.1 Cargos e permissões pela lista de membros
+
+- Hoje: `server_members.role` (`owner`/`moderator`/`member`) e `channel_permissions` já existem no banco, e a aba **Permissões** do `SettingsDialog` já permite ao dono trocar o cargo de um membro e ligar/desligar ler, escrever e falar por canal e por cargo.
+- Implementação restante: expor isso onde a pessoa está — menu de contexto no `MemberPanel` (promover, rebaixar, expulsar, banir, silenciar) em vez de só na central de configurações; permitir que moderador administre canais, que o RLS já autoriza (`can_manage_channels`), mas o front bloqueia; tratar transferência de propriedade de verdade, porque hoje escolher `owner` para outra pessoa não move `servers.owner_id` e deixaria dois donos; permitir limpar uma permissão de canal e voltar ao padrão.
+- Critério de aceite: dono e moderador administram um membro a partir da lista de membros, dentro do que o cargo permite, e a mudança aparece para os outros sem recarregar.
+- Teste: integração com duas contas; conferir que moderador não consegue agir sobre dono nem sobre outro moderador.
+- QA: abrir o servidor → painel de membros → clicar em um membro → alterar cargo → conferir o que ele passa a ver e a poder fazer.
+
+### 4.2 Convidar sem exigir amizade
+
+- Hoje: o diálogo **Convidar amigos** lista apenas `friendships`, e o campo de busca só filtra essa lista carregada. Convidar alguém de fora existe só como formulário por `@username` exato no `PeopleDialog`, visível apenas para o dono. O link de convite já funciona para qualquer pessoa.
+- Implementação restante: busca de perfis no banco (por apelido ou identificador, parcial) dentro do próprio diálogo de convite, com o resultado convidável direto; liberar convite para moderador, hoje barrado pela política `owners can send server invites`; expor validade e limite de usos na criação do link, colunas que já existem e ficam sempre nulas; usar `inspect_server_invite_link` para o convidado ver de qual servidor é o link antes de aceitar.
+- Critério de aceite: convidar alguém que nunca foi amigo, sem sair do diálogo de convite, e o convidado entra pelo aceite explícito.
+- Teste: integração com uma conta não amiga; conferir que pessoa banida continua recusada.
+- QA: servidor → Convidar → buscar por identificador → convidar → aceitar na outra conta.
+
+### 4.3 Canal de texto só notifica mensagem não lida
+
+- Hoje: `unreadByChannel` conta mensagens e menções por canal, ignora o canal aberto, o próprio autor e servidor silenciado; o badge aparece na lista de canais. Não existe notificação fora da interface.
+- Implementação restante: revisar quando o canal é considerado lido — hoje `last_read_at` só é gravado ao trocar de canal, então o canal aberto em segundo plano pode reabrir com contagem indevida; badge de não lidas também na barra de servidores, que hoje não recebe esse estado e só escuta o servidor ativo no Realtime; menção por tabela em vez de `ilike '%@usuario%'`, que hoje casa `@ana` dentro de `@anabela`; preferência por canal (tudo, só menções, nada).
+- Critério de aceite: um canal só sinaliza quando existe mensagem que a pessoa ainda não leu, e abrir o canal limpa o sinal em qualquer aba.
+- Teste: Playwright no modo demonstração para o badge, mais integração com duas contas para o estado de leitura.
+- QA: duas contas em canais diferentes → enviar mensagem → conferir badge → abrir o canal → conferir que zera e não volta ao recarregar.
+
+### 4.4 Servidor público ou privado
+
+- Hoje: não existe visibilidade. `servers` tem `id`, `owner_id`, `name`, `description`, `icon_url`; o RLS deixa tudo privado (`owner_id = auth.uid() or is_server_member(id)`) e a interface já escreve "SERVIDOR PRIVADO" fixo. Entrar só por convite direto ou por link.
+- Implementação restante: coluna de visibilidade em `servers` com migration e política de leitura para servidor público; campo em `ServerSummary`, na criação do servidor e na aba Servidor das configurações; entrada em servidor público sem convite; tela de descoberta, que não existe — o "Explorar" da tela de entrada é só o modo demonstração.
+- Critério de aceite: o dono escolhe público ou privado; servidor privado continua invisível para quem não é membro.
+- Teste: integração cobrindo leitura por não membro nos dois estados.
+- QA: criar servidor público → sair da conta → entrar com outra → localizar e entrar sem convite.
+
+### 4.5 Menu do servidor na setinha ao lado do nome
+
+- Hoje: já existe um menu no `⌄` ao lado do nome do servidor, com convidar, configurações e criar canal de texto ou voz.
+- Implementação restante: levar para esse menu o que hoje só está na central de configurações — cargos e permissões, notificações do servidor, privacidade, marcar como lido e sair do servidor —, e deixar o alvo de clique claro no cabeçalho, como no menu do Discord usado como referência.
+- Critério de aceite: as ações do servidor ficam alcançáveis pelo cabeçalho, e cada item some para quem não tem o cargo necessário.
+- Teste: Playwright no modo demonstração para abertura, navegação por teclado e fechamento.
+- QA: clicar no nome do servidor → conferir os itens por cargo (dono, moderador, membro).
+
+## 5. Aplicativos nativos
 
 - Windows: Electron, instalador, atualização e áudio de sistema quando suportado.
 - Android: React Native/Expo Development Build e MediaProjection para tela.

@@ -5,12 +5,15 @@ import { AudioIcon, AudioOffIcon, MicIcon, MicOffIcon } from './VoiceStateIcons'
 import type { ScreenShareQuality } from './screen-quality'
 
 type VoiceDockProps = {
+  audioBlocked: boolean
   channelName: string
   demoMode: boolean
   error: string
   floating: boolean
   microphoneDisabled: boolean
   microphoneEnabled: boolean
+  notice: string
+  onEnableAudioPlayback: () => void
   onLeave: () => void
   onOpenChannel: () => void
   onStartScreenShare: (quality: ScreenShareQuality) => void
@@ -23,7 +26,7 @@ type VoiceDockProps = {
   sharing: boolean
 }
 
-export function VoiceDock({ channelName, demoMode, error, floating, microphoneDisabled, microphoneEnabled, onLeave, onOpenChannel, onStartScreenShare, onStopScreenShare, onToggleMicrophone, onToggleOutput, outputDisabled, outputEnabled, serverName, sharing }: VoiceDockProps) {
+export function VoiceDock({ audioBlocked, channelName, demoMode, error, floating, microphoneDisabled, microphoneEnabled, notice, onEnableAudioPlayback, onLeave, onOpenChannel, onStartScreenShare, onStopScreenShare, onToggleMicrophone, onToggleOutput, outputDisabled, outputEnabled, serverName, sharing }: VoiceDockProps) {
   const [qualityPickerOpen, setQualityPickerOpen] = useState(false)
   const [quality, setQuality] = useState<ScreenShareQuality>('automatic')
   const screenShareAvailable = Boolean(navigator.mediaDevices?.getDisplayMedia)
@@ -46,6 +49,8 @@ export function VoiceDock({ channelName, demoMode, error, floating, microphoneDi
         {microphoneOff || outputOff ? <span className="voice-dock-flags">{outputOff ? <i className="voice-flag off" aria-label="Seu áudio está mutado"><AudioOffIcon /></i> : null}{microphoneOff ? <i className="voice-flag off" aria-label="Seu microfone está mutado"><MicOffIcon /></i> : null}</span> : null}
       </button>
       {error ? <p className="share-error" role="status">{error}</p> : null}
+      {notice ? <p className="voice-capability-note" role="status">{notice}</p> : null}
+      {audioBlocked ? <button className="voice-unblock-audio" type="button" onClick={onEnableAudioPlayback}>◖ Tocar o som da chamada</button> : null}
       {!screenShareAvailable ? <p className="voice-capability-note" role="status">Compartilhar tela não é suportado nesta PWA móvel. Use o Concord no desktop.</p> : null}
       <div className="voice-dock-status"><strong>Voz conectada</strong><small>{demoMode ? 'REDE LOCAL · 28 ms' : 'REDE ESTÁVEL · WEBRTC'}</small></div>
       <footer className="voice-controls">

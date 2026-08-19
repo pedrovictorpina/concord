@@ -409,6 +409,8 @@ button { border: 0; cursor: pointer; }
 .voice-dock-status { display: flex; align-items: center; gap: 7px; padding: 5px 4px 10px; color: var(--color-text); }
 .voice-dock-status small { margin-left: auto; color: var(--color-text-faint); font: 7px var(--font-mono); }
 .voice-capability-note { margin: 0 4px 8px; color: var(--color-warning); font: 8px/1.4 var(--font-mono); }
+.voice-unblock-audio { width: calc(100% - 8px); margin: 0 4px 8px; padding: 9px 8px; border: var(--border-width) solid var(--color-accent); color: var(--color-accent); background: var(--color-accent-soft); font: 8px var(--font-mono); letter-spacing: .7px; }
+.voice-unblock-audio:hover { color: var(--color-accent-contrast); background: var(--color-accent); }
 .voice-preview { position: relative; height: 120px; margin-bottom: 9px; overflow: hidden; border: var(--border-width) solid var(--color-border); background: var(--color-canvas); }
 .voice-preview video { width: 100%; height: 100%; object-fit: cover; }
 .live-panel > header { justify-content: space-between; padding: 0 18px; color: var(--color-text-muted); font: 9px var(--font-mono); letter-spacing: 1.4px; }
