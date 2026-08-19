@@ -91,3 +91,6 @@ Branch atual: `codex/etapa-03-voz-tela`.
 - notificações push permanecem bloqueadas até existir chave VAPID e cliente instalável em HTTPS.
 - manifesto e service worker adicionados para permitir instalação como PWA em navegadores compatíveis.
 - navegação móvel revisada: barra inferior persistente para canais, pessoas e perfil; lista de canais agora abre como painel lateral em vez de desaparecer em telas pequenas.
+- seletor de tema removido da lateral de canais; temas permanecem exclusivamente na central de configurações, aberta pelo ícone na barra de servidores; proprietários também criam canais de texto ou voz pelos botões `+` com dica visual.
+- central de configurações passa a listar servidores para gerenciamento; o proprietário pode excluir o servidor atual mediante confirmação.
+- service worker ajustado para sempre buscar a página de navegação na rede e invalidar o cache anterior, evitando tela branca após deploy; bootstrap de tema sem exceção de escopo.

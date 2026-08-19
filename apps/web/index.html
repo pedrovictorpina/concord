@@ -11,8 +11,9 @@
       (() => {
         const key = 'concord.theme.v1'
         let colorMode = 'system'
+        let stored = {}
         try {
-          const stored = JSON.parse(localStorage.getItem(key) || '{}')
+          stored = JSON.parse(localStorage.getItem(key) || '{}')
           if (['system', 'light', 'dark'].includes(stored.colorMode)) colorMode = stored.colorMode
         } catch { /* usa o dispositivo */ }
         const resolved = colorMode === 'system'

@@ -26,17 +26,13 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
   const [peopleDialogOpen, setPeopleDialogOpen] = useState(false)
   const [activeVoiceChannelId, setActiveVoiceChannelId] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [channelCreationKind, setChannelCreationKind] = useState<'text' | 'voice' | null>(null)
+  const [settingsTab, setSettingsTab] = useState<'profile' | 'channels' | 'server' | 'servers'>('profile')
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false)
   const [inviteOpen, setInviteOpen] = useState(Boolean(inviteCode && !demoMode))
   const [localIdentity, setLocalIdentity] = useState(identity)
   const workspace = useCommunityWorkspace({ demoMode, userId, username: identity.username })
   const activeVoiceChannel = workspace.channels.find((channel) => channel.id === activeVoiceChannelId && channel.kind === 'voice') ?? null
-
-  useEffect(() => {
-    if (!activeVoiceChannel && workspace.channels.some((channel) => channel.kind === 'voice')) {
-      setActiveVoiceChannelId(workspace.channels.find((channel) => channel.kind === 'voice')?.id ?? null)
-    }
-  }, [activeVoiceChannel, workspace.channels])
 
   useEffect(() => setLocalIdentity(identity), [identity])
 
@@ -52,17 +48,18 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
         activeServerId={workspace.activeServerId}
         servers={workspace.servers}
         onCreateServer={() => setCreateDialogOpen(true)}
+        onOpenSettings={() => { setSettingsTab('profile'); setSettingsOpen(true) }}
         onServerChange={(serverId) => workspace.setActiveServerId(serverId)}
       />
-      <ChannelPanel activeChannelId={workspace.activeChannelId} activeVoiceChannelId={activeVoiceChannelId} channels={workspace.channels} identity={localIdentity} mobileOpen={mobileNavigationOpen} onChannelChange={(channelId) => { workspace.setActiveChannelId(channelId); setMobileNavigationOpen(false) }} onCloseMobile={() => setMobileNavigationOpen(false)} onExit={onExit} onOpenPeople={() => setPeopleDialogOpen(true)} onOpenSettings={() => setSettingsOpen(true)} onVoiceChannelChange={(channelId) => { setActiveVoiceChannelId(channelId); setMobileNavigationOpen(false) }} server={workspace.activeServer} unreadByChannel={workspace.unreadByChannel} />
+      <ChannelPanel activeChannelId={workspace.activeChannelId} activeVoiceChannelId={activeVoiceChannelId} channels={workspace.channels} identity={localIdentity} mobileOpen={mobileNavigationOpen} onChannelChange={(channelId) => { workspace.setActiveChannelId(channelId); setMobileNavigationOpen(false) }} onCloseMobile={() => setMobileNavigationOpen(false)} onCreateChannel={(kind) => { setChannelCreationKind(kind); setSettingsTab('channels'); setSettingsOpen(true) }} onExit={onExit} onOpenPeople={() => setPeopleDialogOpen(true)} onVoiceChannelChange={(channelId) => { setActiveVoiceChannelId(channelId); setMobileNavigationOpen(false) }} server={workspace.activeServer} unreadByChannel={workspace.unreadByChannel} />
       <ChatPanel activeChannel={workspace.activeChannel} identity={localIdentity} loading={workspace.loading} messages={workspace.messages} onOpenMobileNavigation={() => setMobileNavigationOpen(true)} onSendMessage={workspace.sendMessage} server={workspace.activeServer} userId={userId} />
       <LivePanel demoMode={demoMode} voiceChannel={activeVoiceChannel} />
       {workspace.error ? <p className="workspace-error" role="status">{workspace.error}</p> : null}
       {createDialogOpen ? <CreateServerDialog onClose={() => setCreateDialogOpen(false)} onCreate={workspace.createServer} /> : null}
       {peopleDialogOpen ? <PeopleDialog friendRequests={workspace.friendRequests} friends={workspace.friends} onAcceptFriendRequest={workspace.acceptFriendRequest} onAcceptServerInvite={workspace.acceptServerInvite} onClose={() => setPeopleDialogOpen(false)} onSendFriendRequest={workspace.sendFriendRequest} onSendServerInvite={workspace.sendServerInvite} server={workspace.activeServer} serverInvites={workspace.serverInvites} /> : null}
-      {settingsOpen ? <SettingsDialog categories={workspace.categories} channels={workspace.channels} channelPermissions={workspace.channelPermissions} identity={localIdentity} inviteLinks={workspace.inviteLinks} members={workspace.members} onClose={() => setSettingsOpen(false)} onCreateCategory={workspace.createCategory} onCreateInviteLink={workspace.createInviteLink} onDeleteChannel={workspace.deleteChannel} onLeaveServer={workspace.leaveServer} onMarkServerRead={workspace.markServerRead} onRevokeInviteLink={workspace.revokeInviteLink} onSaveChannel={workspace.saveChannel} onSaveChannelPermissions={workspace.saveChannelPermissions} onSaveProfile={saveProfile} onSaveServer={workspace.saveServer} onSaveServerNickname={workspace.saveServerNickname} onSetMemberRole={workspace.setMemberRole} onSetMuted={workspace.setMuted} onUploadAvatar={onUploadAvatar} server={workspace.activeServer} serverMuted={workspace.serverMuted} userId={userId} /> : null}
+      {settingsOpen ? <SettingsDialog categories={workspace.categories} channels={workspace.channels} channelPermissions={workspace.channelPermissions} identity={localIdentity} initialChannelKind={channelCreationKind ?? 'text'} initialTab={settingsTab} inviteLinks={workspace.inviteLinks} key={`${workspace.activeServerId}-${settingsTab}`} members={workspace.members} onClose={() => { setSettingsOpen(false); setChannelCreationKind(null); setSettingsTab('profile') }} onCreateCategory={workspace.createCategory} onCreateInviteLink={workspace.createInviteLink} onDeleteChannel={workspace.deleteChannel} onDeleteServer={workspace.deleteServer} onLeaveServer={workspace.leaveServer} onMarkServerRead={workspace.markServerRead} onRevokeInviteLink={workspace.revokeInviteLink} onSaveChannel={workspace.saveChannel} onSaveChannelPermissions={workspace.saveChannelPermissions} onSaveProfile={saveProfile} onSaveServer={workspace.saveServer} onSaveServerNickname={workspace.saveServerNickname} onSelectServer={(serverId) => { workspace.setActiveServerId(serverId); setSettingsTab('server') }} onSetMemberRole={workspace.setMemberRole} onSetMuted={workspace.setMuted} onUploadAvatar={onUploadAvatar} server={workspace.activeServer} serverMuted={workspace.serverMuted} servers={workspace.servers} userId={userId} /> : null}
       {inviteOpen && inviteCode ? <InviteLinkDialog code={inviteCode} onAccept={workspace.redeemInviteLink} onClose={() => { setInviteOpen(false); const url = new URL(window.location.href); url.searchParams.delete('invite'); window.history.replaceState({}, '', `${url.pathname}${url.search}`) }} /> : null}
-      <nav className="mobile-you-bar" aria-label="Navegação móvel"><button type="button" onClick={() => setMobileNavigationOpen(true)}>☰ <span>Canais</span></button><button type="button" onClick={() => setPeopleDialogOpen(true)}>◎ <span>Pessoas</span></button><button type="button" onClick={() => setSettingsOpen(true)}>{localIdentity.avatarUrl ? <img src={localIdentity.avatarUrl} alt="" /> : localIdentity.initials}<span>Você</span></button></nav>
+      <nav className="mobile-you-bar" aria-label="Navegação móvel"><button type="button" onClick={() => setMobileNavigationOpen(true)}>☰ <span>Canais</span></button><button type="button" onClick={() => setPeopleDialogOpen(true)}>◎ <span>Pessoas</span></button><button type="button" onClick={() => { setSettingsTab('profile'); setSettingsOpen(true) }}>{localIdentity.avatarUrl ? <img src={localIdentity.avatarUrl} alt="" /> : localIdentity.initials}<span>Você</span></button></nav>
     </main>
   )
 }

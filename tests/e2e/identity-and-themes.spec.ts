@@ -1,6 +1,14 @@
 import { expect, test } from '@playwright/test'
 
 test.describe('identidade e temas', () => {
+  test('inicia sem erro de script', async ({ page }) => {
+    const pageErrors: Error[] = []
+    page.on('pageerror', (error) => pageErrors.push(error))
+    await page.goto('/')
+    await expect(page.getByRole('heading', { name: 'Bom ter você de volta.' })).toBeVisible()
+    expect(pageErrors).toEqual([])
+  })
+
   test('segue a preferência de cor do dispositivo no modo sistema', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/')
@@ -66,10 +74,11 @@ test.describe('identidade e temas', () => {
     await page.getByRole('textbox', { name: 'Mensagem' }).press('Enter')
     await expect(page.getByText('Temas funcionando')).toBeVisible()
 
-    await page.getByRole('button', { name: 'sala-da-madrugada' }).click()
-    await expect(page.getByText('SALA-DA-MADRUGADA', { exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: 'Compartilhar tela' })).toBeEnabled()
-    await page.getByRole('button', { name: 'Compartilhar tela' }).click()
+    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await expect(page.getByRole('button', { name: /Entrar em sala-da-madrugada/ })).toBeEnabled()
+    await page.getByRole('button', { name: /Entrar em sala-da-madrugada/ }).click()
+    await expect(page.getByRole('button', { name: 'TELA' })).toBeEnabled()
+    await page.getByRole('button', { name: 'TELA' }).click()
     await expect(page.getByRole('dialog', { name: 'Qualidade da transmissao' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Automatica/ })).toBeVisible()
     await page.getByRole('button', { name: 'Fechar seletor de qualidade' }).click()
@@ -85,6 +94,10 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Abrir configurações' }).click()
 
     await expect(page.getByRole('heading', { name: 'Configurações.' })).toBeVisible()
+    await page.getByRole('button', { name: 'Servidores', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'Gerenciar servidores' })).toBeVisible()
+    await page.getByRole('button', { name: 'GERENCIAR' }).click()
+    await expect(page.getByRole('heading', { name: 'Informações do servidor' })).toBeVisible()
     await page.getByRole('button', { name: 'Tema', exact: true }).click()
     await page.getByRole('dialog', { name: 'Configurações.' }).getByLabel('Estilo').selectOption('ios')
     await expect(page.locator('html')).toHaveAttribute('data-style-theme', 'ios')

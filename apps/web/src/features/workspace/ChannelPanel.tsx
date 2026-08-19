@@ -1,5 +1,4 @@
 import type { ChannelSummary, ServerSummary } from '@concord/contracts'
-import { ThemeControls } from '../../components/theme/ThemeControls'
 import type { WorkspaceIdentity } from './workspace-types'
 
 type ChannelPanelProps = {
@@ -10,24 +9,24 @@ type ChannelPanelProps = {
   mobileOpen: boolean
   onCloseMobile: () => void
   onChannelChange: (channelId: string) => void
+  onCreateChannel: (kind: ChannelSummary['kind']) => void
   onVoiceChannelChange: (channelId: string) => void
   onExit: () => void
   onOpenPeople: () => void
-  onOpenSettings: () => void
   server: ServerSummary | null
   unreadByChannel: Record<string, { count: number; mentioned: boolean }>
 }
 
-export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, identity, mobileOpen, onCloseMobile, onChannelChange, onVoiceChannelChange, onExit, onOpenPeople, onOpenSettings, server, unreadByChannel }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onVoiceChannelChange, onExit, onOpenPeople, server, unreadByChannel }: ChannelPanelProps) {
   return (
     <aside className={mobileOpen ? 'channel-panel mobile-open' : 'channel-panel'}>
       <header className="workspace-heading">
         <div><span className="eyebrow">SERVIDOR PRIVADO</span><strong>{server?.name ?? 'Concord'}</strong></div>
-        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><button type="button" aria-label="Abrir configurações" onClick={onOpenSettings}>⚙</button><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
+        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
       </header>
 
       <section className="channel-group">
-        <p>TRANSMISSOES DE TEXTO</p>
+        <p>TRANSMISSOES DE TEXTO{server?.role === 'owner' ? <button className="channel-add" type="button" aria-label="Adicionar canal de texto" data-tooltip="Adicionar canal de texto" onClick={() => onCreateChannel('text')}>+</button> : null}</p>
         {channels.filter((channel) => channel.kind === 'text').map((channel) => (
           <button
             className={activeChannelId === channel.id ? 'channel active' : 'channel'}
@@ -41,7 +40,7 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
       </section>
 
       <section className="channel-group voice-group">
-        <p>FREQUENCIAS DE VOZ</p>
+        <p>FREQUENCIAS DE VOZ{server?.role === 'owner' ? <button className="channel-add" type="button" aria-label="Adicionar canal de voz" data-tooltip="Adicionar canal de voz" onClick={() => onCreateChannel('voice')}>+</button> : null}</p>
         {channels.filter((channel) => channel.kind === 'voice').map((channel) => (
           <button className={activeVoiceChannelId === channel.id ? 'channel voice active' : 'channel voice'} key={channel.id} type="button" onClick={() => onVoiceChannelChange(channel.id)}><span>◖</span>{channel.name}</button>
         ))}
@@ -55,7 +54,6 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
         </div>
       </section>
 
-      <div className="workspace-theme-control"><ThemeControls compact /></div>
       <footer className="identity-strip">
         {identity.avatarUrl ? <img className="avatar avatar-photo" src={identity.avatarUrl} alt="Foto de perfil" /> : <span className="avatar avatar-green">{identity.initials}</span>}
         <div><strong>{identity.nickname}</strong><small>@{identity.username} · {identity.connectionLabel}</small></div>

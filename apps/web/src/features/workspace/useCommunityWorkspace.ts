@@ -361,6 +361,18 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     return { ok: true, message: 'Configuracoes do servidor atualizadas.' }
   }, [activeServer, loadServers])
 
+  const deleteServer = useCallback(async () => {
+    if (demoMode) {
+      setServers([]); setActiveServerId(null); setChannels([]); setActiveChannelId(null); setMessages([])
+      return { ok: true, message: 'Servidor excluído.' }
+    }
+    if (!supabase || !activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietário pode excluir este servidor.' }
+    const { error: requestError } = await supabase.from('servers').delete().eq('id', activeServer.id)
+    if (requestError) return { ok: false, message: 'Não foi possível excluir o servidor.' }
+    await loadServers()
+    return { ok: true, message: 'Servidor excluído.' }
+  }, [activeServer, demoMode, loadServers])
+
   const saveChannel = useCallback(async (channel: { id?: string; name: string; kind: ChannelSummary['kind'] }) => {
     const name = channel.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
     if (name.length < 2) return { ok: false, message: 'Use ao menos dois caracteres no nome do canal.' }
@@ -579,6 +591,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     setActiveChannelId,
     setActiveServerId,
     saveServer,
+    deleteServer,
     saveChannel,
     deleteChannel,
     redeemInviteLink,
