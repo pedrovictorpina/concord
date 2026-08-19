@@ -96,3 +96,5 @@ Branch atual: `codex/etapa-03-voz-tela`.
 - service worker ajustado para sempre buscar a página de navegação na rede e invalidar o cache anterior, evitando tela branca após deploy; bootstrap de tema sem exceção de escopo.
 - entrada em canal de voz agora bloqueia novos cliques e indica carregamento até a confirmação da conexão.
 - compartilhamento de tela em PWA móvel identificado como indisponível pela ausência de `getDisplayMedia`; transmissão móvel real permanece dependente do app Android nativo com MediaProjection.
+- entrada em canal de voz simplificada para um clique direto no canal; estado de conexão e controles foram movidos para o rodapé da lista de canais, acima do perfil do usuário.
+- participantes fictícios removidos da lista de voz; o usuário conectado agora é exibido somente dentro do canal de voz em que a conexão foi confirmada.

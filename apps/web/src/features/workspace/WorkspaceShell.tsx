@@ -25,6 +25,8 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [peopleDialogOpen, setPeopleDialogOpen] = useState(false)
   const [activeVoiceChannelId, setActiveVoiceChannelId] = useState<string | null>(null)
+  const [voiceJoinRequest, setVoiceJoinRequest] = useState(0)
+  const [voiceParticipantChannelId, setVoiceParticipantChannelId] = useState<string | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [channelCreationKind, setChannelCreationKind] = useState<'text' | 'voice' | null>(null)
   const [settingsTab, setSettingsTab] = useState<'profile' | 'channels' | 'server' | 'servers'>('profile')
@@ -51,9 +53,8 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
         onOpenSettings={() => { setSettingsTab('profile'); setSettingsOpen(true) }}
         onServerChange={(serverId) => workspace.setActiveServerId(serverId)}
       />
-      <ChannelPanel activeChannelId={workspace.activeChannelId} activeVoiceChannelId={activeVoiceChannelId} channels={workspace.channels} identity={localIdentity} mobileOpen={mobileNavigationOpen} onChannelChange={(channelId) => { workspace.setActiveChannelId(channelId); setMobileNavigationOpen(false) }} onCloseMobile={() => setMobileNavigationOpen(false)} onCreateChannel={(kind) => { setChannelCreationKind(kind); setSettingsTab('channels'); setSettingsOpen(true) }} onExit={onExit} onOpenPeople={() => setPeopleDialogOpen(true)} onVoiceChannelChange={(channelId) => { setActiveVoiceChannelId(channelId); setMobileNavigationOpen(false) }} server={workspace.activeServer} unreadByChannel={workspace.unreadByChannel} />
+      <ChannelPanel activeChannelId={workspace.activeChannelId} activeVoiceChannelId={activeVoiceChannelId} channels={workspace.channels} identity={localIdentity} mobileOpen={mobileNavigationOpen} onChannelChange={(channelId) => { workspace.setActiveChannelId(channelId); setMobileNavigationOpen(false) }} onCloseMobile={() => setMobileNavigationOpen(false)} onCreateChannel={(kind) => { setChannelCreationKind(kind); setSettingsTab('channels'); setSettingsOpen(true) }} onExit={onExit} onOpenPeople={() => setPeopleDialogOpen(true)} onVoiceChannelChange={(channelId) => { setActiveVoiceChannelId(channelId); setVoiceJoinRequest((current) => current + 1); setMobileNavigationOpen(false) }} server={workspace.activeServer} unreadByChannel={workspace.unreadByChannel} voiceParticipantChannelId={voiceParticipantChannelId} voicePanel={<LivePanel demoMode={demoMode} joinRequest={voiceJoinRequest} onConnectionChange={(channelId, connected) => setVoiceParticipantChannelId(connected ? channelId : null)} voiceChannel={activeVoiceChannel} />} />
       <ChatPanel activeChannel={workspace.activeChannel} identity={localIdentity} loading={workspace.loading} messages={workspace.messages} onOpenMobileNavigation={() => setMobileNavigationOpen(true)} onSendMessage={workspace.sendMessage} server={workspace.activeServer} userId={userId} />
-      <LivePanel demoMode={demoMode} voiceChannel={activeVoiceChannel} />
       {workspace.error ? <p className="workspace-error" role="status">{workspace.error}</p> : null}
       {createDialogOpen ? <CreateServerDialog onClose={() => setCreateDialogOpen(false)} onCreate={workspace.createServer} /> : null}
       {peopleDialogOpen ? <PeopleDialog friendRequests={workspace.friendRequests} friends={workspace.friends} onAcceptFriendRequest={workspace.acceptFriendRequest} onAcceptServerInvite={workspace.acceptServerInvite} onClose={() => setPeopleDialogOpen(false)} onSendFriendRequest={workspace.sendFriendRequest} onSendServerInvite={workspace.sendServerInvite} server={workspace.activeServer} serverInvites={workspace.serverInvites} /> : null}

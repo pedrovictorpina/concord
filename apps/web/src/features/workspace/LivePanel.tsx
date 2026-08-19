@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ChannelSummary, VoicePreferences } from '@concord/contracts'
 import { useLiveRoom } from './useLiveRoom'
 import { useScreenShare } from './useScreenShare'
@@ -7,18 +7,22 @@ import type { ScreenShareQuality } from './screen-quality'
 
 type LivePanelProps = {
   demoMode: boolean
+  joinRequest: number
+  onConnectionChange: (channelId: string | null, connected: boolean) => void
   voiceChannel: ChannelSummary | null
 }
 
-export function LivePanel({ demoMode, voiceChannel }: LivePanelProps) {
+export function LivePanel({ demoMode, joinRequest, onConnectionChange, voiceChannel }: LivePanelProps) {
   const demoShare = useScreenShare()
   const liveRoom = useLiveRoom(voiceChannel?.id ?? null)
+  const disconnectRoom = liveRoom.disconnect
   const [preferences, setPreferences] = useState<VoicePreferences>({ microphoneEnabled: true, outputEnabled: true, screenShareEnabled: false })
   const [qualityPickerOpen, setQualityPickerOpen] = useState(false)
   const [quality, setQuality] = useState<ScreenShareQuality>('automatic')
   const [demoJoined, setDemoJoined] = useState(false)
   const [joining, setJoining] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const handledJoinRequest = useRef(0)
   const sharing = demoMode ? Boolean(demoShare.stream) : Boolean(liveRoom.screenTrack)
   const screenShareAvailable = Boolean(navigator.mediaDevices?.getDisplayMedia)
   const error = demoMode ? demoShare.error : liveRoom.error
@@ -44,6 +48,12 @@ export function LivePanel({ demoMode, voiceChannel }: LivePanelProps) {
   useEffect(() => setPreferences((current) => ({ ...current, screenShareEnabled: sharing })), [sharing])
   useEffect(() => { if (joined) setJoining(false) }, [joined])
   useEffect(() => setJoining(false), [voiceChannel?.id])
+  useEffect(() => {
+    setDemoJoined(false)
+    disconnectRoom()
+    handledJoinRequest.current = 0
+  }, [disconnectRoom, voiceChannel?.id])
+  useEffect(() => onConnectionChange(voiceChannel?.id ?? null, joined), [joined, onConnectionChange, voiceChannel?.id])
 
   const toggleDemoPreference = (key: 'microphoneEnabled' | 'outputEnabled') => {
     setPreferences((current) => ({ ...current, [key]: !current[key] }))
@@ -56,7 +66,7 @@ export function LivePanel({ demoMode, voiceChannel }: LivePanelProps) {
     return demoMode ? demoShare.start(nextQuality) : liveRoom.startScreenShare(nextQuality)
   }
 
-  const joinVoice = async () => {
+  const joinVoice = useCallback(async () => {
     if (joining || joined) return
     setJoining(true)
     const connected = demoMode
@@ -64,7 +74,13 @@ export function LivePanel({ demoMode, voiceChannel }: LivePanelProps) {
       : await liveRoom.join()
     if (demoMode && connected) setDemoJoined(true)
     if (!connected) setJoining(false)
-  }
+  }, [demoMode, joined, joining, liveRoom])
+
+  useEffect(() => {
+    if (!voiceChannel || !joinRequest || joined || joining || handledJoinRequest.current === joinRequest) return
+    handledJoinRequest.current = joinRequest
+    void joinVoice()
+  }, [joinRequest, joined, joining, joinVoice, voiceChannel])
 
   if (!voiceChannel) return null
 
@@ -74,7 +90,7 @@ export function LivePanel({ demoMode, voiceChannel }: LivePanelProps) {
       {error ? <p className="share-error" role="status">{error}</p> : null}
       {joined && !screenShareAvailable ? <p className="voice-capability-note" role="status">Compartilhar tela não é suportado nesta PWA móvel. Use o Concord no desktop.</p> : null}
       {!joined ? (
-        <button aria-busy={joining} className="voice-join" disabled={!voiceChannel || joining} type="button" onClick={() => void joinVoice()}><span>{joining ? '◌' : '◖'}</span>{joining ? 'Entrando…' : `Entrar em ${voiceChannel.name}`}</button>
+        <p aria-busy={joining} className="voice-join" role="status"><span>{joining ? '◌' : '◖'}</span>{joining ? 'Entrando…' : `Conectando a ${voiceChannel.name}…`}</p>
       ) : (
         <><div className="voice-dock-status"><span className="live-pulse" /> <strong>{voiceChannel?.name ?? 'Voz'}</strong><small>{demoMode ? 'REDE LOCAL · 28 ms' : 'REDE ESTÁVEL · WEBRTC'}</small></div>
         <footer className="voice-controls">
