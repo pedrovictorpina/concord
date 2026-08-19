@@ -60,6 +60,11 @@ type ChannelPermissionRow = { channel_id: string; role: Exclude<ServerMemberRole
 type InviteLinkRow = { id: string; code: string; expires_at: string | null; max_uses: number | null; uses_count: number }
 type CategoryRow = { id: string; name: string }
 
+const mentionPattern = (username: string) => {
+  const safe = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`@${safe}(?![\\p{L}\\p{N}_])`, 'iu')
+}
+
 const demoServer: ServerSummary = {
   id: 'demo-concord',
   name: 'Concord',
@@ -302,13 +307,16 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
         filter: `channel_id=eq.${activeChannelId}`,
       }, () => {
         void loadMessages(activeChannelId)
+        if (userId && document.visibilityState === 'visible') {
+          void client.from('channel_read_states').upsert({ channel_id: activeChannelId, user_id: userId, last_read_at: new Date().toISOString() })
+        }
       })
       .subscribe()
 
     return () => {
       void client.removeChannel(realtimeChannel)
     }
-  }, [activeChannelId, demoMode, loadMessages])
+  }, [activeChannelId, demoMode, loadMessages, userId])
 
   useEffect(() => {
     if (!supabase || demoMode || !activeServerId || !userId) return
@@ -319,8 +327,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
         const message = payload.new as { channel_id?: string; author_id?: string; body?: string }
         if (!message.channel_id || message.author_id === userId || message.channel_id === activeChannelId || serverMuted) return
         if (!channels.some((channel) => channel.id === message.channel_id)) return
-        const body = message.body?.toLowerCase() ?? ''
-        const mentioned = Boolean(username && body.includes(`@${username.toLowerCase()}`))
+        const mentioned = Boolean(username && mentionPattern(username).test(message.body ?? ''))
         setUnreadByChannel((current) => ({
           ...current,
           [message.channel_id!]: { count: (current[message.channel_id!]?.count ?? 0) + 1, mentioned: current[message.channel_id!]?.mentioned || mentioned },
@@ -353,11 +360,19 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
       const readAt = new Map((states ?? []).map((state) => [state.channel_id, state.last_read_at]))
       const results = await Promise.all(channels.filter((channel) => channel.id !== activeChannelId && channel.kind === 'text').map(async (channel) => {
         const since = readAt.get(channel.id) ?? '1970-01-01T00:00:00.000Z'
-        const [countResult, mentionResult] = await Promise.all([
-          client.from('messages').select('*', { count: 'exact', head: true }).eq('channel_id', channel.id).neq('author_id', userId).gt('created_at', since),
-          username ? client.from('messages').select('*', { count: 'exact', head: true }).eq('channel_id', channel.id).neq('author_id', userId).gt('created_at', since).ilike('body', `%@${username}%`) : Promise.resolve({ count: 0 }),
-        ])
-        return [channel.id, { count: countResult.count ?? 0, mentioned: (mentionResult.count ?? 0) > 0 }] as const
+        const { data: unread } = await client
+          .from('messages')
+          .select('body')
+          .eq('channel_id', channel.id)
+          .neq('author_id', userId)
+          .gt('created_at', since)
+          .limit(99)
+        const rows = (unread ?? []) as Array<{ body: string | null }>
+        const pattern = username ? mentionPattern(username) : null
+        return [channel.id, {
+          count: rows.length,
+          mentioned: Boolean(pattern && rows.some((row) => pattern.test(row.body ?? ''))),
+        }] as const
       }))
       setUnreadByChannel(Object.fromEntries(results.filter(([, value]) => value.count > 0)))
     })()

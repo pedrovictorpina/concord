@@ -46,10 +46,11 @@ Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a 
 - Teste: integração com uma conta não amiga; conferir que pessoa banida continua recusada.
 - QA: servidor → Convidar → buscar por identificador → convidar → aceitar na outra conta.
 
-### 4.3 Canal de texto só notifica mensagem não lida
+### 4.3 Canal de texto só notifica mensagem não lida — PARCIAL em 19/08/2026
 
 - Hoje: `unreadByChannel` conta mensagens e menções por canal, ignora o canal aberto, o próprio autor e servidor silenciado; o badge aparece na lista de canais. Não existe notificação fora da interface.
-- Implementação restante: revisar quando o canal é considerado lido — hoje `last_read_at` só é gravado ao trocar de canal, então o canal aberto em segundo plano pode reabrir com contagem indevida; badge de não lidas também na barra de servidores, que hoje não recebe esse estado e só escuta o servidor ativo no Realtime; menção por tabela em vez de `ilike '%@usuario%'`, que hoje casa `@ana` dentro de `@anabela`; preferência por canal (tudo, só menções, nada).
+- Entregue: o canal aberto grava `last_read_at` a cada mensagem recebida enquanto a aba está visível, então ele não reabre com contagem indevida; a menção passou a usar regex com fronteira (`@ana` não casa mais dentro de `@anabela`), na contagem inicial e no tempo real; a contagem inicial virou uma consulta por canal em vez de duas, com teto de 99 e badge `99+`.
+- Restante: badge de não lidas na barra de servidores (exige escutar os outros servidores, hoje o Realtime só assina o ativo), menção por tabela com `@everyone`/`@here` e por cargo, e preferência por canal (tudo, só menções, nada).
 - Critério de aceite: um canal só sinaliza quando existe mensagem que a pessoa ainda não leu, e abrir o canal limpa o sinal em qualquer aba.
 - Teste: Playwright no modo demonstração para o badge, mais integração com duas contas para o estado de leitura.
 - QA: duas contas em canais diferentes → enviar mensagem → conferir badge → abrir o canal → conferir que zera e não volta ao recarregar.

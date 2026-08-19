@@ -83,7 +83,7 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
             type="button"
             onClick={() => onChannelChange(channel.id)}
           >
-            <span>#</span>{channel.name}{unreadByChannel[channel.id] ? <i className={unreadByChannel[channel.id].mentioned ? 'channel-badge mention' : 'channel-badge'}>{unreadByChannel[channel.id].mentioned ? '@' : unreadByChannel[channel.id].count}</i> : null}
+            <span>#</span>{channel.name}{unreadByChannel[channel.id] ? <i className={unreadByChannel[channel.id].mentioned ? 'channel-badge mention' : 'channel-badge'}>{unreadByChannel[channel.id].mentioned ? '@' : unreadByChannel[channel.id].count >= 99 ? '99+' : unreadByChannel[channel.id].count}</i> : null}
           </button>
         ))}
       </section>
