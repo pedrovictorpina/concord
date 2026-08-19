@@ -120,3 +120,7 @@ Branch atual: `main`.
 - painel de membros adicionado na coluna direita, que ficava vazia fora dos canais de voz: lista agrupada por cargo (proprietário, moderadores, membros) com avatar, apelido, identificador e marcação de quem está em voz. Some abaixo de 1120px, junto com o chat lateral de voz, e no canal de voz cede lugar ao painel da chamada.
 - autor das mensagens aparecia sempre como "Membro": o embed `profiles!messages_author_id_fkey(nickname)` é uma relação muitos-para-um e retorna objeto, mas o mapeamento lia `profiles[0]`. Corrigido com leitura tolerante a objeto e a array.
 - modo demonstração passou a ter três membros com cargos distintos, para o painel e o teste de jornada terem o que exibir.
+- convite de amigos ganhou fluxo dedicado, no formato do Discord: atalho no cabecalho do servidor e item do menu abrem um dialogo com busca de amigos, lista com botao CONVIDAR por pessoa, marcacao de quem ja e membro e, no rodape, o link do servidor com copiar e aviso de expiracao. Antes, convidar exigia digitar o identificador na mao no dialogo de pessoas e o link vivia so na aba Servidor das configuracoes.
+- mensagem de erro ao gerar link deixou de dizer "somente o proprietario" quando o caso real era falta de sessao.
+- titulos de dialogo com quebra de linha ganharam espaco explicito: o nome acessivel saia grudado ("Convidarpara Concord."), o que o leitor de tela anunciava errado.
+- modo demonstracao ganhou um segundo amigo que nao e membro do servidor, para exercitar os dois estados da lista de convite.

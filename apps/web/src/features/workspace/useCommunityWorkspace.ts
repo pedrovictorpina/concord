@@ -62,7 +62,10 @@ const demoServer: ServerSummary = {
   description: 'Fundacao e sinais do produto',
   role: 'owner',
 }
-const demoFriends: PersonSummary[] = [{ id: 'demo-amigo', nickname: 'Ari', username: 'ari' }]
+const demoFriends: PersonSummary[] = [
+  { id: 'demo-moderador', nickname: 'Ari', username: 'ari' },
+  { id: 'demo-amigo', nickname: 'Nina', username: 'nina' },
+]
 
 const demoMembers: Array<PersonSummary & { role: ServerMemberRole }> = [
   { id: 'demo-user', nickname: 'Pedro', username: 'fundador', role: 'owner' },
@@ -461,7 +464,8 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
   }, [activeServer, loadServerControls])
 
   const createInviteLink = useCallback(async () => {
-    if (!supabase || !activeServer || activeServer.role !== 'owner' || !userId) return { ok: false, message: 'Somente o proprietário pode criar links.', url: '' }
+    if (!supabase || !userId) return { ok: false, message: 'Entre com sua conta para gerar links de convite.', url: '' }
+    if (!activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietário pode criar links.', url: '' }
     const { data, error: requestError } = await supabase.from('server_invite_links').insert({ server_id: activeServer.id, created_by: userId }).select('code').single()
     if (requestError || !data) return { ok: false, message: 'Não foi possível criar o link.', url: '' }
     await loadServerControls(activeServer.id)

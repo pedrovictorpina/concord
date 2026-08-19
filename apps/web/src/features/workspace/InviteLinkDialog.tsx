@@ -25,7 +25,7 @@ export function InviteLinkDialog({ code, onAccept, onClose }: InviteLinkDialogPr
       description="Você recebeu um convite por link. Confirme antes de entrar na comunidade."
       eyebrow="CONVITE PRIVADO"
       onClose={onClose}
-      title={<>Entrar no<br />servidor?</>}
+      title={<>Entrar no{' '}<br />servidor?</>}
     >
       <button className="dialog-submit" disabled={submitting} type="button" onClick={() => void accept()}>{submitting ? 'ENTRANDO...' : 'ACEITAR CONVITE'}</button>
       {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}

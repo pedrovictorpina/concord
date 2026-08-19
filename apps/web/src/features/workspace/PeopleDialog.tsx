@@ -79,7 +79,7 @@ export function PeopleDialog({ friendRequests, friends, onAcceptFriendRequest, o
       closeLabel="Fechar pessoas e convites"
       eyebrow="CONEXOES PRIVADAS"
       onClose={onClose}
-      title={<>Pessoas<br />em sintonia.</>}
+      title={<>Pessoas{' '}<br />em sintonia.</>}
     >
 
         <section className="mobile-add-friend" aria-label="Adicionar amigos">

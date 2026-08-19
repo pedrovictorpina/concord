@@ -31,7 +31,7 @@ export function CreateServerDialog({ onClose, onCreate }: CreateServerDialogProp
       eyebrow="NOVA FREQUENCIA"
       initialFocusRef={nameRef}
       onClose={onClose}
-      title={<>Dê um nome<br />ao seu lugar.</>}
+      title={<>Dê um nome{' '}<br />ao seu lugar.</>}
     >
       <form onSubmit={submit}>
         <label>

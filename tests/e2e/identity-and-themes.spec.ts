@@ -92,6 +92,34 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Fechar pessoas e convites' }).click()
   })
 
+  test('convida amigos para o servidor pelo atalho do cabeçalho', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Convidar amigos' }).click()
+
+    const dialog = page.getByRole('dialog', { name: /Convidar/ })
+    await expect(dialog).toContainText('Convidar para Concord.')
+    await expect(dialog).toContainText('SEUS AMIGOS — 2')
+    await expect(dialog.getByText('@ari')).toBeVisible()
+    await expect(dialog.getByText('JÁ É MEMBRO')).toBeVisible()
+
+    const convidar = dialog.getByRole('button', { name: 'CONVIDAR' })
+    await expect(convidar).toHaveCount(1)
+
+    await dialog.getByLabel('Buscar amigos').fill('nina')
+    await expect(dialog.getByText('@nina')).toBeVisible()
+    await expect(dialog.getByText('@ari')).toHaveCount(0)
+
+    await dialog.getByLabel('Buscar amigos').fill('zzz')
+    await expect(dialog.getByText('Nenhum amigo corresponde a essa busca.')).toBeVisible()
+
+    await dialog.getByRole('button', { name: 'GERAR LINK DE CONVITE' }).click()
+    await expect(dialog.getByText('Entre com sua conta para gerar links de convite.')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(dialog).toHaveCount(0)
+  })
+
   test('lista os membros do servidor e seus cargos', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()

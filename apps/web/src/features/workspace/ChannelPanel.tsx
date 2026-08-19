@@ -21,6 +21,7 @@ type ChannelPanelProps = {
   onCloseMobile: () => void
   onChannelChange: (channelId: string) => void
   onCreateChannel: (kind: ChannelSummary['kind']) => void
+  onOpenInvite: () => void
   onOpenServerSettings: () => void
   onVoiceChannelChange: (channelId: string) => void
   onExit: () => void
@@ -30,12 +31,12 @@ type ChannelPanelProps = {
   voiceParticipantsByChannel: Record<string, VoiceParticipant[]>
 }
 
-export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, connectedVoiceChannelId, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onOpenServerSettings, onVoiceChannelChange, onExit, onOpenPeople, server, unreadByChannel, voiceParticipantsByChannel }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, connectedVoiceChannelId, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onOpenInvite, onOpenServerSettings, onVoiceChannelChange, onExit, onOpenPeople, server, unreadByChannel, voiceParticipantsByChannel }: ChannelPanelProps) {
   return (
     <aside className={mobileOpen ? 'channel-panel mobile-open' : 'channel-panel'}>
       <header className="workspace-heading">
         <div><span className="eyebrow">SERVIDOR PRIVADO</span><strong>{server?.name ?? 'Concord'}</strong></div>
-        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><DropdownMenu.Root><DropdownMenu.Trigger aria-label="Abrir menu do servidor" className="server-menu-trigger">⌄</DropdownMenu.Trigger><DropdownMenu.Portal><DropdownMenu.Content align="end" className="server-menu-content" sideOffset={10}><DropdownMenu.Item onSelect={onOpenPeople}>Convidar pessoas</DropdownMenu.Item><DropdownMenu.Item onSelect={onOpenServerSettings}>Configurações do servidor</DropdownMenu.Item>{server?.role === 'owner' ? <><DropdownMenu.Item onSelect={() => onCreateChannel('text')}>Criar canal de texto</DropdownMenu.Item><DropdownMenu.Item onSelect={() => onCreateChannel('voice')}>Criar canal de voz</DropdownMenu.Item></> : null}</DropdownMenu.Content></DropdownMenu.Portal></DropdownMenu.Root><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
+        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><Hint label="Convidar amigos"><button type="button" aria-label="Convidar amigos" onClick={onOpenInvite}>⊕</button></Hint><Hint label="Amigos e convites recebidos"><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button></Hint><DropdownMenu.Root><DropdownMenu.Trigger aria-label="Abrir menu do servidor" className="server-menu-trigger">⌄</DropdownMenu.Trigger><DropdownMenu.Portal><DropdownMenu.Content align="end" className="server-menu-content" sideOffset={10}><DropdownMenu.Item onSelect={onOpenInvite}>Convidar amigos</DropdownMenu.Item><DropdownMenu.Item onSelect={onOpenServerSettings}>Configurações do servidor</DropdownMenu.Item>{server?.role === 'owner' ? <><DropdownMenu.Item onSelect={() => onCreateChannel('text')}>Criar canal de texto</DropdownMenu.Item><DropdownMenu.Item onSelect={() => onCreateChannel('voice')}>Criar canal de voz</DropdownMenu.Item></> : null}</DropdownMenu.Content></DropdownMenu.Portal></DropdownMenu.Root><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
       </header>
 
       <section className="channel-group">
