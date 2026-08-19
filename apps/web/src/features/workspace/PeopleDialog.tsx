@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import type { FriendRequestSummary, PersonSummary, ServerInviteSummary, ServerSummary } from '@concord/contracts'
+import { Avatar } from '../../components/ui/Avatar'
+import { Modal } from '../../components/ui/Modal'
 
 type ActionResult = { ok: boolean; message: string }
 
@@ -17,6 +19,7 @@ type PeopleDialogProps = {
 }
 
 export function PeopleDialog({ friendRequests, friends, onAcceptFriendRequest, onAcceptServerInvite, onClose, onSendFriendRequest, onSendServerInvite, server, serverInvites }: PeopleDialogProps) {
+  const addFriendRef = useRef<HTMLInputElement>(null)
   const [friendUsername, setFriendUsername] = useState('')
   const [inviteUsername, setInviteUsername] = useState('')
   const [feedback, setFeedback] = useState('')
@@ -52,26 +55,32 @@ export function PeopleDialog({ friendRequests, friends, onAcceptFriendRequest, o
 
   if (showAddForm) {
     return (
-      <div className="server-dialog-backdrop" role="presentation">
-        <section className="server-dialog people-dialog mobile-add-form" role="dialog" aria-modal="true" aria-labelledby="add-friend-title">
-          <button className="mobile-back" type="button" aria-label="Voltar para adicionar amigos" onClick={() => setShowAddForm(false)}>←</button>
-          <h2 id="add-friend-title">Adicionar via nome de usuário</h2>
-          <form className="people-form" onSubmit={sendFriend}>
-            <label><span>Quem você quer adicionar como amigo?</span><input autoFocus required value={friendUsername} onChange={(event) => setFriendUsername(event.target.value)} placeholder="Insira um nome de usuário" /></label>
-            <button className="dialog-submit" type="submit" disabled={submitting || !friendUsername.trim()}>ENVIAR PEDIDO DE AMIZADE</button>
-          </form>
-          {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}
-        </section>
-      </div>
+      <Modal
+        className="people-dialog mobile-add-form"
+        closeLabel="Voltar para adicionar amigos"
+        hideClose
+        initialFocusRef={addFriendRef}
+        onClose={onClose}
+        title="Adicionar via nome de usuário"
+      >
+        <button className="mobile-back" type="button" aria-label="Voltar para adicionar amigos" onClick={() => setShowAddForm(false)}>←</button>
+        <form className="people-form" onSubmit={sendFriend}>
+          <label><span>Quem você quer adicionar como amigo?</span><input ref={addFriendRef} required value={friendUsername} onChange={(event) => setFriendUsername(event.target.value)} placeholder="Insira um nome de usuário" /></label>
+          <button className="dialog-submit" type="submit" disabled={submitting || !friendUsername.trim()}>ENVIAR PEDIDO DE AMIZADE</button>
+        </form>
+        {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}
+      </Modal>
     )
   }
 
   return (
-    <div className="server-dialog-backdrop" role="presentation">
-      <section className="server-dialog people-dialog" role="dialog" aria-modal="true" aria-labelledby="people-dialog-title">
-        <button className="dialog-close" type="button" aria-label="Fechar pessoas e convites" onClick={onClose}>×</button>
-        <span className="eyebrow">CONEXOES PRIVADAS</span>
-        <h2 id="people-dialog-title">Pessoas<br />em sintonia.</h2>
+    <Modal
+      className="people-dialog"
+      closeLabel="Fechar pessoas e convites"
+      eyebrow="CONEXOES PRIVADAS"
+      onClose={onClose}
+      title={<>Pessoas<br />em sintonia.</>}
+    >
 
         <section className="mobile-add-friend" aria-label="Adicionar amigos">
           <header><button type="button" aria-label="Fechar adicionar amigos" onClick={onClose}>←</button><h2>Adicionar amigos</h2></header>
@@ -93,24 +102,23 @@ export function PeopleDialog({ friendRequests, friends, onAcceptFriendRequest, o
 
         <section className="people-list" aria-label="Pedidos recebidos">
           <p>PEDIDOS RECEBIDOS</p>
-          {friendRequests.filter((request) => request.direction === 'received').map((request) => <div className="person-row" key={request.id}><span className="avatar avatar-amber">{request.person.nickname.slice(0, 2).toUpperCase()}</span><strong>{request.person.nickname}<small>@{request.person.username}</small></strong><button type="button" disabled={submitting} onClick={() => void run(() => onAcceptFriendRequest(request.id))}>ACEITAR</button></div>)}
+          {friendRequests.filter((request) => request.direction === 'received').map((request) => <div className="person-row" key={request.id}><Avatar initials={request.person.nickname.slice(0, 2).toUpperCase()} tone="amber" /><strong>{request.person.nickname}<small>@{request.person.username}</small></strong><button type="button" disabled={submitting} onClick={() => void run(() => onAcceptFriendRequest(request.id))}>ACEITAR</button></div>)}
           {!friendRequests.some((request) => request.direction === 'received') ? <small>Nenhum pedido pendente.</small> : null}
         </section>
 
         <section className="people-list" aria-label="Convites recebidos">
           <p>CONVITES DE SERVIDOR</p>
-          {serverInvites.map((invite) => <div className="person-row" key={invite.id}><span className="avatar avatar-green">{invite.serverName.slice(0, 2).toUpperCase()}</span><strong>{invite.serverName}<small>por @{invite.sender.username}</small></strong><button type="button" disabled={submitting} onClick={() => void run(() => onAcceptServerInvite(invite))}>ENTRAR</button></div>)}
+          {serverInvites.map((invite) => <div className="person-row" key={invite.id}><Avatar initials={invite.serverName.slice(0, 2).toUpperCase()} /><strong>{invite.serverName}<small>por @{invite.sender.username}</small></strong><button type="button" disabled={submitting} onClick={() => void run(() => onAcceptServerInvite(invite))}>ENTRAR</button></div>)}
           {!serverInvites.length ? <small>Nenhum convite pendente.</small> : null}
         </section>
 
         <section className="people-list" aria-label="Amigos">
           <p>AMIGOS</p>
-          {friends.map((friend) => <div className="person-row" key={friend.id}><span className="avatar avatar-green">{friend.nickname.slice(0, 2).toUpperCase()}</span><strong>{friend.nickname}<small>@{friend.username}</small></strong><small>ONLINE</small></div>)}
+          {friends.map((friend) => <div className="person-row" key={friend.id}><Avatar initials={friend.nickname.slice(0, 2).toUpperCase()} /><strong>{friend.nickname}<small>@{friend.username}</small></strong><small>ONLINE</small></div>)}
           {!friends.length ? <small>Nenhuma amizade ativa.</small> : null}
         </section>
 
-        {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}
-      </section>
-    </div>
+      {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}
+    </Modal>
   )
 }

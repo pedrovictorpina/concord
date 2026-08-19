@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import type { ChannelSummary, MessageSummary, ServerSummary } from '@concord/contracts'
+import { Avatar } from '../../components/ui/Avatar'
 import type { WorkspaceIdentity } from './workspace-types'
 
 type ChatPanelProps = {
@@ -74,7 +75,7 @@ export function ChatPanel({ activeChannel, identity, loading, messages, onOpenMo
 
         {messages.map((message) => (
           <article className="message" key={message.id}>
-            <span className={message.authorId === userId ? 'avatar avatar-green' : 'avatar avatar-amber'}>{message.authorNickname.slice(0, 2).toUpperCase()}</span>
+            <Avatar initials={message.authorNickname.slice(0, 2).toUpperCase()} tone={message.authorId === userId ? 'green' : 'amber'} />
             <div>
               <header><strong>{message.authorNickname}</strong><time>{formatTime(message.createdAt)}</time>{message.editedAt ? <em>EDITADA</em> : null}</header>
               <p>{message.body}</p>

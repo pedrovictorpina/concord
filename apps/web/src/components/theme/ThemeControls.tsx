@@ -1,3 +1,4 @@
+import { Choice } from '../ui/Choice'
 import { styleThemes } from '../../theme/theme-registry'
 import { colorModes } from '../../theme/theme-types'
 import type { ColorMode, StyleThemeId } from '../../theme/theme-types'
@@ -19,20 +20,13 @@ export function ThemeControls({ compact = false }: ThemeControlsProps) {
 
   return (
     <section className={compact ? 'theme-controls compact' : 'theme-controls'} aria-label="Aparencia">
-      <div className="theme-style-field">
-        <label htmlFor={compact ? 'style-theme-compact' : 'style-theme'}>Estilo</label>
-        <select
-          id={compact ? 'style-theme-compact' : 'style-theme'}
-          value={styleTheme}
-          onChange={(event) => setStyleTheme(event.target.value as StyleThemeId)}
-        >
-          {styleThemes.map((theme) => (
-            <option key={theme.id} value={theme.id} disabled={!theme.available}>
-              {theme.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Choice
+        className="theme-style-field"
+        label="Estilo"
+        onChange={(value: StyleThemeId) => setStyleTheme(value)}
+        options={styleThemes.map((theme) => ({ value: theme.id, label: theme.label, disabled: !theme.available }))}
+        value={styleTheme}
+      />
 
       <div className="mode-selector" aria-label="Modo de cor">
         {colorModes.map((mode) => (

@@ -5,13 +5,9 @@
 }
 
 .theme-style-field { display: grid; gap: var(--space-2); }
-.theme-style-field label { font: var(--font-label); letter-spacing: .12em; text-transform: uppercase; }
-.theme-style-field select {
-  width: 100%;
+.theme-style-field .choice-label { font: var(--font-label); letter-spacing: .12em; text-transform: uppercase; }
+.theme-style-field .choice-trigger {
   padding: var(--space-3);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-control);
-  color: var(--color-text);
   background: var(--color-surface-raised);
 }
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { ThemeControls } from '../../components/theme/ThemeControls'
+import { Toggle } from '../../components/ui/Toggle'
 import { useAuth } from './useAuth'
 import './AuthScreen.css'
 
@@ -216,14 +217,12 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
 
               {formMode === 'sign-in' ? (
                 <div className="auth-login-options">
-                  <label className="auth-keep-session">
-                    <input
-                      checked={keepSession}
-                      type="checkbox"
-                      onChange={(event) => setKeepSession(event.target.checked)}
-                    />
-                    <span>Manter conectado</span>
-                  </label>
+                  <Toggle
+                    checked={keepSession}
+                    className="auth-keep-session"
+                    label="Manter conectado"
+                    onChange={setKeepSession}
+                  />
                   <button className="auth-secondary-action" type="button" onClick={() => changeMode('forgot-password')}>
                     Esqueci minha senha
                   </button>

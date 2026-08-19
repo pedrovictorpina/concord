@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { Tabs } from 'radix-ui'
+import { Choice } from '../../components/ui/Choice'
+import { Modal } from '../../components/ui/Modal'
+import { Toggle } from '../../components/ui/Toggle'
 import { ThemeControls } from '../../components/theme/ThemeControls'
 import type { ChannelPermission, ChannelSummary, PersonSummary, ServerMemberRole, ServerSummary } from '@concord/contracts'
 import type { WorkspaceIdentity } from './workspace-types'
@@ -39,6 +43,16 @@ type SettingsDialogProps = {
 }
 
 type SettingsTab = 'profile' | 'appearance' | 'servers' | 'server' | 'channels' | 'notifications' | 'permissions'
+
+const settingsTabs: ReadonlyArray<readonly [SettingsTab, string]> = [
+  ['profile', 'Perfil'],
+  ['appearance', 'Tema'],
+  ['servers', 'Servidores'],
+  ['server', 'Servidor'],
+  ['channels', 'Canais'],
+  ['notifications', 'Notificações'],
+  ['permissions', 'Permissões'],
+]
 
 export function SettingsDialog({ channels, identity, initialChannelKind = 'text', initialTab = 'profile', onClose, onDeleteChannel, onDeleteServer, onSaveChannel, onSaveProfile, onSaveServer, onSetMuted, onUploadAvatar, channelPermissions, inviteLinks, members, onCreateInviteLink, onRevokeInviteLink, onSaveChannelPermissions, onSetMemberRole, categories, onCreateCategory, onLeaveServer, onMarkServerRead, onModerateMember, onSaveServerNickname, onSelectServer, server, servers, serverMuted, userId }: SettingsDialogProps) {
   const [tab, setTab] = useState<SettingsTab>(initialTab)
@@ -104,16 +118,18 @@ export function SettingsDialog({ channels, identity, initialChannelKind = 'text'
   const permission = (channelId: string, role: 'moderator' | 'member') => channelPermissions.find((item) => item.channelId === channelId && item.role === role) ?? { channelId, role, canRead: true, canWrite: true, canSpeak: true }
 
   return (
-    <div className="server-dialog-backdrop" role="presentation">
-      <section className="server-dialog settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-dialog-title">
-        <button className="dialog-close" type="button" aria-label="Fechar configurações" onClick={onClose}>×</button>
-        <span className="eyebrow">CENTRO DE CONTROLE</span>
-        <h2 id="settings-dialog-title">Configurações.</h2>
-        <div className="settings-layout">
-          <nav aria-label="Seções das configurações" className="settings-nav">
-            {([['profile', 'Perfil'], ['appearance', 'Tema'], ['servers', 'Servidores'], ['server', 'Servidor'], ['channels', 'Canais'], ['notifications', 'Notificações'], ['permissions', 'Permissões']] as const).map(([id, label]) => <button className={tab === id ? 'active' : ''} key={id} type="button" onClick={() => setTab(id)}>{label}</button>)}
-          </nav>
-          <div className="settings-content">
+    <Modal
+      className="settings-dialog"
+      closeLabel="Fechar configurações"
+      eyebrow="CENTRO DE CONTROLE"
+      onClose={onClose}
+      title="Configurações."
+    >
+      <Tabs.Root className="settings-layout" onValueChange={(value) => setTab(value as SettingsTab)} orientation="vertical" value={tab}>
+          <Tabs.List aria-label="Seções das configurações" className="settings-nav">
+            {settingsTabs.map(([id, label]) => <Tabs.Trigger key={id} value={id}>{label}</Tabs.Trigger>)}
+          </Tabs.List>
+          <Tabs.Content className="settings-content" value={tab}>
             {tab === 'profile' ? <form onSubmit={submitProfile}>
               <h3>Sua identidade</h3><p>Defina como você aparece em toda a rede.</p>
               <label><span>Apelido</span><input required minLength={3} maxLength={32} value={nickname} onChange={(event) => setNickname(event.target.value)} /></label>
@@ -136,15 +152,14 @@ export function SettingsDialog({ channels, identity, initialChannelKind = 'text'
               {owner ? <button className="dialog-text-button danger" type="button" onClick={() => { if (window.confirm(`Excluir ${server?.name}? Esta ação não pode ser desfeita.`)) void run(onDeleteServer) }}>EXCLUIR SERVIDOR</button> : null}
             </form> : null}
             {tab === 'channels' ? <section><h3>Canais do servidor</h3><p>{owner ? 'Crie e ajuste canais de texto ou voz.' : 'Somente o proprietário administra os canais.'}</p>
-              {owner ? <><form onSubmit={submitChannel}><label><span>Nome do canal</span><input required value={channelName} onChange={(event) => setChannelName(event.target.value)} placeholder="reunião-diária" /></label><label><span>Tipo</span><select value={channelKind} onChange={(event) => setChannelKind(event.target.value as ChannelSummary['kind'])}><option value="text">Texto</option><option value="voice">Voz</option></select></label><button className="dialog-submit" type="submit" disabled={submitting}>{editingChannelId ? 'SALVAR CANAL' : 'CRIAR CANAL'}</button>{editingChannelId ? <button className="dialog-text-button" type="button" onClick={() => { setEditingChannelId(undefined); setChannelName(''); setChannelKind('text') }}>CANCELAR EDIÇÃO</button> : null}</form><form className="category-form" onSubmit={(event) => { event.preventDefault(); void run(async () => { const result = await onCreateCategory(categoryName); if (result.ok) setCategoryName(''); return result }) }}><label><span>Nova categoria</span><input required value={categoryName} onChange={(event) => setCategoryName(event.target.value)} placeholder="Geral" /></label><button className="dialog-submit subdued" type="submit">CRIAR CATEGORIA</button></form><p className="category-list">{categories.map((category) => category.name).join(' · ') || 'Sem categorias ainda.'}</p></> : null}
+              {owner ? <><form onSubmit={submitChannel}><label><span>Nome do canal</span><input required value={channelName} onChange={(event) => setChannelName(event.target.value)} placeholder="reunião-diária" /></label><Choice label="Tipo" onChange={setChannelKind} options={[{ value: 'text', label: 'Texto' }, { value: 'voice', label: 'Voz' }]} value={channelKind} /><button className="dialog-submit" type="submit" disabled={submitting}>{editingChannelId ? 'SALVAR CANAL' : 'CRIAR CANAL'}</button>{editingChannelId ? <button className="dialog-text-button" type="button" onClick={() => { setEditingChannelId(undefined); setChannelName(''); setChannelKind('text') }}>CANCELAR EDIÇÃO</button> : null}</form><form className="category-form" onSubmit={(event) => { event.preventDefault(); void run(async () => { const result = await onCreateCategory(categoryName); if (result.ok) setCategoryName(''); return result }) }}><label><span>Nova categoria</span><input required value={categoryName} onChange={(event) => setCategoryName(event.target.value)} placeholder="Geral" /></label><button className="dialog-submit subdued" type="submit">CRIAR CATEGORIA</button></form><p className="category-list">{categories.map((category) => category.name).join(' · ') || 'Sem categorias ainda.'}</p></> : null}
               <div className="settings-channel-list">{channels.map((channel) => <div key={channel.id}><span>{channel.kind === 'text' ? '#' : '◖'} {channel.name}</span>{owner ? <aside><button type="button" onClick={() => startEditChannel(channel)}>EDITAR</button><button type="button" onClick={() => void run(() => onDeleteChannel(channel.id))}>REMOVER</button></aside> : null}</div>)}</div>
             </section> : null}
-            {tab === 'notifications' ? <section><h3>Sinais e alertas</h3><p>Mensagens e menções aparecem dentro do Concord enquanto ele estiver aberto.</p><label className="settings-toggle"><span><strong>Silenciar servidor</strong><small>Oculta alertas e contadores deste servidor.</small></span><input checked={serverMuted} type="checkbox" onChange={(event) => void run(() => onSetMuted(event.target.checked))} /></label><form className="category-form" onSubmit={(event) => { event.preventDefault(); void run(() => onSaveServerNickname(serverNickname)) }}><label><span>Apelido neste servidor</span><input value={serverNickname} onChange={(event) => setServerNickname(event.target.value)} placeholder={identity.nickname} /></label><button className="dialog-submit subdued" type="submit">SALVAR APELIDO</button></form></section> : null}
-            {tab === 'permissions' ? <section><h3>Permissões</h3><p>Proprietário administra tudo. Moderador administra canais e membros comuns. Por canal, você pode controlar leitura, escrita e voz.</p><div className="permission-card"><strong>Proprietário</strong><span>configura servidor, cargos, canais e convites</span></div><div className="permission-card"><strong>Moderador</strong><span>cria canais e modera membros comuns</span></div><div className="permission-card"><strong>Membro</strong><span>usa os canais liberados</span></div>{canModerate ? <><h4 className="settings-subtitle">Moderação</h4>{members.filter((member) => member.id !== userId && member.role !== 'owner' && (owner || member.role === 'member')).map((member) => <div className="member-moderation-row" key={member.id}><span><strong>{member.nickname}</strong><small>@{member.username}</small></span><button type="button" onClick={() => void run(() => onModerateMember(member.id, 'microphone'))}>MIC</button><button type="button" onClick={() => void run(() => onModerateMember(member.id, 'audio'))}>ÁUDIO</button><button type="button" onClick={() => void run(() => onModerateMember(member.id, 'timeout'))}>TIMEOUT</button><button className="danger" type="button" onClick={() => { if (window.confirm(`Banir ${member.nickname} deste servidor?`)) void run(() => onModerateMember(member.id, 'ban')) }}>BANIR</button></div>)}</> : null}{owner ? <><h4 className="settings-subtitle">Cargos</h4>{members.filter((member) => member.id !== userId).map((member) => <label className="role-row" key={member.id}><span>{member.nickname}<small>@{member.username}</small></span><select value={member.role} disabled={member.role === 'owner'} onChange={(event) => void run(() => onSetMemberRole(member.id, event.target.value as ServerMemberRole))}><option value="owner">Proprietário</option><option value="moderator">Moderador</option><option value="member">Membro</option></select></label>)}<h4 className="settings-subtitle">Por canal</h4>{channels.map((channel) => <div className="channel-permission-row" key={channel.id}><strong>{channel.kind === 'text' ? '#' : '◖'} {channel.name}</strong>{(['moderator', 'member'] as const).map((role) => { const value = permission(channel.id, role); return <div key={role}><small>{role}</small>{(['canRead', 'canWrite', 'canSpeak'] as const).map((key) => <label key={key}><input checked={value[key]} type="checkbox" onChange={(event) => void run(() => onSaveChannelPermissions(channel.id, role, { ...value, [key]: event.target.checked }))} />{key === 'canRead' ? 'ler' : key === 'canWrite' ? 'escrever' : 'falar'}</label>)}</div>})}</div>)}</> : null}</section> : null}
-          </div>
-        </div>
-        {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}
-      </section>
-    </div>
+            {tab === 'notifications' ? <section><h3>Sinais e alertas</h3><p>Mensagens e menções aparecem dentro do Concord enquanto ele estiver aberto.</p><Toggle checked={serverMuted} className="settings-toggle" description="Oculta alertas e contadores deste servidor." label="Silenciar servidor" onChange={(checked) => void run(() => onSetMuted(checked))} /><form className="category-form" onSubmit={(event) => { event.preventDefault(); void run(() => onSaveServerNickname(serverNickname)) }}><label><span>Apelido neste servidor</span><input value={serverNickname} onChange={(event) => setServerNickname(event.target.value)} placeholder={identity.nickname} /></label><button className="dialog-submit subdued" type="submit">SALVAR APELIDO</button></form></section> : null}
+            {tab === 'permissions' ? <section><h3>Permissões</h3><p>Proprietário administra tudo. Moderador administra canais e membros comuns. Por canal, você pode controlar leitura, escrita e voz.</p><div className="permission-card"><strong>Proprietário</strong><span>configura servidor, cargos, canais e convites</span></div><div className="permission-card"><strong>Moderador</strong><span>cria canais e modera membros comuns</span></div><div className="permission-card"><strong>Membro</strong><span>usa os canais liberados</span></div>{canModerate ? <><h4 className="settings-subtitle">Moderação</h4>{members.filter((member) => member.id !== userId && member.role !== 'owner' && (owner || member.role === 'member')).map((member) => <div className="member-moderation-row" key={member.id}><span><strong>{member.nickname}</strong><small>@{member.username}</small></span><button type="button" onClick={() => void run(() => onModerateMember(member.id, 'microphone'))}>MIC</button><button type="button" onClick={() => void run(() => onModerateMember(member.id, 'audio'))}>ÁUDIO</button><button type="button" onClick={() => void run(() => onModerateMember(member.id, 'timeout'))}>TIMEOUT</button><button className="danger" type="button" onClick={() => { if (window.confirm(`Banir ${member.nickname} deste servidor?`)) void run(() => onModerateMember(member.id, 'ban')) }}>BANIR</button></div>)}</> : null}{owner ? <><h4 className="settings-subtitle">Cargos</h4>{members.filter((member) => member.id !== userId).map((member) => <div className="role-row" key={member.id}><span>{member.nickname}<small>@{member.username}</small></span><Choice disabled={member.role === 'owner'} hideLabel label={`Cargo de ${member.nickname}`} onChange={(role) => void run(() => onSetMemberRole(member.id, role))} options={[{ value: 'owner', label: 'Proprietário' }, { value: 'moderator', label: 'Moderador' }, { value: 'member', label: 'Membro' }]} value={member.role} /></div>)}<h4 className="settings-subtitle">Por canal</h4>{channels.map((channel) => <div className="channel-permission-row" key={channel.id}><strong>{channel.kind === 'text' ? '#' : '◖'} {channel.name}</strong>{(['moderator', 'member'] as const).map((role) => { const value = permission(channel.id, role); return <div key={role}><small>{role}</small>{(['canRead', 'canWrite', 'canSpeak'] as const).map((key) => <Toggle checked={value[key]} className="permission-toggle" key={key} label={key === 'canRead' ? 'ler' : key === 'canWrite' ? 'escrever' : 'falar'} onChange={(checked) => void run(() => onSaveChannelPermissions(channel.id, role, { ...value, [key]: checked }))} />)}</div>})}</div>)}</> : null}</section> : null}
+          </Tabs.Content>
+      </Tabs.Root>
+      {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}
+    </Modal>
   )
 }

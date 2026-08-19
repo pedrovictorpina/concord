@@ -87,8 +87,10 @@
 .auth-card input::placeholder { color: var(--color-text-faint); }
 .auth-card input:focus { border-color: var(--color-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 18%, transparent); }
 .auth-login-options { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: calc(var(--space-2) * -1); }
-.auth-keep-session { display: inline-flex !important; grid-template-columns: auto 1fr; align-items: center; gap: var(--space-2); color: var(--color-text-muted); cursor: pointer; font-size: var(--font-size-xs); }
-.auth-keep-session input { width: 14px; height: 14px; margin: 0; accent-color: var(--color-accent); }
+.auth-keep-session { display: inline-flex !important; align-items: center; justify-content: flex-start; gap: var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.auth-keep-session .toggle-box { order: -1; width: 14px; height: 14px; flex-basis: 14px; }
+.auth-keep-session .toggle-mark { font-size: 9px; }
+.auth-keep-session strong { color: inherit; font-size: var(--font-size-xs); font-weight: 400; }
 .auth-secondary-action { justify-self: end; padding: 0; color: var(--color-text-muted); background: transparent; font-size: var(--font-size-xs); text-decoration: underline; text-underline-offset: 3px; }
 .auth-secondary-action:hover { color: var(--color-accent); }
 
