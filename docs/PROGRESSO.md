@@ -78,4 +78,4 @@ Branch atual: `codex/etapa-02-comunidades-texto`.
 - migration de convites aplicada ao Supabase e aprovada no lint;
 - integracao remota aprovou envio e aceite de convite, incluindo a criacao segura de membro;
 - seis jornadas Playwright, build e lint aprovados;
-- quatro contas temporarias de QA aguardam limpeza pelo manifesto local.
+- quatro contas temporarias de QA e seus dados dependentes foram removidos; a verificacao retornou zero registros em `auth.users` e `public.profiles`.

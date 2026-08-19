@@ -48,6 +48,15 @@ test.describe('identidade e temas', () => {
     await expect(page.getByRole('heading', { name: 'Bom ter você de volta.' })).toBeVisible()
   })
 
+  test('permite escolher manter a sessão no login', async ({ page }) => {
+    await page.goto('/')
+
+    const keepSession = page.getByLabel('Manter conectado')
+    await expect(keepSession).toBeChecked()
+    await keepSession.uncheck()
+    await expect(keepSession).not.toBeChecked()
+  })
+
   test('abre a demonstração da comunidade e envia uma mensagem local', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
