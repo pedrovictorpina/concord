@@ -75,8 +75,10 @@ test.describe('identidade e temas', () => {
     await expect(page.getByText('Temas funcionando')).toBeVisible()
 
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
-    await expect(page.getByRole('button', { name: /Entrar em sala-da-madrugada/ })).toBeEnabled()
-    await page.getByRole('button', { name: /Entrar em sala-da-madrugada/ }).click()
+    const joinButton = page.getByRole('button', { name: /Entrar em sala-da-madrugada/ })
+    await expect(joinButton).toBeEnabled()
+    await joinButton.click()
+    await expect(page.getByRole('button', { name: 'Entrando…' })).toBeDisabled()
     await expect(page.getByRole('button', { name: 'TELA' })).toBeEnabled()
     await page.getByRole('button', { name: 'TELA' }).click()
     await expect(page.getByRole('dialog', { name: 'Qualidade da transmissao' })).toBeVisible()

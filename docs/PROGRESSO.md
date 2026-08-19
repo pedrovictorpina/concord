@@ -94,3 +94,5 @@ Branch atual: `codex/etapa-03-voz-tela`.
 - seletor de tema removido da lateral de canais; temas permanecem exclusivamente na central de configurações, aberta pelo ícone na barra de servidores; proprietários também criam canais de texto ou voz pelos botões `+` com dica visual.
 - central de configurações passa a listar servidores para gerenciamento; o proprietário pode excluir o servidor atual mediante confirmação.
 - service worker ajustado para sempre buscar a página de navegação na rede e invalidar o cache anterior, evitando tela branca após deploy; bootstrap de tema sem exceção de escopo.
+- entrada em canal de voz agora bloqueia novos cliques e indica carregamento até a confirmação da conexão.
+- compartilhamento de tela em PWA móvel identificado como indisponível pela ausência de `getDisplayMedia`; transmissão móvel real permanece dependente do app Android nativo com MediaProjection.
