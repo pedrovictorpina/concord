@@ -92,6 +92,31 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Fechar pessoas e convites' }).click()
   })
 
+  test('mantém a conexão de voz ao navegar entre canais', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+
+    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
+    await expect(page.getByText('Você está em voz.')).toBeVisible()
+
+    const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
+    await expect(dock).toContainText('sala-da-madrugada')
+    await expect(page.locator('.voice-member')).toHaveCount(1)
+
+    await page.getByRole('button', { name: '# geral', exact: true }).click()
+    await expect(page.getByRole('textbox', { name: 'Mensagem' })).toBeVisible()
+    await expect(dock).toContainText('sala-da-madrugada')
+    await expect(page.locator('.voice-member')).toContainText('conectado')
+
+    await dock.getByRole('button', { name: 'MIC' }).click()
+    await expect(page.locator('.voice-member')).toContainText('sem microfone')
+
+    await dock.getByRole('button', { name: 'SAIR' }).click()
+    await expect(dock).toHaveCount(0)
+    await expect(page.locator('.voice-member')).toHaveCount(0)
+  })
+
   test('exibe a tela inicial de mensagens e o atalho para adicionar amigo', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
@@ -120,21 +145,23 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Abrir configurações' }).click()
 
     await expect(page.getByRole('heading', { name: 'Configurações.' })).toBeVisible()
-    await page.getByRole('button', { name: 'Servidores', exact: true }).click()
+    await page.getByRole('tab', { name: 'Servidores', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'Gerenciar servidores' })).toBeVisible()
     await page.getByRole('button', { name: 'GERENCIAR' }).click()
     await expect(page.getByRole('heading', { name: 'Informações do servidor' })).toBeVisible()
-    await page.getByRole('button', { name: 'Tema', exact: true }).click()
-    await page.getByRole('dialog', { name: 'Configurações.' }).getByLabel('Estilo').selectOption('ios')
+    await page.getByRole('tab', { name: 'Tema', exact: true }).click()
+    await page.getByRole('combobox', { name: 'Estilo' }).click()
+    await page.getByRole('option', { name: 'iOS Glass' }).click()
     await expect(page.locator('html')).toHaveAttribute('data-style-theme', 'ios')
 
-    await page.getByRole('button', { name: 'Canais' }).click()
+    await page.getByRole('tab', { name: 'Canais' }).click()
     await page.getByLabel('Nome do canal').fill('planejamento')
-    await page.getByLabel('Tipo').selectOption('voice')
+    await page.getByRole('combobox', { name: 'Tipo' }).click()
+    await page.getByRole('option', { name: 'Voz' }).click()
     await page.getByRole('button', { name: 'CRIAR CANAL' }).click()
     await expect(page.getByText('◖ planejamento')).toBeVisible()
 
-    await page.getByRole('button', { name: 'Notificações' }).click()
+    await page.getByRole('tab', { name: 'Notificações' }).click()
     await page.getByLabel('Silenciar servidor').check()
     await expect(page.getByText('Servidor silenciado.')).toBeVisible()
     await page.getByRole('button', { name: 'Fechar configurações' }).click()

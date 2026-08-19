@@ -64,6 +64,18 @@ export type ServerInviteSummary = {
   status: 'pending' | 'accepted' | 'declined'
 }
 
+export type VoiceParticipant = {
+  userId: string
+  channelId: string
+  nickname: string
+  username: string
+  initials: string
+  avatarUrl: string | null
+  microphoneEnabled: boolean
+  sharingScreen: boolean
+  speaking: boolean
+}
+
 export type VoicePreferences = {
   microphoneEnabled: boolean
   outputEnabled: boolean

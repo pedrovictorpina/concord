@@ -1,10 +1,21 @@
-import type { ChannelSummary, ServerSummary } from '@concord/contracts'
+import { DropdownMenu } from 'radix-ui'
+import type { ChannelSummary, ServerSummary, VoiceParticipant } from '@concord/contracts'
+import { Avatar } from '../../components/ui/Avatar'
+import { Hint } from '../../components/ui/Hint'
 import type { WorkspaceIdentity } from './workspace-types'
+
+const statusFor = (participant: VoiceParticipant) => {
+  if (participant.sharingScreen) return 'compartilhando tela'
+  if (!participant.microphoneEnabled) return 'sem microfone'
+  if (participant.speaking) return 'falando'
+  return 'conectado'
+}
 
 type ChannelPanelProps = {
   activeChannelId: string | null
   activeVoiceChannelId: string | null
   channels: ChannelSummary[]
+  connectedVoiceChannelId: string | null
   identity: WorkspaceIdentity
   mobileOpen: boolean
   onCloseMobile: () => void
@@ -16,19 +27,19 @@ type ChannelPanelProps = {
   onOpenPeople: () => void
   server: ServerSummary | null
   unreadByChannel: Record<string, { count: number; mentioned: boolean }>
-  voiceParticipantChannelId: string | null
+  voiceParticipantsByChannel: Record<string, VoiceParticipant[]>
 }
 
-export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onOpenServerSettings, onVoiceChannelChange, onExit, onOpenPeople, server, unreadByChannel, voiceParticipantChannelId }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, connectedVoiceChannelId, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onOpenServerSettings, onVoiceChannelChange, onExit, onOpenPeople, server, unreadByChannel, voiceParticipantsByChannel }: ChannelPanelProps) {
   return (
     <aside className={mobileOpen ? 'channel-panel mobile-open' : 'channel-panel'}>
       <header className="workspace-heading">
         <div><span className="eyebrow">SERVIDOR PRIVADO</span><strong>{server?.name ?? 'Concord'}</strong></div>
-        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><details className="server-menu"><summary aria-label="Abrir menu do servidor">⌄</summary><div><button type="button" onClick={onOpenPeople}>Convidar pessoas</button><button type="button" onClick={onOpenServerSettings}>Configurações do servidor</button>{server?.role === 'owner' ? <><button type="button" onClick={() => onCreateChannel('text')}>Criar canal de texto</button><button type="button" onClick={() => onCreateChannel('voice')}>Criar canal de voz</button></> : null}</div></details><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
+        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><DropdownMenu.Root><DropdownMenu.Trigger aria-label="Abrir menu do servidor" className="server-menu-trigger">⌄</DropdownMenu.Trigger><DropdownMenu.Portal><DropdownMenu.Content align="end" className="server-menu-content" sideOffset={10}><DropdownMenu.Item onSelect={onOpenPeople}>Convidar pessoas</DropdownMenu.Item><DropdownMenu.Item onSelect={onOpenServerSettings}>Configurações do servidor</DropdownMenu.Item>{server?.role === 'owner' ? <><DropdownMenu.Item onSelect={() => onCreateChannel('text')}>Criar canal de texto</DropdownMenu.Item><DropdownMenu.Item onSelect={() => onCreateChannel('voice')}>Criar canal de voz</DropdownMenu.Item></> : null}</DropdownMenu.Content></DropdownMenu.Portal></DropdownMenu.Root><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
       </header>
 
       <section className="channel-group">
-        <p>TRANSMISSOES DE TEXTO{server?.role === 'owner' ? <button className="channel-add" type="button" aria-label="Adicionar canal de texto" data-tooltip="Adicionar canal de texto" onClick={() => onCreateChannel('text')}>+</button> : null}</p>
+        <p>TRANSMISSOES DE TEXTO{server?.role === 'owner' ? <Hint label="Adicionar canal de texto"><button className="channel-add" type="button" aria-label="Adicionar canal de texto" onClick={() => onCreateChannel('text')}>+</button></Hint> : null}</p>
         {channels.filter((channel) => channel.kind === 'text').map((channel) => (
           <button
             className={activeChannelId === channel.id ? 'channel active' : 'channel'}
@@ -42,18 +53,30 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
       </section>
 
       <section className="channel-group voice-group">
-        <p>FREQUENCIAS DE VOZ{server?.role === 'owner' ? <button className="channel-add" type="button" aria-label="Adicionar canal de voz" data-tooltip="Adicionar canal de voz" onClick={() => onCreateChannel('voice')}>+</button> : null}</p>
-        {channels.filter((channel) => channel.kind === 'voice').map((channel) => (
-          <div className="voice-channel" key={channel.id}>
-            <button className={activeVoiceChannelId === channel.id ? 'channel voice active' : 'channel voice'} type="button" onClick={() => onVoiceChannelChange(channel.id)}><span>◖</span>{channel.name}</button>
-            {voiceParticipantChannelId === channel.id ? <div className="voice-member"><span className="avatar avatar-green">{identity.initials}</span><div><strong>{identity.nickname}</strong><small>conectado</small></div><i aria-label="Microfone ligado">⌁</i></div> : null}
-          </div>
-        ))}
+        <p>FREQUENCIAS DE VOZ{server?.role === 'owner' ? <Hint label="Adicionar canal de voz"><button className="channel-add" type="button" aria-label="Adicionar canal de voz" onClick={() => onCreateChannel('voice')}>+</button></Hint> : null}</p>
+        {channels.filter((channel) => channel.kind === 'voice').map((channel) => {
+          const participants = voiceParticipantsByChannel[channel.id] ?? []
+          const channelClasses = ['channel', 'voice']
+          if (activeVoiceChannelId === channel.id) channelClasses.push('active')
+          if (connectedVoiceChannelId === channel.id) channelClasses.push('connected')
+          return (
+            <div className="voice-channel" key={channel.id}>
+              <button className={channelClasses.join(' ')} type="button" onClick={() => onVoiceChannelChange(channel.id)}><span>◖</span>{channel.name}{participants.length > 0 ? <i className="voice-count">{participants.length}</i> : null}</button>
+              {participants.map((participant) => (
+                <div className={`voice-member${participant.microphoneEnabled ? '' : ' muted'}${participant.speaking ? ' speaking' : ''}`} key={participant.userId}>
+                  <Avatar initials={participant.initials} url={participant.avatarUrl} />
+                  <div><strong>{participant.nickname}</strong><small>{statusFor(participant)}</small></div>
+                  <i aria-label={participant.microphoneEnabled ? 'Microfone ligado' : 'Microfone desligado'}>{participant.sharingScreen ? '▣' : participant.microphoneEnabled ? '⌁' : '×'}</i>
+                </div>
+              ))}
+            </div>
+          )
+        })}
       </section>
 
       <div className="channel-panel-footer">
         <footer className="identity-strip">
-          {identity.avatarUrl ? <img className="avatar avatar-photo" src={identity.avatarUrl} alt="Foto de perfil" /> : <span className="avatar avatar-green">{identity.initials}</span>}
+          <Avatar alt="Foto de perfil" initials={identity.initials} url={identity.avatarUrl} />
           <div><strong>{identity.nickname}</strong><small>@{identity.username} · {identity.connectionLabel}</small></div>
           <span className="presence-dot" aria-label="Online" />
         </footer>

@@ -1,115 +1,79 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import type { ChannelSummary, VoicePreferences } from '@concord/contracts'
-import { useLiveRoom } from './useLiveRoom'
-import { useScreenShare } from './useScreenShare'
-import { screenShareQualities } from './screen-quality'
-import type { ScreenShareQuality } from './screen-quality'
+import { useEffect, useRef } from 'react'
+import type { LocalTrack, RemoteTrack } from 'livekit-client'
+import type { ChannelSummary, VoiceParticipant } from '@concord/contracts'
+import { Avatar } from '../../components/ui/Avatar'
 
 type LivePanelProps = {
+  channel: ChannelSummary
+  connected: boolean
+  connecting: boolean
   demoMode: boolean
-  microphoneDisabled: boolean
-  onConnectionChange: (channelId: string | null, connected: boolean) => void
-  outputDisabled: boolean
-  voiceChannel: ChannelSummary | null
+  onJoin: () => void
+  participants: VoiceParticipant[]
+  screenTrack: LocalTrack | RemoteTrack | null
+  stream: MediaStream | null
 }
 
-export function LivePanel({ demoMode, microphoneDisabled, onConnectionChange, outputDisabled, voiceChannel }: LivePanelProps) {
-  const demoShare = useScreenShare()
-  const liveRoom = useLiveRoom(voiceChannel?.id ?? null)
-  const disconnectRoom = liveRoom.disconnect
-  const [preferences, setPreferences] = useState<VoicePreferences>({ microphoneEnabled: true, outputEnabled: true, screenShareEnabled: false })
-  const [qualityPickerOpen, setQualityPickerOpen] = useState(false)
-  const [quality, setQuality] = useState<ScreenShareQuality>('automatic')
-  const [demoJoined, setDemoJoined] = useState(false)
-  const [joining, setJoining] = useState(false)
+const statusFor = (participant: VoiceParticipant) => {
+  if (participant.sharingScreen) return 'compartilhando tela'
+  if (!participant.microphoneEnabled) return 'sem microfone'
+  if (participant.speaking) return 'falando'
+  return 'conectado'
+}
+
+export function LivePanel({ channel, connected, connecting, demoMode, onJoin, participants, screenTrack, stream }: LivePanelProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const sharing = demoMode ? Boolean(demoShare.stream) : Boolean(liveRoom.screenTrack)
-  const screenShareAvailable = Boolean(navigator.mediaDevices?.getDisplayMedia)
-  const error = demoMode ? demoShare.error : liveRoom.error
-  const joined = demoMode ? demoJoined : liveRoom.connected
+  const sharing = demoMode ? Boolean(stream) : Boolean(screenTrack)
 
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
     if (demoMode) {
-      video.srcObject = demoShare.stream
+      video.srcObject = stream
       return
     }
-    if (!liveRoom.screenTrack) {
+    if (!screenTrack) {
       video.srcObject = null
       return
     }
-    liveRoom.screenTrack.attach(video)
+    screenTrack.attach(video)
     return () => {
-      liveRoom.screenTrack?.detach(video)
+      screenTrack.detach(video)
     }
-  }, [demoMode, demoShare.stream, liveRoom.screenTrack])
+  }, [demoMode, screenTrack, stream])
 
-  useEffect(() => setPreferences((current) => ({ ...current, screenShareEnabled: sharing })), [sharing])
-  useEffect(() => { if (joined) setJoining(false) }, [joined])
-  useEffect(() => setJoining(false), [voiceChannel?.id])
-  useEffect(() => {
-    setDemoJoined(false)
-    disconnectRoom()
-  }, [disconnectRoom, voiceChannel?.id])
-  useEffect(() => onConnectionChange(voiceChannel?.id ?? null, joined), [joined, onConnectionChange, voiceChannel?.id])
-  useEffect(() => {
-    if (demoMode || !joined) return
-    if (microphoneDisabled && liveRoom.microphoneEnabled) void liveRoom.toggleMicrophone()
-    if (outputDisabled && liveRoom.outputEnabled) liveRoom.toggleOutput()
-  }, [demoMode, joined, liveRoom, microphoneDisabled, outputDisabled])
-
-  const toggleDemoPreference = (key: 'microphoneEnabled' | 'outputEnabled') => {
-    setPreferences((current) => ({ ...current, [key]: !current[key] }))
-  }
-
-  const startScreenShare = (nextQuality: ScreenShareQuality) => {
-    if (!screenShareAvailable) return
-    setQuality(nextQuality)
-    setQualityPickerOpen(false)
-    return demoMode ? demoShare.start(nextQuality) : liveRoom.startScreenShare(nextQuality)
-  }
-
-  const joinVoice = useCallback(async () => {
-    if (joining || joined) return
-    setJoining(true)
-    const connected = demoMode
-      ? await new Promise<boolean>((resolve) => window.setTimeout(() => resolve(true), 250))
-      : await liveRoom.join()
-    if (demoMode && connected) setDemoJoined(true)
-    if (!connected) setJoining(false)
-  }, [demoMode, joined, joining, liveRoom])
-
-  if (!voiceChannel) return null
+  const summary = connected
+    ? 'Você está em voz.'
+    : participants.length === 1
+      ? '1 pessoa em voz agora.'
+      : participants.length > 1
+        ? `${participants.length} pessoas em voz agora.`
+        : 'Ninguém está em voz'
 
   return (
     <>
       <section className="voice-room">
-        <header><div><span>◖</span><strong>{voiceChannel.name}</strong></div><small>{joined ? 'CONECTADO' : 'CANAL DE VOZ'}</small></header>
-        <div className="voice-room-stage"><span className="voice-room-icon">◖</span><h1>{voiceChannel.name}</h1><p>{joined ? 'Você está em voz.' : 'Ninguém está em voz'}</p>{!joined ? <button aria-busy={joining} className="voice-room-join" disabled={joining} type="button" onClick={() => void joinVoice()}>{joining ? 'Entrando na chamada…' : 'Entrar na chamada de voz'}</button> : null}</div>
+        <header><div><span>◖</span><strong>{channel.name}</strong></div><small>{connected ? 'CONECTADO' : 'CANAL DE VOZ'}</small></header>
+        <div className="voice-room-stage">
+          {participants.length === 0 ? <span className="voice-room-icon">◖</span> : null}
+          <h1>{channel.name}</h1>
+          {sharing ? <div className="voice-stage-share"><video ref={videoRef} autoPlay muted={demoMode} playsInline /><span className="capture-label">TRANSMITINDO</span></div> : null}
+          {participants.length > 0 ? (
+            <ul className="voice-stage-grid">
+              {participants.map((participant) => (
+                <li className={participant.speaking ? 'voice-tile speaking' : 'voice-tile'} key={participant.userId}>
+                  <Avatar initials={participant.initials} url={participant.avatarUrl} />
+                  <strong>{participant.nickname}</strong>
+                  <small>{statusFor(participant)}</small>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p>{summary}</p>
+          {!connected ? <button aria-busy={connecting} className="voice-room-join" disabled={connecting} type="button" onClick={onJoin}>{connecting ? 'Entrando na chamada…' : 'Entrar na chamada de voz'}</button> : null}
+        </div>
       </section>
-      <aside className="voice-chat-side"><header><strong>Chat de voz</strong><small>#{voiceChannel.name}</small></header><div><p>O chat deste canal aparece aqui.</p></div></aside>
-      {joined ? <aside className="voice-dock joined">
-        {sharing ? <div className="voice-preview"><video ref={videoRef} autoPlay muted={demoMode} playsInline /><span className="capture-label">TRANSMITINDO</span></div> : null}
-        {error ? <p className="share-error" role="status">{error}</p> : null}
-        {!screenShareAvailable ? <p className="voice-capability-note" role="status">Compartilhar tela não é suportado nesta PWA móvel. Use o Concord no desktop.</p> : null}
-        <div className="voice-dock-status"><span className="live-pulse" /> <strong>Voz conectada</strong><small>{demoMode ? 'REDE LOCAL · 28 ms' : 'REDE ESTÁVEL · WEBRTC'}</small></div>
-        <footer className="voice-controls">
-          <button aria-label={microphoneDisabled ? 'Microfone desativado pela moderação' : 'MIC'} className={microphoneDisabled || (demoMode ? !preferences.microphoneEnabled : !liveRoom.microphoneEnabled) ? 'disabled' : ''} disabled={microphoneDisabled} type="button" onClick={() => demoMode ? toggleDemoPreference('microphoneEnabled') : void liveRoom.toggleMicrophone()}><span>{microphoneDisabled || (demoMode ? !preferences.microphoneEnabled : !liveRoom.microphoneEnabled) ? '×' : '⌁'}</span>MIC</button>
-          <button aria-label={outputDisabled ? 'Áudio desativado pela moderação' : 'ÁUDIO'} className={outputDisabled || (demoMode ? !preferences.outputEnabled : !liveRoom.outputEnabled) ? 'disabled' : ''} disabled={outputDisabled} type="button" onClick={() => demoMode ? toggleDemoPreference('outputEnabled') : liveRoom.toggleOutput()}><span>{outputDisabled || (demoMode ? !preferences.outputEnabled : !liveRoom.outputEnabled) ? '×' : '◖'}</span>ÁUDIO</button>
-          <button aria-label={screenShareAvailable ? 'TELA' : 'Tela indisponível neste dispositivo'} className={sharing || !screenShareAvailable ? 'disabled' : ''} disabled={!screenShareAvailable} title={screenShareAvailable ? undefined : 'Compartilhamento de tela indisponível nesta PWA móvel'} type="button" onClick={() => sharing ? void (demoMode ? demoShare.stop() : liveRoom.stopScreenShare()) : setQualityPickerOpen(true)}><span>{sharing ? '■' : '▣'}</span>TELA</button>
-          <button className="leave-voice" type="button" onClick={() => demoMode ? setDemoJoined(false) : liveRoom.disconnect()}><span>×</span>SAIR</button>
-        </footer>
-      </aside> : null}
-      {joined && qualityPickerOpen ? (
-        <section className="quality-picker" role="dialog" aria-label="Qualidade da transmissao">
-          <header><strong>QUALIDADE DA TELA</strong><button aria-label="Fechar seletor de qualidade" type="button" onClick={() => setQualityPickerOpen(false)}>×</button></header>
-          <p>Escolha como quer transmitir antes de selecionar a tela.</p>
-          <div>{(Object.keys(screenShareQualities) as ScreenShareQuality[]).map((option) => (
-            <button className={quality === option ? 'active' : ''} key={option} type="button" onClick={() => void startScreenShare(option)}><strong>{screenShareQualities[option].label}</strong><small>{screenShareQualities[option].detail}</small></button>
-          ))}</div>
-        </section>
-      ) : null}
+      <aside className="voice-chat-side"><header><strong>Chat de voz</strong><small>#{channel.name}</small></header><div><p>O chat deste canal aparece aqui.</p></div></aside>
     </>
   )
 }
