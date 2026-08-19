@@ -271,6 +271,23 @@ test.describe('identidade e temas', () => {
     await expect(servers.getByRole('menuitem', { name: 'Criar servidor' })).toBeVisible()
   })
 
+  test('abre o convite acima dos canais no celular', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: /Canais/ }).click()
+    await page.getByRole('button', { name: 'Convidar amigos' }).click()
+
+    const dialog = page.getByRole('dialog', { name: /Convidar/ })
+    await expect(dialog).toBeVisible()
+    await page.waitForTimeout(250)
+    const isOnTop = await dialog.evaluate((element) => {
+      const box = element.getBoundingClientRect()
+      return document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2)?.closest('[role="dialog"]') === element
+    })
+    expect(isOnTop).toBeTruthy()
+  })
+
   test('oferece o fluxo móvel de adicionar amigos por identificador', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
