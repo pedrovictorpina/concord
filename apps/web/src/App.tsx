@@ -7,7 +7,7 @@ function App() {
   const { loading, profile, profileError, profileLoading, recoveryMode, session, signOut, updateProfile, uploadAvatar } = useAuth()
   const [demoMode, setDemoMode] = useState(false)
 
-  if (loading || (session && profileLoading)) {
+  if (loading || (session && profileLoading && !profile)) {
     return (
       <main className="app-loading" aria-live="polite">
         <span>C</span>

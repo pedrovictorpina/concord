@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PropsWithChildren } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { isSupabaseConfigured, setKeepSession, supabase } from '../../lib/supabase'
@@ -50,8 +50,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [profileError, setProfileError] = useState<string | null>(null)
   const [profileLoading, setProfileLoading] = useState(false)
   const [recoveryMode, setRecoveryMode] = useState(false)
+  const loadedProfileUserId = useRef<string | null>(null)
 
   const loadProfile = useCallback(async (userId: string | null) => {
+    loadedProfileUserId.current = userId
+
     if (!supabase || !userId) {
       setProfile(null)
       setProfileError(null)
@@ -96,7 +99,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
     })
 
     const { data: { subscription } } = client.auth.onAuthStateChange((event, nextSession) => {
-      setSession(nextSession)
+      setSession((current) => current?.access_token === nextSession?.access_token ? current : nextSession)
       setLoading(false)
       if (event === 'PASSWORD_RECOVERY') setRecoveryMode(true)
       if (event === 'SIGNED_OUT') {
@@ -104,9 +107,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
         clearRecoveryQuery()
       }
 
+      const nextUserId = nextSession?.user.id ?? null
+      if (event !== 'USER_UPDATED' && nextUserId === loadedProfileUserId.current) return
+
       if (profileTimer) clearTimeout(profileTimer)
       profileTimer = setTimeout(() => {
-        void loadProfile(nextSession?.user.id ?? null)
+        void loadProfile(nextUserId)
       }, 0)
     })
 
