@@ -72,6 +72,7 @@ export type VoiceParticipant = {
   initials: string
   avatarUrl: string | null
   microphoneEnabled: boolean
+  outputEnabled: boolean
   sharingScreen: boolean
   speaking: boolean
 }

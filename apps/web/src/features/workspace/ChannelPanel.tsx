@@ -2,11 +2,13 @@ import { DropdownMenu } from 'radix-ui'
 import type { ChannelSummary, ServerSummary, VoiceParticipant } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
 import { Hint } from '../../components/ui/Hint'
+import { VoiceStateFlags } from './VoiceStateIcons'
 import type { WorkspaceIdentity } from './workspace-types'
 
 const statusFor = (participant: VoiceParticipant) => {
-  if (participant.sharingScreen) return 'compartilhando tela'
+  if (!participant.outputEnabled) return 'sem áudio'
   if (!participant.microphoneEnabled) return 'sem microfone'
+  if (participant.sharingScreen) return 'compartilhando tela'
   if (participant.speaking) return 'falando'
   return 'conectado'
 }
@@ -66,7 +68,7 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
                 <div className={`voice-member${participant.microphoneEnabled ? '' : ' muted'}${participant.speaking ? ' speaking' : ''}`} key={participant.userId}>
                   <Avatar initials={participant.initials} url={participant.avatarUrl} />
                   <div><strong>{participant.nickname}</strong><small>{statusFor(participant)}</small></div>
-                  <i aria-label={participant.microphoneEnabled ? 'Microfone ligado' : 'Microfone desligado'}>{participant.sharingScreen ? '▣' : participant.microphoneEnabled ? '⌁' : '×'}</i>
+                  <VoiceStateFlags microphoneEnabled={participant.microphoneEnabled} outputEnabled={participant.outputEnabled} sharingScreen={participant.sharingScreen} />
                 </div>
               ))}
             </div>

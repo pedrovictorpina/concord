@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { VoiceParticipant } from '@concord/contracts'
 import { useLiveRoom } from './useLiveRoom'
 import { useScreenShare } from './useScreenShare'
@@ -30,6 +30,7 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
   const [target, setTarget] = useState<VoiceTarget | null>(null)
   const [connecting, setConnecting] = useState(false)
   const [demoPreferences, setDemoPreferences] = useState({ microphoneEnabled: true, outputEnabled: true })
+  const microphoneBeforeMuteRef = useRef(false)
 
   const microphoneEnabled = demoMode ? demoPreferences.microphoneEnabled : liveRoom.microphoneEnabled
   const outputEnabled = demoMode ? demoPreferences.outputEnabled : liveRoom.outputEnabled
@@ -51,8 +52,8 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
 
   useEffect(() => {
     if (demoMode || !target) return
-    if (microphoneDisabled && liveRoom.microphoneEnabled) void liveRoom.toggleMicrophone()
-    if (outputDisabled && liveRoom.outputEnabled) liveRoom.toggleOutput()
+    if (microphoneDisabled && liveRoom.microphoneEnabled) void liveRoom.setMicrophone(false)
+    if (outputDisabled && liveRoom.outputEnabled) liveRoom.setOutput(false)
   }, [demoMode, liveRoom, microphoneDisabled, outputDisabled, target])
 
   const presenceSelf = useMemo(() => {
@@ -67,10 +68,11 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
         initials: identity.initials,
         avatarUrl: identity.avatarUrl,
         microphoneEnabled: microphoneEnabled && !microphoneDisabled,
+        outputEnabled: outputEnabled && !outputDisabled,
         sharingScreen: sharing,
       },
     }
-  }, [demoMode, identity, microphoneDisabled, microphoneEnabled, sharing, target, userId])
+  }, [demoMode, identity, microphoneDisabled, microphoneEnabled, outputDisabled, outputEnabled, sharing, target, userId])
 
   const presenceByChannel = useVoicePresence({ demoMode, observedServerId, self: presenceSelf, userId })
 
@@ -86,11 +88,12 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
         initials: identity.initials,
         avatarUrl: identity.avatarUrl,
         microphoneEnabled: microphoneEnabled && !microphoneDisabled,
+        outputEnabled: outputEnabled && !outputDisabled,
         sharingScreen: sharing,
         speaking: false,
       }],
     }
-  }, [connectedChannelId, demoMode, identity, liveRoom.participants, microphoneDisabled, microphoneEnabled, presenceByChannel, sharing, userId])
+  }, [connectedChannelId, demoMode, identity, liveRoom.participants, microphoneDisabled, microphoneEnabled, outputDisabled, outputEnabled, presenceByChannel, sharing, userId])
 
   const join = useCallback(async (next: VoiceTarget) => {
     if (connecting || target?.channelId === next.channelId) return
@@ -115,23 +118,35 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
     liveRoom.leave()
   }, [demoMode, demoShare, liveRoom])
 
-  const toggleMicrophone = useCallback(() => {
-    if (microphoneDisabled) return
+  const applyPreferences = useCallback((next: { microphoneEnabled: boolean; outputEnabled: boolean }) => {
     if (demoMode) {
-      setDemoPreferences((current) => ({ ...current, microphoneEnabled: !current.microphoneEnabled }))
+      setDemoPreferences(next)
       return
     }
-    void liveRoom.toggleMicrophone()
-  }, [demoMode, liveRoom, microphoneDisabled])
+    if (next.outputEnabled !== liveRoom.outputEnabled) liveRoom.setOutput(next.outputEnabled)
+    if (next.microphoneEnabled !== liveRoom.microphoneEnabled) void liveRoom.setMicrophone(next.microphoneEnabled)
+  }, [demoMode, liveRoom])
+
+  const toggleMicrophone = useCallback(() => {
+    if (microphoneDisabled) return
+    const nextMicrophone = !microphoneEnabled
+    microphoneBeforeMuteRef.current = nextMicrophone
+    applyPreferences({
+      microphoneEnabled: nextMicrophone,
+      outputEnabled: nextMicrophone && !outputEnabled && !outputDisabled ? true : outputEnabled,
+    })
+  }, [applyPreferences, microphoneDisabled, microphoneEnabled, outputDisabled, outputEnabled])
 
   const toggleOutput = useCallback(() => {
     if (outputDisabled) return
-    if (demoMode) {
-      setDemoPreferences((current) => ({ ...current, outputEnabled: !current.outputEnabled }))
-      return
-    }
-    liveRoom.toggleOutput()
-  }, [demoMode, liveRoom, outputDisabled])
+    const nextOutput = !outputEnabled
+    if (!nextOutput) microphoneBeforeMuteRef.current = microphoneEnabled
+    const restored = microphoneBeforeMuteRef.current && !microphoneDisabled
+    applyPreferences({
+      microphoneEnabled: nextOutput ? restored : false,
+      outputEnabled: nextOutput,
+    })
+  }, [applyPreferences, microphoneDisabled, microphoneEnabled, outputDisabled, outputEnabled])
 
   const startScreenShare = useCallback((quality: ScreenShareQuality) => {
     if (demoMode) return demoShare.start(quality)

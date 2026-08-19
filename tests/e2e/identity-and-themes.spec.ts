@@ -179,12 +179,34 @@ test.describe('identidade e temas', () => {
     await expect(dock).toContainText('sala-da-madrugada')
     await expect(page.locator('.voice-member')).toContainText('conectado')
 
-    await dock.getByRole('button', { name: 'MIC' }).click()
+    await dock.getByRole('button', { name: 'Microfone ligado' }).click()
     await expect(page.locator('.voice-member')).toContainText('sem microfone')
+    await expect(page.locator('.voice-member .voice-flag[aria-label="Microfone mutado"]')).toBeVisible()
 
     await dock.getByRole('button', { name: 'SAIR' }).click()
     await expect(dock).toHaveCount(0)
     await expect(page.locator('.voice-member')).toHaveCount(0)
+  })
+
+  test('mutar o áudio também muta o microfone', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+
+    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
+    await expect(page.getByText('Você está em voz.')).toBeVisible()
+
+    const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
+    await dock.getByRole('button', { name: 'Áudio ligado' }).click()
+
+    await expect(dock.getByRole('button', { name: 'Microfone mutado' })).toBeVisible()
+    await expect(page.locator('.voice-member')).toContainText('sem áudio')
+    await expect(page.locator('.voice-member .voice-flag[aria-label="Áudio mutado"]')).toBeVisible()
+    await expect(page.locator('.voice-member .voice-flag[aria-label="Microfone mutado"]')).toBeVisible()
+
+    await dock.getByRole('button', { name: 'Áudio mutado' }).click()
+    await expect(dock.getByRole('button', { name: 'Microfone ligado' })).toBeVisible()
+    await expect(page.locator('.voice-member')).toContainText('conectado')
   })
 
   test('exibe a tela inicial de mensagens e o atalho para adicionar amigo', async ({ page }) => {

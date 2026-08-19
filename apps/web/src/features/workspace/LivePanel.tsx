@@ -3,6 +3,7 @@ import type { ChannelSummary, VoiceParticipant } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
 import { ScreenShareTile } from './ScreenShareTile'
 import type { ScreenShareView } from './screen-shares'
+import { VoiceStateFlags } from './VoiceStateIcons'
 
 type LivePanelProps = {
   channel: ChannelSummary
@@ -14,8 +15,9 @@ type LivePanelProps = {
 }
 
 const statusFor = (participant: VoiceParticipant) => {
-  if (participant.sharingScreen) return 'compartilhando tela'
+  if (!participant.outputEnabled) return 'sem áudio'
   if (!participant.microphoneEnabled) return 'sem microfone'
+  if (participant.sharingScreen) return 'compartilhando tela'
   if (participant.speaking) return 'falando'
   return 'conectado'
 }
@@ -67,6 +69,7 @@ export function LivePanel({ channel, connected, connecting, onJoin, participants
                   <Avatar initials={participant.initials} url={participant.avatarUrl} />
                   <strong>{participant.nickname}</strong>
                   <small>{statusFor(participant)}</small>
+                  <VoiceStateFlags microphoneEnabled={participant.microphoneEnabled} outputEnabled={participant.outputEnabled} sharingScreen={participant.sharingScreen} />
                 </li>
               ))}
             </ul>

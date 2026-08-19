@@ -106,9 +106,16 @@ button { border: 0; cursor: pointer; }
 .voice-member > div, .identity-strip > div { display: grid; gap: 1px; min-width: 0; }
 .voice-member strong, .identity-strip strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .voice-member small, .identity-strip small { color: var(--color-text-muted); font: 9px var(--font-mono); }
-.voice-member i { margin-left: auto; color: var(--color-accent); font-style: normal; }
-.voice-member.muted { opacity: .55; }
-.voice-member.muted i { color: var(--color-danger); }
+.voice-member i { color: var(--color-accent); font-style: normal; }
+.voice-member .voice-flags { margin-left: auto; }
+.voice-member.muted { opacity: .7; }
+.voice-flags { display: flex; flex-shrink: 0; align-items: center; gap: 6px; }
+.voice-flags:empty { display: none; }
+.voice-flag { display: inline-flex; align-items: center; color: var(--color-accent); font-style: normal; }
+.voice-flag.off { color: var(--color-danger); }
+.voice-flag svg { width: 13px; height: 13px; }
+.voice-tile .voice-flags { justify-content: center; min-height: 13px; }
+.voice-dock-flags { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 .voice-member.speaking .avatar { border-color: var(--color-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 45%, transparent); }
 .voice-member.speaking strong { color: var(--color-text-strong); }
 .voice-count { display: grid; min-width: 16px; height: 16px; margin-left: auto; padding: 0 4px; place-items: center; border: var(--border-width) solid var(--color-border); border-radius: 9px; color: var(--color-text-muted); background: var(--color-surface-sunken); font: 8px var(--font-mono); font-style: normal; }
@@ -371,7 +378,9 @@ button { border: 0; cursor: pointer; }
 .voice-dock-channel > div { display: grid; gap: 1px; min-width: 0; }
 .voice-dock-channel strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .voice-dock-channel small { overflow: hidden; color: var(--color-text-muted); font: 9px var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
-.voice-dock-channel i { margin-left: auto; color: var(--color-accent); font-style: normal; }
+.voice-dock-channel i { color: var(--color-accent); font-style: normal; }
+.voice-dock-channel > i { margin-left: auto; }
+.voice-dock-channel .voice-dock-flags i { margin-left: 0; }
 .voice-stage-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 22px 0 4px; padding: 0; list-style: none; }
 .voice-tile { display: grid; width: 132px; gap: 6px; justify-items: center; padding: 16px 12px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); background: var(--color-surface-raised); }
 .voice-tile .avatar { width: 46px; height: 46px; flex: 0 0 46px; font-size: 12px; }
@@ -444,7 +453,8 @@ button { border: 0; cursor: pointer; }
 .quality-panel strong.pending { color: var(--color-warning); }
 .voice-controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin: 0; }
 .voice-controls button { display: grid; gap: 5px; place-items: center; padding: 12px 6px; border: var(--border-width) solid var(--color-border); color: var(--color-text-muted); background: var(--color-surface-raised); font: 7px var(--font-mono); }
-.voice-controls button span { color: var(--color-accent); font-size: 14px; }
+.voice-controls button span { display: inline-flex; align-items: center; justify-content: center; min-height: 16px; color: var(--color-accent); font-size: 14px; }
+.voice-controls button span svg { width: 16px; height: 16px; }
 .voice-controls button.disabled { color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 38%, var(--color-border)); }
 .voice-controls button.disabled span { color: var(--color-danger); }
 

@@ -211,25 +211,23 @@ export function useLiveRoom() {
     return true
   }, [leave])
 
-  const toggleOutput = useCallback(() => {
-    const nextValue = !outputEnabledRef.current
-    outputEnabledRef.current = nextValue
-    audioElementsRef.current.forEach((element) => { element.muted = !nextValue })
-    setOutputEnabled(nextValue)
+  const setOutput = useCallback((next: boolean) => {
+    outputEnabledRef.current = next
+    audioElementsRef.current.forEach((element) => { element.muted = !next })
+    setOutputEnabled(next)
   }, [])
 
-  const toggleMicrophone = useCallback(async () => {
+  const setMicrophone = useCallback(async (next: boolean) => {
     const room = roomRef.current
     if (!room) return
-    const nextValue = !microphoneEnabled
     try {
-      await room.localParticipant.setMicrophoneEnabled(nextValue)
-      setMicrophoneEnabled(nextValue)
+      await room.localParticipant.setMicrophoneEnabled(next)
+      setMicrophoneEnabled(next)
     } catch (caught) {
       console.error('[voz] falha ao alternar o microfone', caught)
       setError('Permissao de microfone negada ou indisponivel.')
     }
-  }, [microphoneEnabled])
+  }, [])
 
   const startScreenShare = useCallback(async (quality: ScreenShareQuality) => {
     const room = roomRef.current
@@ -267,9 +265,9 @@ export function useLiveRoom() {
     outputEnabled,
     participants,
     screenShares,
+    setMicrophone,
+    setOutput,
     startScreenShare,
     stopScreenShare,
-    toggleMicrophone,
-    toggleOutput,
   }
 }

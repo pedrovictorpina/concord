@@ -29,6 +29,7 @@ const groupByChannel = (state: Record<string, PresenceRecord[]>) => {
       initials: record.initials,
       avatarUrl: record.avatarUrl,
       microphoneEnabled: record.microphoneEnabled,
+      outputEnabled: record.outputEnabled !== false,
       sharingScreen: record.sharingScreen,
       speaking: false,
     })
