@@ -193,6 +193,10 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
 
     await expect(page.getByRole('heading', { name: 'Mensagens' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: 'Amigos' })).toBeVisible()
+    await page.getByRole('tab', { name: 'Convites' }).click()
+    await expect(page.getByText('Nenhum convite de servidor pendente.')).toBeVisible()
+    await page.getByRole('tab', { name: 'Amigos' }).click()
     await expect(page.getByRole('button', { name: /Ari/ })).toBeVisible()
     await page.locator('.friends-add').click()
     await expect(page.getByRole('heading', { name: 'Pessoas em sintonia.' })).toBeVisible()
