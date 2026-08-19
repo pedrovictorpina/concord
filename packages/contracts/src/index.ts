@@ -41,6 +41,14 @@ export type PersonSummary = {
   username: string
 }
 
+export type DirectMessageSummary = {
+  id: string
+  authorId: string
+  authorNickname: string
+  body: string
+  createdAt: string
+}
+
 export type FriendRequestSummary = {
   id: string
   direction: 'received' | 'sent'

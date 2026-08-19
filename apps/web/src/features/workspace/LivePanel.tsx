@@ -7,12 +7,13 @@ import type { ScreenShareQuality } from './screen-quality'
 
 type LivePanelProps = {
   demoMode: boolean
-  joinRequest: number
+  microphoneDisabled: boolean
   onConnectionChange: (channelId: string | null, connected: boolean) => void
+  outputDisabled: boolean
   voiceChannel: ChannelSummary | null
 }
 
-export function LivePanel({ demoMode, joinRequest, onConnectionChange, voiceChannel }: LivePanelProps) {
+export function LivePanel({ demoMode, microphoneDisabled, onConnectionChange, outputDisabled, voiceChannel }: LivePanelProps) {
   const demoShare = useScreenShare()
   const liveRoom = useLiveRoom(voiceChannel?.id ?? null)
   const disconnectRoom = liveRoom.disconnect
@@ -22,7 +23,6 @@ export function LivePanel({ demoMode, joinRequest, onConnectionChange, voiceChan
   const [demoJoined, setDemoJoined] = useState(false)
   const [joining, setJoining] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const handledJoinRequest = useRef(0)
   const sharing = demoMode ? Boolean(demoShare.stream) : Boolean(liveRoom.screenTrack)
   const screenShareAvailable = Boolean(navigator.mediaDevices?.getDisplayMedia)
   const error = demoMode ? demoShare.error : liveRoom.error
@@ -51,9 +51,13 @@ export function LivePanel({ demoMode, joinRequest, onConnectionChange, voiceChan
   useEffect(() => {
     setDemoJoined(false)
     disconnectRoom()
-    handledJoinRequest.current = 0
   }, [disconnectRoom, voiceChannel?.id])
   useEffect(() => onConnectionChange(voiceChannel?.id ?? null, joined), [joined, onConnectionChange, voiceChannel?.id])
+  useEffect(() => {
+    if (demoMode || !joined) return
+    if (microphoneDisabled && liveRoom.microphoneEnabled) void liveRoom.toggleMicrophone()
+    if (outputDisabled && liveRoom.outputEnabled) liveRoom.toggleOutput()
+  }, [demoMode, joined, liveRoom, microphoneDisabled, outputDisabled])
 
   const toggleDemoPreference = (key: 'microphoneEnabled' | 'outputEnabled') => {
     setPreferences((current) => ({ ...current, [key]: !current[key] }))
@@ -76,31 +80,28 @@ export function LivePanel({ demoMode, joinRequest, onConnectionChange, voiceChan
     if (!connected) setJoining(false)
   }, [demoMode, joined, joining, liveRoom])
 
-  useEffect(() => {
-    if (!voiceChannel || !joinRequest || joined || joining || handledJoinRequest.current === joinRequest) return
-    handledJoinRequest.current = joinRequest
-    void joinVoice()
-  }, [joinRequest, joined, joining, joinVoice, voiceChannel])
-
   if (!voiceChannel) return null
 
   return (
-    <aside className={joined ? 'voice-dock joined' : 'voice-dock'}>
-      {joined && sharing ? <div className="voice-preview"><video ref={videoRef} autoPlay muted={demoMode} playsInline /><span className="capture-label">TRANSMITINDO</span></div> : null}
-      {error ? <p className="share-error" role="status">{error}</p> : null}
-      {joined && !screenShareAvailable ? <p className="voice-capability-note" role="status">Compartilhar tela não é suportado nesta PWA móvel. Use o Concord no desktop.</p> : null}
-      {!joined ? (
-        <p aria-busy={joining} className="voice-join" role="status"><span>{joining ? '◌' : '◖'}</span>{joining ? 'Entrando…' : `Conectando a ${voiceChannel.name}…`}</p>
-      ) : (
-        <><div className="voice-dock-status"><span className="live-pulse" /> <strong>{voiceChannel?.name ?? 'Voz'}</strong><small>{demoMode ? 'REDE LOCAL · 28 ms' : 'REDE ESTÁVEL · WEBRTC'}</small></div>
+    <>
+      <section className="voice-room">
+        <header><div><span>◖</span><strong>{voiceChannel.name}</strong></div><small>{joined ? 'CONECTADO' : 'CANAL DE VOZ'}</small></header>
+        <div className="voice-room-stage"><span className="voice-room-icon">◖</span><h1>{voiceChannel.name}</h1><p>{joined ? 'Você está em voz.' : 'Ninguém está em voz'}</p>{!joined ? <button aria-busy={joining} className="voice-room-join" disabled={joining} type="button" onClick={() => void joinVoice()}>{joining ? 'Entrando na chamada…' : 'Entrar na chamada de voz'}</button> : null}</div>
+      </section>
+      <aside className="voice-chat-side"><header><strong>Chat de voz</strong><small>#{voiceChannel.name}</small></header><div><p>O chat deste canal aparece aqui.</p></div></aside>
+      {joined ? <aside className="voice-dock joined">
+        {sharing ? <div className="voice-preview"><video ref={videoRef} autoPlay muted={demoMode} playsInline /><span className="capture-label">TRANSMITINDO</span></div> : null}
+        {error ? <p className="share-error" role="status">{error}</p> : null}
+        {!screenShareAvailable ? <p className="voice-capability-note" role="status">Compartilhar tela não é suportado nesta PWA móvel. Use o Concord no desktop.</p> : null}
+        <div className="voice-dock-status"><span className="live-pulse" /> <strong>Voz conectada</strong><small>{demoMode ? 'REDE LOCAL · 28 ms' : 'REDE ESTÁVEL · WEBRTC'}</small></div>
         <footer className="voice-controls">
-          <button className={demoMode ? (preferences.microphoneEnabled ? '' : 'disabled') : (liveRoom.microphoneEnabled ? '' : 'disabled')} type="button" onClick={() => demoMode ? toggleDemoPreference('microphoneEnabled') : void liveRoom.toggleMicrophone()}><span>{demoMode ? (preferences.microphoneEnabled ? '⌁' : '×') : (liveRoom.microphoneEnabled ? '⌁' : '×')}</span>MIC</button>
-          <button className={demoMode ? (preferences.outputEnabled ? '' : 'disabled') : (liveRoom.outputEnabled ? '' : 'disabled')} type="button" onClick={() => demoMode ? toggleDemoPreference('outputEnabled') : liveRoom.toggleOutput()}><span>{demoMode ? (preferences.outputEnabled ? '◖' : '×') : (liveRoom.outputEnabled ? '◖' : '×')}</span>ÁUDIO</button>
+          <button aria-label={microphoneDisabled ? 'Microfone desativado pela moderação' : 'MIC'} className={microphoneDisabled || (demoMode ? !preferences.microphoneEnabled : !liveRoom.microphoneEnabled) ? 'disabled' : ''} disabled={microphoneDisabled} type="button" onClick={() => demoMode ? toggleDemoPreference('microphoneEnabled') : void liveRoom.toggleMicrophone()}><span>{microphoneDisabled || (demoMode ? !preferences.microphoneEnabled : !liveRoom.microphoneEnabled) ? '×' : '⌁'}</span>MIC</button>
+          <button aria-label={outputDisabled ? 'Áudio desativado pela moderação' : 'ÁUDIO'} className={outputDisabled || (demoMode ? !preferences.outputEnabled : !liveRoom.outputEnabled) ? 'disabled' : ''} disabled={outputDisabled} type="button" onClick={() => demoMode ? toggleDemoPreference('outputEnabled') : liveRoom.toggleOutput()}><span>{outputDisabled || (demoMode ? !preferences.outputEnabled : !liveRoom.outputEnabled) ? '×' : '◖'}</span>ÁUDIO</button>
           <button aria-label={screenShareAvailable ? 'TELA' : 'Tela indisponível neste dispositivo'} className={sharing || !screenShareAvailable ? 'disabled' : ''} disabled={!screenShareAvailable} title={screenShareAvailable ? undefined : 'Compartilhamento de tela indisponível nesta PWA móvel'} type="button" onClick={() => sharing ? void (demoMode ? demoShare.stop() : liveRoom.stopScreenShare()) : setQualityPickerOpen(true)}><span>{sharing ? '■' : '▣'}</span>TELA</button>
           <button className="leave-voice" type="button" onClick={() => demoMode ? setDemoJoined(false) : liveRoom.disconnect()}><span>×</span>SAIR</button>
-        </footer></>
-      )}
-      {qualityPickerOpen ? (
+        </footer>
+      </aside> : null}
+      {joined && qualityPickerOpen ? (
         <section className="quality-picker" role="dialog" aria-label="Qualidade da transmissao">
           <header><strong>QUALIDADE DA TELA</strong><button aria-label="Fechar seletor de qualidade" type="button" onClick={() => setQualityPickerOpen(false)}>×</button></header>
           <p>Escolha como quer transmitir antes de selecionar a tela.</p>
@@ -109,6 +110,6 @@ export function LivePanel({ demoMode, joinRequest, onConnectionChange, voiceChan
           ))}</div>
         </section>
       ) : null}
-    </aside>
+    </>
   )
 }

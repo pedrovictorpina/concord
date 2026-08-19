@@ -76,7 +76,9 @@ test.describe('identidade e temas', () => {
 
     await expect(page.locator('.voice-member')).toHaveCount(0)
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
-    await expect(page.getByRole('status')).toContainText('Entrando…')
+    await expect(page.getByRole('heading', { name: 'sala-da-madrugada' })).toBeVisible()
+    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
+    await expect(page.getByText('Você está em voz.')).toBeVisible()
     await expect(page.getByRole('button', { name: 'TELA' })).toBeEnabled()
     await expect(page.locator('.voice-member')).toContainText('conectado')
     await expect(page.getByText('Concord Bot')).toHaveCount(0)
@@ -96,9 +98,20 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
 
     await expect(page.getByRole('heading', { name: 'Mensagens' })).toBeVisible()
-    await expect(page.getByText('Sua lista está pronta.')).toBeVisible()
-    await page.getByRole('button', { name: 'ADICIONAR AMIGO', exact: true }).click()
+    await expect(page.getByRole('button', { name: /Ari/ })).toBeVisible()
+    await page.locator('.friends-add').click()
     await expect(page.getByRole('heading', { name: 'Pessoas em sintonia.' })).toBeVisible()
+  })
+
+  test('abre uma mensagem privada com um amigo', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Inicio do Concord' }).click()
+    await page.getByRole('button', { name: /Ari/ }).click()
+    await expect(page.getByText('Conversa com Ari')).toBeVisible()
+    await page.getByLabel('Mensagem privada').fill('Sinal privado')
+    await page.getByLabel('Mensagem privada').press('Enter')
+    await expect(page.getByText('Sinal privado')).toBeVisible()
   })
 
   test('administra canais e preferências pela central de configurações', async ({ page }) => {

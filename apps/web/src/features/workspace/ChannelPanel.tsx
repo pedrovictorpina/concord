@@ -1,5 +1,4 @@
 import type { ChannelSummary, ServerSummary } from '@concord/contracts'
-import type { ReactNode } from 'react'
 import type { WorkspaceIdentity } from './workspace-types'
 
 type ChannelPanelProps = {
@@ -11,21 +10,21 @@ type ChannelPanelProps = {
   onCloseMobile: () => void
   onChannelChange: (channelId: string) => void
   onCreateChannel: (kind: ChannelSummary['kind']) => void
+  onOpenServerSettings: () => void
   onVoiceChannelChange: (channelId: string) => void
   onExit: () => void
   onOpenPeople: () => void
   server: ServerSummary | null
   unreadByChannel: Record<string, { count: number; mentioned: boolean }>
   voiceParticipantChannelId: string | null
-  voicePanel: ReactNode
 }
 
-export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onVoiceChannelChange, onExit, onOpenPeople, server, unreadByChannel, voiceParticipantChannelId, voicePanel }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onOpenServerSettings, onVoiceChannelChange, onExit, onOpenPeople, server, unreadByChannel, voiceParticipantChannelId }: ChannelPanelProps) {
   return (
     <aside className={mobileOpen ? 'channel-panel mobile-open' : 'channel-panel'}>
       <header className="workspace-heading">
         <div><span className="eyebrow">SERVIDOR PRIVADO</span><strong>{server?.name ?? 'Concord'}</strong></div>
-        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
+        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><details className="server-menu"><summary aria-label="Abrir menu do servidor">⌄</summary><div><button type="button" onClick={onOpenPeople}>Convidar pessoas</button><button type="button" onClick={onOpenServerSettings}>Configurações do servidor</button>{server?.role === 'owner' ? <><button type="button" onClick={() => onCreateChannel('text')}>Criar canal de texto</button><button type="button" onClick={() => onCreateChannel('voice')}>Criar canal de voz</button></> : null}</div></details><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
       </header>
 
       <section className="channel-group">
@@ -53,7 +52,6 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
       </section>
 
       <div className="channel-panel-footer">
-        {voicePanel}
         <footer className="identity-strip">
           {identity.avatarUrl ? <img className="avatar avatar-photo" src={identity.avatarUrl} alt="Foto de perfil" /> : <span className="avatar avatar-green">{identity.initials}</span>}
           <div><strong>{identity.nickname}</strong><small>@{identity.username} · {identity.connectionLabel}</small></div>

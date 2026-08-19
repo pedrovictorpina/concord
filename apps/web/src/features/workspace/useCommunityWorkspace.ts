@@ -62,6 +62,7 @@ const demoServer: ServerSummary = {
   description: 'Fundacao e sinais do produto',
   role: 'owner',
 }
+const demoFriends: PersonSummary[] = [{ id: 'demo-amigo', nickname: 'Ari', username: 'ari' }]
 
 const demoMessageList: MessageSummary[] = initialMessages.map((message) => ({
   id: String(message.id),
@@ -91,7 +92,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
   const [activeChannelId, setActiveChannelId] = useState<string | null>(demoMode ? 'geral' : null)
   const [messages, setMessages] = useState<MessageSummary[]>(demoMode ? demoMessageList : [])
   const [friendRequests, setFriendRequests] = useState<FriendRequestSummary[]>([])
-  const [friends, setFriends] = useState<PersonSummary[]>([])
+  const [friends, setFriends] = useState<PersonSummary[]>(demoMode ? demoFriends : [])
   const [serverInvites, setServerInvites] = useState<ServerInviteSummary[]>([])
   const [loading, setLoading] = useState(connected)
   const [error, setError] = useState<string | null>(null)
@@ -101,6 +102,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
   const [channelPermissions, setChannelPermissions] = useState<ChannelPermission[]>([])
   const [inviteLinks, setInviteLinks] = useState<InviteLinkRow[]>([])
   const [categories, setCategories] = useState<CategoryRow[]>([])
+  const [voiceRestrictions, setVoiceRestrictions] = useState({ microphoneDisabled: false, outputDisabled: false })
 
   const activeServer = useMemo(
     () => servers.find((server) => server.id === activeServerId) ?? null,
@@ -156,21 +158,23 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
 
   const loadServerControls = useCallback(async (serverId: string | null) => {
     if (!supabase || !serverId) {
-      setMembers([]); setChannelPermissions([]); setInviteLinks([])
+      setMembers([]); setChannelPermissions([]); setInviteLinks([]); setVoiceRestrictions({ microphoneDisabled: false, outputDisabled: false })
       return
     }
-    const [membersResult, permissionsResult, linksResult, categoriesResult] = await Promise.all([
+    const [membersResult, permissionsResult, linksResult, categoriesResult, moderationResult] = await Promise.all([
       supabase.from('server_members').select('user_id, role, profiles(id, nickname, username)').eq('server_id', serverId),
       supabase.from('channel_permissions').select('channel_id, role, can_read, can_write, can_speak').in('channel_id', channels.map((channel) => channel.id)),
       supabase.from('server_invite_links').select('id, code, expires_at, max_uses, uses_count').eq('server_id', serverId).is('revoked_at', null).order('created_at', { ascending: false }),
       supabase.from('channel_categories').select('id, name').eq('server_id', serverId).order('position'),
+      userId ? supabase.from('server_member_moderation').select('microphone_disabled, output_disabled').eq('server_id', serverId).eq('user_id', userId).maybeSingle() : Promise.resolve({ data: null, error: null }),
     ])
     if (membersResult.error || permissionsResult.error || linksResult.error || categoriesResult.error) return
     setMembers(((membersResult.data ?? []) as unknown as MemberRow[]).flatMap((member) => member.profiles ? [{ ...member.profiles, role: member.role }] : []))
     setChannelPermissions(((permissionsResult.data ?? []) as ChannelPermissionRow[]).map((item) => ({ channelId: item.channel_id, role: item.role, canRead: item.can_read, canWrite: item.can_write, canSpeak: item.can_speak })))
     setInviteLinks((linksResult.data ?? []) as InviteLinkRow[])
     setCategories((categoriesResult.data ?? []) as CategoryRow[])
-  }, [channels])
+    setVoiceRestrictions({ microphoneDisabled: moderationResult.data?.microphone_disabled ?? false, outputDisabled: moderationResult.data?.output_disabled ?? false })
+  }, [channels, userId])
 
   const loadMessages = useCallback(async (channelId: string | null) => {
     if (!supabase || !channelId) {
@@ -422,6 +426,21 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     return { ok: true, message: 'Cargo atualizado.' }
   }, [activeServer, loadServerControls, loadServers])
 
+  const moderateMember = useCallback(async (memberId: string, action: 'ban' | 'timeout' | 'microphone' | 'audio') => {
+    if (demoMode) {
+      if (action === 'ban') setMembers((current) => current.filter((member) => member.id !== memberId))
+      return { ok: true, message: action === 'ban' ? 'Membro banido.' : action === 'timeout' ? 'Timeout de 10 minutos aplicado.' : action === 'microphone' ? 'Microfone desativado.' : 'Áudio desativado.' }
+    }
+    if (!supabase || !activeServer || !['owner', 'moderator'].includes(activeServer.role)) return { ok: false, message: 'Sem permissão para moderar membros.' }
+    const request = action === 'ban'
+      ? supabase.rpc('ban_server_member', { target_server_id: activeServer.id, target_user_id: memberId })
+      : supabase.rpc('set_server_member_moderation', { target_server_id: activeServer.id, target_user_id: memberId, next_timeout_until: action === 'timeout' ? new Date(Date.now() + 10 * 60 * 1000).toISOString() : null, next_microphone_disabled: action === 'microphone', next_output_disabled: action === 'audio' })
+    const { error: requestError } = await request
+    if (requestError) return { ok: false, message: 'Não foi possível aplicar a moderação.' }
+    await Promise.all([loadServerControls(activeServer.id), loadServers()])
+    return { ok: true, message: action === 'ban' ? 'Membro banido.' : action === 'timeout' ? 'Timeout de 10 minutos aplicado.' : action === 'microphone' ? 'Microfone desativado.' : 'Áudio desativado.' }
+  }, [activeServer, demoMode, loadServerControls, loadServers])
+
   const saveChannelPermissions = useCallback(async (channelId: string, role: Exclude<ServerMemberRole, 'owner'>, permissions: Omit<ChannelPermission, 'channelId' | 'role'>) => {
     if (!supabase || !activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietário pode alterar permissões.' }
     const { error: requestError } = await supabase.from('channel_permissions').upsert({ channel_id: channelId, role, can_read: permissions.canRead, can_write: permissions.canWrite, can_speak: permissions.canSpeak })
@@ -579,6 +598,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     markServerRead,
     members,
     unreadByChannel,
+    voiceRestrictions,
     serverMuted,
     inviteLinks,
     sendMessage,
@@ -599,6 +619,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     saveChannelPermissions,
     saveServerNickname,
     setMemberRole,
+    moderateMember,
     setMuted,
   }
 }

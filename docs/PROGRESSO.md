@@ -100,3 +100,8 @@ Branch atual: `codex/etapa-03-voz-tela`.
 - participantes fictícios removidos da lista de voz; o usuário conectado agora é exibido somente dentro do canal de voz em que a conexão foi confirmada.
 - tela inicial de mensagens adicionada: lista de amigos, pedidos recebidos e atalho para adicionar amigo, acessível pelo ícone inicial e pela barra móvel.
 - fluxo móvel de amizades revisado com tela de mensagens e adição por identificador em tela cheia; ações sem suporte real, como sincronização de contatos, permanecem fora da interface.
+- mensagens privadas entre amigos confirmados implementadas com conversas isoladas por RLS, persistência e atualização em tempo real.
+- canais de voz agora abrem em uma tela dedicada, com entrada explícita, chat lateral e painel de conexão ancorado acima do perfil; o menu do servidor reúne convite, configurações e criação de canais.
+- migration de mensagens privadas aplicada ao Supabase e confirmada no histórico remoto.
+- banimento, timeout de 10 minutos e restrições de microfone/áudio foram adicionados para proprietário e moderadores, com migration aplicada e políticas que impedem moderador de agir sobre proprietário ou outro moderador.
+- links e convites diretos agora recusam o retorno de uma pessoa banida ao servidor.
