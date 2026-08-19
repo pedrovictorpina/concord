@@ -73,6 +73,12 @@ button { border: 0; cursor: pointer; }
 .workspace-heading .server-menu-trigger i { color: var(--color-text-muted); font-style: normal; }
 .workspace-heading .server-menu-trigger[data-state='open'] { background: var(--color-surface-raised); }
 .server-menu-content .danger { color: var(--color-danger); }
+.member-context [data-radix-menu-label] { padding: 6px 10px; color: var(--color-text-faint); font: var(--font-label); letter-spacing: 1px; }
+.member-context-volume { display: grid; gap: 6px; padding: 8px 10px; border-top: var(--border-width) solid var(--color-border-soft); }
+.member-context-volume span { color: var(--color-text-faint); font: var(--font-label); letter-spacing: 1px; }
+.member-context-volume input { width: 100%; accent-color: var(--color-accent); }
+.member-context-volume button { padding: 6px 8px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text-muted); background: transparent; font: 8px var(--font-mono); letter-spacing: .7px; }
+.member-context-volume button:hover { border-color: var(--color-accent); color: var(--color-accent); }
 .member-menu-trigger { margin-left: 4px; color: var(--color-text-faint); background: transparent; font-size: 14px; }
 .member-menu-trigger:hover, .member-menu-trigger[data-state='open'] { color: var(--color-accent); }
 .member-feedback { margin: 0 12px 8px; color: var(--color-accent); font: 9px/1.5 var(--font-mono); }

@@ -2,6 +2,7 @@ import { DropdownMenu } from 'radix-ui'
 import type { ChannelSummary, ServerSummary, VoiceParticipant } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
 import { Hint } from '../../components/ui/Hint'
+import { MemberContextMenu } from './MemberContextMenu'
 import { VoiceStateFlags } from './VoiceStateIcons'
 import type { WorkspaceIdentity } from './workspace-types'
 
@@ -24,6 +25,8 @@ type ChannelPanelProps = {
   onChannelChange: (channelId: string) => void
   onCreateChannel: (kind: ChannelSummary['kind']) => void
   onLeaveServer: () => void
+  onModerateMember: (memberId: string, action: 'ban' | 'timeout' | 'microphone' | 'audio') => Promise<{ ok: boolean; message: string }>
+  onSetParticipantVolume: (userId: string, volume: number) => void
   onMarkServerRead: () => void
   onOpenInvite: () => void
   onOpenPermissions: () => void
@@ -33,11 +36,13 @@ type ChannelPanelProps = {
   onOpenPeople: () => void
   server: ServerSummary | null
   serverMuted: boolean
+  userId?: string
+  volumeByUser: Record<string, number>
   unreadByChannel: Record<string, { count: number; mentioned: boolean }>
   voiceParticipantsByChannel: Record<string, VoiceParticipant[]>
 }
 
-export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, connectedVoiceChannelId, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onLeaveServer, onMarkServerRead, onOpenInvite, onOpenPermissions, onOpenServerSettings, onToggleMuted, onVoiceChannelChange, onOpenPeople, server, serverMuted, unreadByChannel, voiceParticipantsByChannel }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, connectedVoiceChannelId, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onLeaveServer, onMarkServerRead, onModerateMember, onSetParticipantVolume, onOpenInvite, onOpenPermissions, onOpenServerSettings, onToggleMuted, onVoiceChannelChange, onOpenPeople, server, serverMuted, unreadByChannel, userId, voiceParticipantsByChannel, volumeByUser }: ChannelPanelProps) {
   const canManage = server?.role === 'owner' || server?.role === 'moderator'
 
   return (
@@ -94,11 +99,23 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
             <div className="voice-channel" key={channel.id}>
               <button className={channelClasses.join(' ')} type="button" onClick={() => onVoiceChannelChange(channel.id)}><span>◖</span>{channel.name}{participants.length > 0 ? <i className="voice-count">{participants.length}</i> : null}</button>
               {participants.map((participant) => (
-                <div className={`voice-member${participant.microphoneEnabled ? '' : ' muted'}${participant.speaking ? ' speaking' : ''}`} key={participant.userId}>
-                  <Avatar initials={participant.initials} url={participant.avatarUrl} />
-                  <div><strong>{participant.nickname}</strong><small>{statusFor(participant)}</small></div>
-                  <VoiceStateFlags microphoneEnabled={participant.microphoneEnabled} outputEnabled={participant.outputEnabled} sharingScreen={participant.sharingScreen} />
-                </div>
+                <MemberContextMenu
+                  canModerate={canManage && participant.userId !== userId}
+                  canSetRole={false}
+                  inVoice
+                  isSelf={participant.userId === userId}
+                  key={participant.userId}
+                  onModerate={(action) => onModerateMember(participant.userId, action)}
+                  onSetVolume={(volume) => onSetParticipantVolume(participant.userId, volume)}
+                  target={{ userId: participant.userId, nickname: participant.nickname, username: participant.username }}
+                  volume={volumeByUser[participant.userId] ?? 1}
+                >
+                  <div className={`voice-member${participant.microphoneEnabled ? '' : ' muted'}${participant.speaking ? ' speaking' : ''}`}>
+                    <Avatar initials={participant.initials} url={participant.avatarUrl} />
+                    <div><strong>{participant.nickname}</strong><small>{statusFor(participant)}</small></div>
+                    <VoiceStateFlags microphoneEnabled={participant.microphoneEnabled} outputEnabled={participant.outputEnabled} sharingScreen={participant.sharingScreen} />
+                  </div>
+                </MemberContextMenu>
               ))}
             </div>
           )

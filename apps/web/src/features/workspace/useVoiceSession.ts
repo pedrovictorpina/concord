@@ -182,11 +182,13 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
     outputEnabled,
     participantsByChannel,
     screenShares,
+    setParticipantVolume: liveRoom.setParticipantVolume,
     sharing,
     startScreenShare,
     stopScreenShare,
     target,
     toggleMicrophone,
     toggleOutput,
+    volumeByUser: liveRoom.volumeByUser,
   }
 }

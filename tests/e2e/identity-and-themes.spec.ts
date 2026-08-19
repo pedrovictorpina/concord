@@ -180,6 +180,24 @@ test.describe('identidade e temas', () => {
     await expect(memberPanel).not.toContainText('Rafa')
   })
 
+  test('abre o menu de contexto de um membro com o botão direito', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
+
+    const memberPanel = page.getByRole('complementary', { name: 'Membros do servidor' })
+    await memberPanel.getByText('Rafa', { exact: true }).click({ button: 'right' })
+
+    const menu = page.getByRole('menu', { name: 'Opções de Rafa' })
+    await expect(menu).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Promover a moderador' })).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Silenciar voz no servidor' })).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Banir do servidor' })).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(menu).toHaveCount(0)
+  })
+
   test('mantém a conexão de voz ao navegar entre canais', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()

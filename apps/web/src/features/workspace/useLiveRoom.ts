@@ -88,6 +88,7 @@ export function useLiveRoom() {
   const [microphoneEnabled, setMicrophoneEnabled] = useState(false)
   const [outputEnabled, setOutputEnabled] = useState(true)
   const [screenShares, setScreenShares] = useState<ScreenShareView[]>([])
+  const [volumeByUser, setVolumeByUser] = useState<Record<string, number>>({})
 
   const leave = useCallback(() => {
     const room = roomRef.current
@@ -100,6 +101,7 @@ export function useLiveRoom() {
     setParticipants([])
     setMicrophoneEnabled(false)
     setScreenShares([])
+    setVolumeByUser({})
     setNotice('')
     setAudioBlocked(false)
   }, [])
@@ -304,6 +306,14 @@ export function useLiveRoom() {
     setNotice('')
   }, [])
 
+  const setParticipantVolume = useCallback((userId: string, volume: number) => {
+    const room = roomRef.current
+    if (!room) return
+    const participant = [...room.remoteParticipants.values()].find((item) => item.identity === userId)
+    participant?.setVolume(volume)
+    setVolumeByUser((current) => ({ ...current, [userId]: volume }))
+  }, [])
+
   const enableAudioPlayback = useCallback(async () => {
     const room = roomRef.current
     if (!room) return
@@ -332,7 +342,9 @@ export function useLiveRoom() {
     screenShares,
     setMicrophone,
     setOutput,
+    setParticipantVolume,
     startScreenShare,
     stopScreenShare,
+    volumeByUser,
   }
 }

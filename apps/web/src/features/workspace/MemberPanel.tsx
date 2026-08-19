@@ -3,6 +3,7 @@ import { DropdownMenu } from 'radix-ui'
 import type { PersonSummary, ServerMemberRole, ServerSummary, VoiceParticipant } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
 import { Modal } from '../../components/ui/Modal'
+import { MemberContextMenu } from './MemberContextMenu'
 import { initialsFrom } from './voice-participants'
 
 type ServerMember = PersonSummary & { role: ServerMemberRole }
@@ -81,7 +82,18 @@ export function MemberPanel({ members, onModerateMember, onRemoveMember, onSetMe
             <section className="member-group" key={role}>
               <p>{label} — {group.length}</p>
               {group.map((member) => (
-                <div className={inVoice.has(member.id) ? 'member-row in-voice' : 'member-row'} key={member.id}>
+                <MemberContextMenu
+                  canModerate={canModerate(member)}
+                  canSetRole={isOwner && member.role !== 'owner' && member.id !== userId}
+                  inVoice={inVoice.has(member.id)}
+                  isSelf={member.id === userId}
+                  key={member.id}
+                  onModerate={(action) => action === 'ban' ? setPending({ kind: 'ban', member }) : run(onModerateMember(member.id, action))}
+                  onRemove={() => setPending({ kind: 'remove', member })}
+                  onSetRole={(role) => run(onSetMemberRole(member.id, role))}
+                  target={{ userId: member.id, nickname: member.nickname, username: member.username, role: member.role }}
+                >
+                <div className={inVoice.has(member.id) ? 'member-row in-voice' : 'member-row'}>
                   <Avatar initials={initialsFrom(member.nickname)} tone={member.role === 'member' ? 'amber' : 'green'} url={member.avatarUrl} />
                   <div>
                     <strong>{member.nickname}{member.id === userId ? ' (você)' : ''}</strong>
@@ -111,6 +123,7 @@ export function MemberPanel({ members, onModerateMember, onRemoveMember, onSetMe
                     </DropdownMenu.Root>
                   ) : null}
                 </div>
+                </MemberContextMenu>
               ))}
             </section>
           )
