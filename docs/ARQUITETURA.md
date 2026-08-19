@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | Linguagem | TypeScript | Linguagem principal dos clientes e funcoes de apoio |
 | Web | React + Vite | Cliente acessado pelo navegador |
+| Componentes de interface | Radix UI | Primitivos acessíveis para diálogos, menus, tooltips e controles sem impor estilo visual |
 | Windows | Electron | Captura confiavel de tela, janela e audio do sistema |
 | Mobile | React Native + Expo Development Build | Android e iOS com integracoes nativas |
 | Dados | Supabase Postgres | Dados relacionais e regras de acesso |
@@ -18,6 +19,12 @@
 A interface usa tokens semanticos e separa familia visual de modo de cor. O tema `concord` oferece claro e escuro; o modo padrao `system` acompanha `prefers-color-scheme`. Novas familias, como iOS e neo-brutalismo, entram pelo registro de temas sem alterar a logica dos componentes.
 
 Detalhes e consequencias estao no [ADR 0004](decisoes/0004-arquitetura-de-temas.md).
+
+## Componentes de interface
+
+O front usa Radix Primitives (pacote único `radix-ui`) para o comportamento acessível de diálogos, menus, abas, tooltips, seletores, checkboxes, avatares e toasts. Os componentes permanecem sem estilo visual imposto: o CSS e os tokens semânticos existentes do Concord continuam sendo a única fonte de aparência e temas.
+
+Os primitivos ficam encapsulados em `apps/web/src/components/ui/` (`Modal`, `Choice`, `Toggle`, `Avatar`, `Hint`, `ErrorToast`). Antes de criar um controle novo, use o wrapper que já existe. Detalhes e consequências no [ADR 0008](decisoes/0008-radix-ui-como-base-de-componentes.md).
 
 ## Infraestrutura gerenciada
 

@@ -47,6 +47,8 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Edge Function versionada para emissao segura de tokens
 - [ ] Configurar projeto LiveKit Cloud e segredos no Supabase
 - [x] Entrada e saida de canais de voz
+- [x] Presenca de voz compartilhada entre membros do servidor
+- [x] Conexao de voz persistente ao navegar entre canais e servidores
 - [x] Silenciar microfone
 - [x] Compartilhar tela ou janela
 - [ ] Audio do sistema no Windows
@@ -68,6 +70,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 ## Etapa 05 - Qualidade e lancamento
 
 - [ ] Testes de jornada completa
+- [x] Radix UI como base de componentes acessiveis do front
 - [ ] Acessibilidade e navegacao por teclado
 - [ ] Observabilidade sem registrar conteudo privado
 - [ ] Limites de uso e protecao contra abuso
