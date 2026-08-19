@@ -405,7 +405,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
       setChannels((current) => channel.id ? current.map((item) => item.id === channel.id ? { ...item, name, kind: channel.kind } : item) : [...current, { id: `demo-${Date.now()}`, name, kind: channel.kind }])
       return { ok: true, message: channel.id ? 'Canal atualizado.' : 'Canal criado.' }
     }
-    if (!supabase || !activeServer || activeServer.role !== 'owner' || !userId) return { ok: false, message: 'Somente o proprietario pode administrar canais.' }
+    if (!supabase || !activeServer || !['owner', 'moderator'].includes(activeServer.role) || !userId) return { ok: false, message: 'Somente quem administra o servidor pode alterar canais.' }
     const request = channel.id
       ? supabase.from('channels').update({ name, kind: channel.kind }).eq('id', channel.id)
       : supabase.from('channels').insert({ server_id: activeServer.id, name, kind: channel.kind, position: channels.length, created_by: userId })
@@ -420,7 +420,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
       setChannels((current) => current.filter((channel) => channel.id !== channelId))
       return { ok: true, message: 'Canal removido.' }
     }
-    if (!supabase || !activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietario pode remover canais.' }
+    if (!supabase || !activeServer || !['owner', 'moderator'].includes(activeServer.role)) return { ok: false, message: 'Somente quem administra o servidor pode remover canais.' }
     const { error: requestError } = await supabase.from('channels').delete().eq('id', channelId)
     if (requestError) return { ok: false, message: 'Nao foi possivel remover o canal.' }
     await loadChannels(activeServer.id)
@@ -460,6 +460,27 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     if (requestError) return { ok: false, message: 'Não foi possível aplicar a moderação.' }
     await Promise.all([loadServerControls(activeServer.id), loadServers()])
     return { ok: true, message: action === 'ban' ? 'Membro banido.' : action === 'timeout' ? 'Timeout de 10 minutos aplicado.' : action === 'microphone' ? 'Microfone desativado.' : 'Áudio desativado.' }
+  }, [activeServer, demoMode, loadServerControls, loadServers])
+
+  const removeMember = useCallback(async (memberId: string) => {
+    if (demoMode) {
+      setMembers((current) => current.filter((member) => member.id !== memberId))
+      return { ok: true, message: 'Membro removido.' }
+    }
+    if (!supabase || !activeServer || !['owner', 'moderator'].includes(activeServer.role)) return { ok: false, message: 'Sem permissão para remover membros.' }
+    const { error: requestError } = await supabase.rpc('remove_server_member', { target_server_id: activeServer.id, target_user_id: memberId })
+    if (requestError) return { ok: false, message: 'Não foi possível remover o membro.' }
+    await loadServerControls(activeServer.id)
+    return { ok: true, message: 'Membro removido do servidor.' }
+  }, [activeServer, demoMode, loadServerControls])
+
+  const transferOwnership = useCallback(async (memberId: string) => {
+    if (demoMode) return { ok: false, message: 'A demonstração não transfere servidores.' }
+    if (!supabase || !activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietário pode transferir o servidor.' }
+    const { error: requestError } = await supabase.rpc('transfer_server_ownership', { target_server_id: activeServer.id, target_user_id: memberId })
+    if (requestError) return { ok: false, message: 'Não foi possível transferir o servidor.' }
+    await Promise.all([loadServerControls(activeServer.id), loadServers()])
+    return { ok: true, message: 'Servidor transferido. Você agora é moderador.' }
   }, [activeServer, demoMode, loadServerControls, loadServers])
 
   const saveChannelPermissions = useCallback(async (channelId: string, role: Exclude<ServerMemberRole, 'owner'>, permissions: Omit<ChannelPermission, 'channelId' | 'role'>) => {
@@ -640,8 +661,10 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     revokeInviteLink,
     saveChannelPermissions,
     saveServerNickname,
+    removeMember,
     setMemberRole,
     moderateMember,
     setMuted,
+    transferOwnership,
   }
 }

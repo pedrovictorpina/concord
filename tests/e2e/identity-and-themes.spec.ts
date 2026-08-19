@@ -166,6 +166,21 @@ test.describe('identidade e temas', () => {
     await expect(panel).toHaveCount(0)
   })
 
+  test('administra um membro pelo painel de membros', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
+
+    const memberPanel = page.getByRole('complementary', { name: 'Membros do servidor' })
+    await expect(memberPanel).toContainText('Rafa')
+    await memberPanel.getByRole('button', { name: 'Administrar Rafa' }).click()
+    await page.getByRole('menuitem', { name: 'Remover do servidor' }).click()
+
+    await expect(page.getByRole('dialog')).toContainText('Remover do servidor')
+    await page.getByRole('button', { name: 'REMOVER' }).click()
+    await expect(memberPanel).not.toContainText('Rafa')
+  })
+
   test('mantém a conexão de voz ao navegar entre canais', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()

@@ -29,10 +29,11 @@ Esta lista é a referência operacional do Concord. Ela separa o que já está p
 
 Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a tarefa ser a lacuna real e não uma reimplementação.
 
-### 4.1 Cargos e permissões pela lista de membros
+### 4.1 Cargos e permissões pela lista de membros — FEITO em 19/08/2026
 
 - Hoje: `server_members.role` (`owner`/`moderator`/`member`) e `channel_permissions` já existem no banco, e a aba **Permissões** do `SettingsDialog` já permite ao dono trocar o cargo de um membro e ligar/desligar ler, escrever e falar por canal e por cargo.
-- Implementação restante: expor isso onde a pessoa está — menu de contexto no `MemberPanel` (promover, rebaixar, expulsar, banir, silenciar) em vez de só na central de configurações; permitir que moderador administre canais, que o RLS já autoriza (`can_manage_channels`), mas o front bloqueia; tratar transferência de propriedade de verdade, porque hoje escolher `owner` para outra pessoa não move `servers.owner_id` e deixaria dois donos; permitir limpar uma permissão de canal e voltar ao padrão.
+- Entregue: menu por membro no `MemberPanel` com promover, rebaixar, cortar microfone, cortar áudio, timeout, remover e banir, respeitando a hierarquia; transferência de propriedade real pela RPC `transfer_server_ownership`, que move `servers.owner_id` e rebaixa o dono anterior a moderador; remoção sem banimento pela RPC `remove_server_member`; moderador passou a administrar canais na interface, como o RLS já permitia.
+- Restante: limpar uma permissão de canal e voltar ao padrão, e overrides por membro individual.
 - Critério de aceite: dono e moderador administram um membro a partir da lista de membros, dentro do que o cargo permite, e a mudança aparece para os outros sem recarregar.
 - Teste: integração com duas contas; conferir que moderador não consegue agir sobre dono nem sobre outro moderador.
 - QA: abrir o servidor → painel de membros → clicar em um membro → alterar cargo → conferir o que ele passa a ver e a poder fazer.

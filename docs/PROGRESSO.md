@@ -142,4 +142,7 @@ Branch atual: `main`.
 - validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (21/21, com as jornadas de home reescritas).
 - menu do servidor saiu da setinha isolada e passou a ocupar o cabecalho inteiro: nome, papel de quem le e seta abrem o mesmo menu, agora com convidar pessoas, configuracoes, cargos e permissoes, criar canal, silenciar, marcar como lido e sair do servidor. Antes o menu tinha tres itens e o resto so existia na central de configuracoes.
 - criar canal deixou de ser exclusivo do dono na interface: moderador ja podia pelo RLS (`can_manage_channels`) e agora ve os mesmos atalhos.
+- painel de membros deixou de ser so leitura: cada membro tem menu com promover, rebaixar, cortar microfone, cortar audio, timeout, remover e banir, dentro do que o cargo de quem le permite. Antes tudo isso vivia apenas na aba Permissoes da central de configuracoes.
+- transferencia de propriedade passou a existir de verdade. Escolher `owner` no seletor antigo so mudava `server_members.role` e deixava `servers.owner_id` apontando para o dono antigo, criando dois donos; a RPC `transfer_server_ownership` move o dono, promove o alvo e rebaixa quem transferiu a moderador. Migration `20260819234500_add_member_administration.sql`, ainda nao aplicada no Supabase.
+- remover sem banir passou a existir (`remove_server_member`), e moderador agora administra canais tambem na interface, direito que o RLS (`can_manage_channels`) ja concedia.
 
