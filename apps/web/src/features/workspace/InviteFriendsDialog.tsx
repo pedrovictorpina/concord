@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PersonSummary, ServerMemberRole, ServerSummary } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
 import { Modal } from '../../components/ui/Modal'
@@ -20,8 +20,9 @@ type InviteFriendsDialogProps = {
   inviteLinks: InviteLink[]
   members: Array<PersonSummary & { role: ServerMemberRole }>
   onClose: () => void
-  onCreateInviteLink: () => Promise<Result & { url: string }>
+  onCreateInviteLink: (options?: { expiresInHours?: number | null; maxUses?: number | null }) => Promise<Result & { url: string }>
   onOpenPeople: () => void
+  onSearchProfiles: (term: string) => Promise<PersonSummary[]>
   onSendServerInvite: (serverId: string, username: string) => Promise<Result>
   server: ServerSummary
 }
@@ -37,7 +38,7 @@ const expiryLabel = (expiresAt: string | null | undefined) => {
   return days === 1 ? 'Este link expira amanhã.' : `Este link expira em ${days} dias.`
 }
 
-export function InviteFriendsDialog({ channelKind = 'text', channelName, friends, inviteLinks, members, onClose, onCreateInviteLink, onOpenPeople, onSendServerInvite, server }: InviteFriendsDialogProps) {
+export function InviteFriendsDialog({ channelKind = 'text', channelName, friends, inviteLinks, members, onClose, onCreateInviteLink, onOpenPeople, onSearchProfiles, onSendServerInvite, server }: InviteFriendsDialogProps) {
   const searchRef = useRef<HTMLInputElement>(null)
   const [search, setSearch] = useState('')
   const [states, setStates] = useState<Record<string, InviteState>>({})
@@ -45,17 +46,42 @@ export function InviteFriendsDialog({ channelKind = 'text', channelName, friends
   const [createdUrl, setCreatedUrl] = useState('')
   const [copied, setCopied] = useState(false)
   const [creating, setCreating] = useState(false)
+  const [found, setFound] = useState<PersonSummary[]>([])
+  const [searching, setSearching] = useState(false)
+  const [expiresInHours, setExpiresInHours] = useState<number | null>(null)
+  const [maxUses, setMaxUses] = useState<number | null>(null)
 
   const memberIds = useMemo(() => new Set(members.map((member) => member.id)), [members])
   const activeLink = inviteLinks[0]
   const inviteUrl = createdUrl || (activeLink ? linkFor(activeLink.code) : '')
-  const owner = server.role === 'owner'
+  const canInvite = server.role === 'owner' || server.role === 'moderator'
 
   const visibleFriends = useMemo(() => {
     const term = search.trim().toLowerCase().replace(/^@/, '')
     if (!term) return friends
     return friends.filter((friend) => friend.nickname.toLowerCase().includes(term) || friend.username.toLowerCase().includes(term))
   }, [friends, search])
+
+  useEffect(() => {
+    const term = search.trim()
+    if (term.length < 2) {
+      setFound([])
+      setSearching(false)
+      return
+    }
+    let active = true
+    setSearching(true)
+    const timer = window.setTimeout(async () => {
+      const results = await onSearchProfiles(term)
+      if (!active) return
+      setFound(results)
+      setSearching(false)
+    }, 320)
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
+  }, [onSearchProfiles, search])
 
   const invite = async (friend: PersonSummary) => {
     setStates((current) => ({ ...current, [friend.id]: 'sending' }))
@@ -65,10 +91,29 @@ export function InviteFriendsDialog({ channelKind = 'text', channelName, friends
     setFeedback(result.message)
   }
 
+  const friendIds = useMemo(() => new Set(friends.map((friend) => friend.id)), [friends])
+  const outsiders = useMemo(() => found.filter((person) => !friendIds.has(person.id)), [found, friendIds])
+
+  const renderPerson = (person: PersonSummary) => {
+    const already = memberIds.has(person.id)
+    const state = states[person.id] ?? 'idle'
+    return (
+      <div className="invite-friend-row" key={person.id}>
+        <Avatar initials={initialsFrom(person.nickname)} url={person.avatarUrl} />
+        <div><strong>{person.nickname}</strong><small>@{person.username}</small></div>
+        {already
+          ? <span className="invite-tag">JÁ É MEMBRO</span>
+          : <button disabled={state !== 'idle' || !canInvite} type="button" onClick={() => void invite(person)}>
+              {state === 'sending' ? 'ENVIANDO...' : state === 'sent' ? 'CONVIDADO' : 'CONVIDAR'}
+            </button>}
+      </div>
+    )
+  }
+
   const createLink = async () => {
     setCreating(true)
     setFeedback('')
-    const result = await onCreateInviteLink()
+    const result = await onCreateInviteLink({ expiresInHours, maxUses })
     setCreating(false)
     if (result.ok) setCreatedUrl(result.url)
     else setFeedback(result.message)
@@ -90,14 +135,14 @@ export function InviteFriendsDialog({ channelKind = 'text', channelName, friends
     <Modal
       className="invite-friends-dialog"
       closeLabel="Fechar convite de amigos"
-      description={channelName ? <>Quem aceitar chega direto em <strong>{channelKind === 'voice' ? '◖' : '#'} {channelName}</strong>.</> : 'Convide alguém da sua lista de amigos para este servidor.'}
+      description={channelName ? <>Quem aceitar chega direto em <strong>{channelKind === 'voice' ? '◖' : '#'} {channelName}</strong>.</> : 'Busque por apelido ou identificador: a pessoa não precisa ser sua amiga.'}
       eyebrow="CONVIDAR PARA O SERVIDOR"
       initialFocusRef={searchRef}
       onClose={onClose}
       title={<>Convidar{' '}<br />para {server.name}.</>}
     >
       <label className="invite-search">
-        <span>Buscar amigos</span>
+        <span>Buscar pessoas</span>
         <input ref={searchRef} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Nome ou @identificador" type="search" />
       </label>
 
@@ -110,22 +155,16 @@ export function InviteFriendsDialog({ channelKind = 'text', channelName, friends
           </div>
         ) : null}
         {friends.length > 0 && visibleFriends.length === 0 ? <small>Nenhum amigo corresponde a essa busca.</small> : null}
-        {visibleFriends.map((friend) => {
-          const already = memberIds.has(friend.id)
-          const state = states[friend.id] ?? 'idle'
-          return (
-            <div className="invite-friend-row" key={friend.id}>
-              <Avatar initials={initialsFrom(friend.nickname)} />
-              <div><strong>{friend.nickname}</strong><small>@{friend.username}</small></div>
-              {already
-                ? <span className="invite-tag">JÁ É MEMBRO</span>
-                : <button disabled={state !== 'idle'} type="button" onClick={() => void invite(friend)}>
-                    {state === 'sending' ? 'ENVIANDO...' : state === 'sent' ? 'CONVIDADO' : 'CONVIDAR'}
-                  </button>}
-            </div>
-          )
-        })}
+        {visibleFriends.map((friend) => renderPerson(friend))}
       </section>
+
+      {search.trim().length >= 2 ? (
+        <section className="invite-friend-list" aria-label="Outras pessoas">
+          <p>OUTRAS PESSOAS{searching ? ' — BUSCANDO...' : ''}</p>
+          {outsiders.map((person) => renderPerson(person))}
+          {!searching && outsiders.length === 0 ? <small>Ninguém novo com esse nome ou identificador.</small> : null}
+        </section>
+      ) : null}
 
       <section className="invite-link-section" aria-label="Convite por link">
         <p>OU ENVIE UM LINK DO SERVIDOR</p>
@@ -137,12 +176,32 @@ export function InviteFriendsDialog({ channelKind = 'text', channelName, friends
             </div>
             <small>{expiryLabel(activeLink?.expires_at)}{activeLink ? ` · ${activeLink.uses_count} entradas por este link.` : ''}</small>
           </>
-        ) : owner ? (
+        ) : canInvite ? (
           <>
+            <div className="invite-link-options">
+              <label>
+                <span>Expira em</span>
+                <select value={expiresInHours ?? ''} onChange={(event) => setExpiresInHours(event.target.value ? Number(event.target.value) : null)}>
+                  <option value="">Nunca</option>
+                  <option value="1">1 hora</option>
+                  <option value="24">1 dia</option>
+                  <option value="168">7 dias</option>
+                </select>
+              </label>
+              <label>
+                <span>Limite de usos</span>
+                <select value={maxUses ?? ''} onChange={(event) => setMaxUses(event.target.value ? Number(event.target.value) : null)}>
+                  <option value="">Sem limite</option>
+                  <option value="1">1 pessoa</option>
+                  <option value="5">5 pessoas</option>
+                  <option value="25">25 pessoas</option>
+                </select>
+              </label>
+            </div>
             <button className="dialog-submit subdued" disabled={creating} type="button" onClick={() => void createLink()}>{creating ? 'GERANDO...' : 'GERAR LINK DE CONVITE'}</button>
             <small>O link pede confirmação antes de entrar e pode ser revogado nas configurações.</small>
           </>
-        ) : <small>Somente o proprietário do servidor pode gerar links de convite.</small>}
+        ) : <small>Somente quem administra o servidor pode gerar links de convite.</small>}
       </section>
 
       {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}

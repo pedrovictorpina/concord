@@ -410,6 +410,10 @@ button { border: 0; cursor: pointer; }
 .invite-friend-list > p, .invite-link-section > p { margin: 0; color: var(--color-text-faint); font: var(--font-label); letter-spacing: 1.2px; }
 .invite-friend-list { max-height: 232px; overflow-y: auto; padding-right: 4px; }
 .invite-friend-list > small, .invite-link-section > small { color: var(--color-text-muted); font: 9px/1.5 var(--font-mono); }
+.invite-link-options { display: flex; gap: 10px; margin-bottom: 10px; }
+.invite-link-options label { display: grid; flex: 1; gap: 4px; }
+.invite-link-options span { color: var(--color-text-faint); font: var(--font-label); letter-spacing: 1px; }
+.invite-link-options select { padding: 8px 9px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text); background: var(--color-surface-sunken); font-size: 12px; }
 .invite-friend-row { display: flex; align-items: center; gap: 9px; padding: 6px 0; border-bottom: var(--border-width) solid var(--color-border-soft); }
 .invite-friend-row > div { display: grid; gap: 1px; min-width: 0; flex: 1; }
 .invite-friend-row strong { overflow: hidden; color: var(--color-text); font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }

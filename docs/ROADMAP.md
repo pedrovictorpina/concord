@@ -43,7 +43,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [ ] Edicao, exclusao e respostas
 - [x] Home de amigos no formato do Discord, com presenca online e conversas diretas
 - [x] Cargos e permissoes pela lista de membros, com transferencia de propriedade
-- [ ] Convidar pessoa que ainda nao e amiga, com busca de perfis no proprio dialogo
+- [x] Convidar pessoa que ainda nao e amiga, com busca de perfis no proprio dialogo
 - [ ] Nao lidas por canal revisadas: leitura confiavel, badge por servidor e mencao sem falso positivo
 - [ ] Servidor publico ou privado, com descoberta de servidores publicos
 - [x] Menu do servidor no cabecalho com cargos, notificacoes, marcar como lido e sair do servidor

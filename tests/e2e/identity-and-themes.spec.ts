@@ -134,11 +134,11 @@ test.describe('identidade e temas', () => {
     const convidar = dialog.getByRole('button', { name: 'CONVIDAR' })
     await expect(convidar).toHaveCount(1)
 
-    await dialog.getByLabel('Buscar amigos').fill('nina')
+    await dialog.getByLabel('Buscar pessoas').fill('nina')
     await expect(dialog.getByText('@nina')).toBeVisible()
     await expect(dialog.getByText('@ari')).toHaveCount(0)
 
-    await dialog.getByLabel('Buscar amigos').fill('zzz')
+    await dialog.getByLabel('Buscar pessoas').fill('zzz')
     await expect(dialog.getByText('Nenhum amigo corresponde a essa busca.')).toBeVisible()
 
     await dialog.getByRole('button', { name: 'GERAR LINK DE CONVITE' }).click()

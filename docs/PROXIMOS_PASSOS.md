@@ -38,10 +38,10 @@ Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a 
 - Teste: integração com duas contas; conferir que moderador não consegue agir sobre dono nem sobre outro moderador.
 - QA: abrir o servidor → painel de membros → clicar em um membro → alterar cargo → conferir o que ele passa a ver e a poder fazer.
 
-### 4.2 Convidar sem exigir amizade
+### 4.2 Convidar sem exigir amizade — FEITO em 19/08/2026
 
 - Hoje: o diálogo **Convidar amigos** lista apenas `friendships`, e o campo de busca só filtra essa lista carregada. Convidar alguém de fora existe só como formulário por `@username` exato no `PeopleDialog`, visível apenas para o dono. O link de convite já funciona para qualquer pessoa.
-- Implementação restante: busca de perfis no banco (por apelido ou identificador, parcial) dentro do próprio diálogo de convite, com o resultado convidável direto; liberar convite para moderador, hoje barrado pela política `owners can send server invites`; expor validade e limite de usos na criação do link, colunas que já existem e ficam sempre nulas; usar `inspect_server_invite_link` para o convidado ver de qual servidor é o link antes de aceitar.
+- Entregue: o diálogo busca perfis no banco por apelido ou identificador parcial e lista "outras pessoas" convidáveis direto; convite e link liberados para moderador pela política `owners and moderators can send server invites` (migration `20260819235500`); criação de link com validade (1 hora, 1 dia, 7 dias) e limite de usos; `inspect_server_invite_link` alimenta o diálogo do convidado, que agora mostra o nome do servidor e bloqueia link inválido antes do clique.
 - Critério de aceite: convidar alguém que nunca foi amigo, sem sair do diálogo de convite, e o convidado entra pelo aceite explícito.
 - Teste: integração com uma conta não amiga; conferir que pessoa banida continua recusada.
 - QA: servidor → Convidar → buscar por identificador → convidar → aceitar na outra conta.

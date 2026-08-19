@@ -491,10 +491,11 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     return { ok: true, message: 'Permissões do canal atualizadas.' }
   }, [activeServer, loadServerControls])
 
-  const createInviteLink = useCallback(async () => {
+  const createInviteLink = useCallback(async (options?: { expiresInHours?: number | null; maxUses?: number | null }) => {
     if (!supabase || !userId) return { ok: false, message: 'Entre com sua conta para gerar links de convite.', url: '' }
-    if (!activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietário pode criar links.', url: '' }
-    const { data, error: requestError } = await supabase.from('server_invite_links').insert({ server_id: activeServer.id, created_by: userId }).select('code').single()
+    if (!activeServer || !['owner', 'moderator'].includes(activeServer.role)) return { ok: false, message: 'Somente quem administra o servidor pode criar links.', url: '' }
+    const expiresAt = options?.expiresInHours ? new Date(Date.now() + options.expiresInHours * 60 * 60 * 1000).toISOString() : null
+    const { data, error: requestError } = await supabase.from('server_invite_links').insert({ server_id: activeServer.id, created_by: userId, expires_at: expiresAt, max_uses: options?.maxUses ?? null }).select('code').single()
     if (requestError || !data) return { ok: false, message: 'Não foi possível criar o link.', url: '' }
     await loadServerControls(activeServer.id)
     return { ok: true, message: 'Link de convite criado.', url: `${window.location.origin}/?invite=${data.code}` }
@@ -507,6 +508,13 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     await loadServerControls(activeServer.id)
     return { ok: true, message: 'Link revogado.' }
   }, [activeServer, loadServerControls])
+
+  const inspectInviteLink = useCallback(async (code: string) => {
+    if (!supabase) return null
+    const { data, error: requestError } = await supabase.rpc('inspect_server_invite_link', { target_code: code }).maybeSingle()
+    if (requestError || !data) return null
+    return data as { server_id: string; server_name: string }
+  }, [])
 
   const redeemInviteLink = useCallback(async (code: string) => {
     if (!supabase) return { ok: false, message: 'Conecte sua identidade antes de aceitar o convite.' }
@@ -547,6 +555,22 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     await loadServerControls(activeServer.id)
     return { ok: true, message: 'Categoria criada.' }
   }, [activeServer, categories.length, loadServerControls])
+
+  const searchProfiles = useCallback(async (term: string) => {
+    const normalized = term.trim().replace(/^@/, '').toLowerCase()
+    if (demoMode || !supabase || !userId || normalized.length < 2) return [] as PersonSummary[]
+    const { data, error: requestError } = await supabase
+      .from('profiles')
+      .select('id, nickname, username, avatar_url')
+      .or(`username.ilike.%${normalized}%,nickname.ilike.%${normalized}%`)
+      .neq('id', userId)
+      .limit(10)
+    if (requestError || !data) return [] as PersonSummary[]
+    return (data as ProfileRow[]).flatMap((row) => {
+      const profile = mapProfile(row)
+      return profile ? [profile] : []
+    })
+  }, [demoMode, userId])
 
   const findProfile = useCallback(async (username: string) => {
     if (!supabase || !userId) return { ok: false as const, message: 'Conecte sua identidade antes de continuar.' }
@@ -645,6 +669,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     serverMuted,
     inviteLinks,
     sendMessage,
+    searchProfiles,
     sendFriendRequest,
     sendServerInvite,
     servers,
@@ -657,6 +682,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     deleteServer,
     saveChannel,
     deleteChannel,
+    inspectInviteLink,
     redeemInviteLink,
     revokeInviteLink,
     saveChannelPermissions,
