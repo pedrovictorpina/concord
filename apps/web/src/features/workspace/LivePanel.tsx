@@ -57,7 +57,7 @@ export function LivePanel({ channel, connected, connecting, demoMode, onJoin, pa
         <div className="voice-room-stage">
           {participants.length === 0 ? <span className="voice-room-icon">◖</span> : null}
           <h1>{channel.name}</h1>
-          {sharing ? <div className="voice-stage-share"><video ref={videoRef} autoPlay muted={demoMode} playsInline /><span className="capture-label">TRANSMITINDO</span></div> : null}
+          {sharing ? <div className="voice-stage-share"><video ref={videoRef} autoPlay muted={demoMode} playsInline /><span className="capture-label">TRANSMITINDO</span><button className="voice-stage-fullscreen" type="button" onClick={() => void videoRef.current?.requestFullscreen()} aria-label="Ver tela em tela cheia">⛶ <span>TELA CHEIA</span></button></div> : null}
           {participants.length > 0 ? (
             <ul className="voice-stage-grid">
               {participants.map((participant) => (

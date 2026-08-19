@@ -378,9 +378,11 @@ button { border: 0; cursor: pointer; }
 .voice-tile strong { max-width: 100%; overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .voice-tile small { color: var(--color-text-muted); font: 8px var(--font-mono); }
 .voice-tile.speaking { border-color: var(--color-accent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent); }
-.voice-stage-share { position: relative; width: min(560px, 100%); margin: 18px 0 4px; overflow: hidden; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); background: var(--color-canvas); }
-.voice-stage-share video { display: block; width: 100%; max-height: 320px; object-fit: contain; }
+.voice-stage-share { position: relative; width: min(1100px, 100%); margin: 18px 0 4px; overflow: hidden; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); background: var(--color-canvas); }
+.voice-stage-share video { display: block; width: 100%; max-height: min(68vh, 680px); object-fit: contain; }
 .voice-stage-share .capture-label { position: absolute; top: 8px; left: 8px; padding: 3px 7px; border-radius: 4px; color: var(--color-accent-contrast); background: var(--color-danger); font: 7px var(--font-mono); letter-spacing: 1px; }
+.voice-stage-fullscreen { position: absolute; top: 8px; right: 8px; padding: 6px 8px; border: var(--border-width) solid var(--color-border); color: var(--color-text); background: color-mix(in srgb, var(--color-canvas) 82%, transparent); font: 8px var(--font-mono); letter-spacing: .7px; }
+.voice-stage-fullscreen:hover { border-color: var(--color-accent); color: var(--color-accent); }
 .voice-join { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; padding: 12px; border: var(--border-width) solid var(--color-accent); color: var(--color-accent); background: var(--color-accent-soft); font: 9px var(--font-mono); letter-spacing: .7px; }
 .voice-dock-status { display: flex; align-items: center; gap: 7px; padding: 5px 4px 10px; color: var(--color-text); }
 .voice-dock-status small { margin-left: auto; color: var(--color-text-faint); font: 7px var(--font-mono); }
@@ -458,6 +460,8 @@ button { border: 0; cursor: pointer; }
   .member-panel { display: none; }
   .voice-room > header { padding: 0 16px; }
   .voice-room-stage { padding: 24px; }
+  .voice-stage-share { width: 100%; }
+  .voice-stage-fullscreen span { display: none; }
   .voice-dock, .voice-dock.floating { right: 12px; bottom: 72px; left: 12px; width: auto; border: var(--border-width) solid var(--color-border); box-shadow: var(--shadow-panel); }
   .quality-picker { width: min(92vw, 300px); }
   .voice-tile { width: 116px; padding: 13px 10px; }
