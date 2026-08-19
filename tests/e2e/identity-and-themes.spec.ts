@@ -92,6 +92,23 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Fechar pessoas e convites' }).click()
   })
 
+  test('lista os membros do servidor e seus cargos', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+
+    const panel = page.getByRole('complementary', { name: 'Membros do servidor' })
+    await expect(panel).toContainText('3 NO SERVIDOR')
+    await expect(panel).toContainText('PROPRIETARIO — 1')
+    await expect(panel).toContainText('MODERADORES — 1')
+    await expect(panel).toContainText('MEMBROS — 1')
+    await expect(panel.getByText('@fundador · proprietário')).toBeVisible()
+    await expect(panel.getByText('@ari · moderador')).toBeVisible()
+    await expect(panel.getByText('@rafa · membro')).toBeVisible()
+
+    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await expect(panel).toHaveCount(0)
+  })
+
   test('mantém a conexão de voz ao navegar entre canais', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()

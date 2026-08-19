@@ -71,7 +71,7 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
     if (!connectedChannelId) return {}
     return {
       [connectedChannelId]: [{
-        userId: userId ?? 'voce',
+        userId: userId ?? 'demo-user',
         channelId: connectedChannelId,
         nickname: identity.nickname,
         username: identity.username,

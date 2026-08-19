@@ -21,7 +21,7 @@ type MessageRow = {
   body: string
   created_at: string
   edited_at: string | null
-  profiles: Array<{ nickname: string }> | null
+  profiles: { nickname: string } | Array<{ nickname: string }> | null
 }
 
 type ProfileRow = PersonSummary
@@ -64,6 +64,12 @@ const demoServer: ServerSummary = {
 }
 const demoFriends: PersonSummary[] = [{ id: 'demo-amigo', nickname: 'Ari', username: 'ari' }]
 
+const demoMembers: Array<PersonSummary & { role: ServerMemberRole }> = [
+  { id: 'demo-user', nickname: 'Pedro', username: 'fundador', role: 'owner' },
+  { id: 'demo-moderador', nickname: 'Ari', username: 'ari', role: 'moderator' },
+  { id: 'demo-membro', nickname: 'Rafa', username: 'rafa', role: 'member' },
+]
+
 const demoMessageList: MessageSummary[] = initialMessages.map((message) => ({
   id: String(message.id),
   channelId: 'geral',
@@ -74,11 +80,16 @@ const demoMessageList: MessageSummary[] = initialMessages.map((message) => ({
   editedAt: null,
 }))
 
+const nicknameFrom = (embedded: { nickname: string } | Array<{ nickname: string }> | null) => {
+  const profile = Array.isArray(embedded) ? embedded[0] : embedded
+  return profile?.nickname?.trim() || 'Membro'
+}
+
 const mapMessage = (row: MessageRow): MessageSummary => ({
   id: row.id,
   channelId: row.channel_id,
   authorId: row.author_id,
-  authorNickname: row.profiles?.[0]?.nickname ?? 'Membro',
+  authorNickname: nicknameFrom(row.profiles),
   body: row.body,
   createdAt: row.created_at,
   editedAt: row.edited_at,
@@ -98,7 +109,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
   const [error, setError] = useState<string | null>(null)
   const [serverMuted, setServerMuted] = useState(false)
   const [unreadByChannel, setUnreadByChannel] = useState<Record<string, { count: number; mentioned: boolean }>>({})
-  const [members, setMembers] = useState<Array<PersonSummary & { role: ServerMemberRole }>>([])
+  const [members, setMembers] = useState<Array<PersonSummary & { role: ServerMemberRole }>>(demoMode ? demoMembers : [])
   const [channelPermissions, setChannelPermissions] = useState<ChannelPermission[]>([])
   const [inviteLinks, setInviteLinks] = useState<InviteLinkRow[]>([])
   const [categories, setCategories] = useState<CategoryRow[]>([])
