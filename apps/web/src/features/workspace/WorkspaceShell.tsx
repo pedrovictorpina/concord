@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { DropdownMenu } from 'radix-ui'
 import { ChannelPanel } from './ChannelPanel'
 import { ChatPanel } from './ChatPanel'
 import { CreateServerDialog } from './CreateServerDialog'
@@ -96,7 +97,22 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
       {settingsOpen ? <SettingsDialog categories={workspace.categories} exitLabel={demoMode ? 'SAIR DA DEMONSTRAÇÃO' : 'SAIR DA CONTA'} onExit={onExit} channels={workspace.channels} channelPermissions={workspace.channelPermissions} identity={localIdentity} initialChannelKind={channelCreationKind ?? 'text'} initialTab={settingsTab} inviteLinks={workspace.inviteLinks} key={`${workspace.activeServerId}-${settingsTab}`} members={workspace.members} onClose={() => { setSettingsOpen(false); setChannelCreationKind(null); setSettingsTab('profile') }} onCreateCategory={workspace.createCategory} onCreateInviteLink={workspace.createInviteLink} onDeleteChannel={workspace.deleteChannel} onDeleteServer={workspace.deleteServer} onLeaveServer={workspace.leaveServer} onMarkServerRead={workspace.markServerRead} onModerateMember={workspace.moderateMember} onRevokeInviteLink={workspace.revokeInviteLink} onSaveChannel={workspace.saveChannel} onSaveChannelPermissions={workspace.saveChannelPermissions} onSaveProfile={saveProfile} onSaveServer={workspace.saveServer} onSaveServerNickname={workspace.saveServerNickname} onSelectServer={(serverId) => { workspace.setActiveServerId(serverId); setSettingsTab('server') }} onSetMemberRole={workspace.setMemberRole} onSetMuted={workspace.setMuted} onUploadAvatar={onUploadAvatar} server={workspace.activeServer} serverMuted={workspace.serverMuted} servers={workspace.servers} userId={userId} /> : null}
       {inviteOpen && inviteCode ? <InviteLinkDialog code={inviteCode} onAccept={workspace.redeemInviteLink} onClose={() => { setInviteOpen(false); const url = new URL(window.location.href); url.searchParams.delete('invite'); window.history.replaceState({}, '', `${url.pathname}${url.search}`) }} /> : null}
       {voice.target ? <VoiceDock channelName={voice.target.channelName} demoMode={demoMode} error={voice.error} floating={!workspace.activeServer} microphoneDisabled={workspace.voiceRestrictions.microphoneDisabled} microphoneEnabled={voice.microphoneEnabled} onLeave={voice.leave} onOpenChannel={openConnectedChannel} onStartScreenShare={(quality) => { void voice.startScreenShare(quality) }} onStopScreenShare={voice.stopScreenShare} onToggleMicrophone={voice.toggleMicrophone} onToggleOutput={voice.toggleOutput} outputDisabled={workspace.voiceRestrictions.outputDisabled} outputEnabled={voice.outputEnabled} serverName={voice.target.serverName} sharing={voice.sharing} /> : null}
-      <nav className="mobile-you-bar" aria-label="Navegação móvel"><button type="button" onClick={() => setMobileNavigationOpen(true)}>☰ <span>Canais</span></button><button type="button" onClick={() => workspace.setActiveServerId(null)}>● <span>Mensagens</span></button><button type="button" onClick={() => { setSettingsTab('profile'); setSettingsOpen(true) }}>{localIdentity.avatarUrl ? <img src={localIdentity.avatarUrl} alt="" /> : localIdentity.initials}<span>Você</span></button></nav>
+      <nav className="mobile-you-bar" aria-label="Navegação móvel">
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild><button type="button" aria-label="Trocar servidor">◉ <span>Servidores</span></button></DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content align="start" className="mobile-servers-menu" side="top" sideOffset={10}>
+              <DropdownMenu.Item onSelect={() => workspace.setActiveServerId(null)}>Mensagens</DropdownMenu.Item>
+              {workspace.servers.map((server) => <DropdownMenu.Item key={server.id} onSelect={() => workspace.setActiveServerId(server.id)}>{server.name}</DropdownMenu.Item>)}
+              <DropdownMenu.Separator />
+              <DropdownMenu.Item onSelect={() => setCreateDialogOpen(true)}>Criar servidor</DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
+        <button type="button" onClick={() => setMobileNavigationOpen(true)}>☰ <span>Canais</span></button>
+        <button type="button" onClick={() => workspace.setActiveServerId(null)}>● <span>Mensagens</span></button>
+        <button type="button" onClick={() => { setSettingsTab('profile'); setSettingsOpen(true) }}>{localIdentity.avatarUrl ? <img src={localIdentity.avatarUrl} alt="" /> : localIdentity.initials}<span>Você</span></button>
+      </nav>
     </main>
   )
 }

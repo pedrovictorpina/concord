@@ -260,6 +260,17 @@ test.describe('identidade e temas', () => {
     await expect(page.getByRole('button', { name: 'geral' })).toBeVisible()
   })
 
+  test('permite trocar de servidor pela navegação móvel', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+
+    await page.getByRole('button', { name: 'Trocar servidor' }).click()
+    const servers = page.getByRole('menu')
+    await expect(servers.getByRole('menuitem', { name: 'Concord' })).toBeVisible()
+    await expect(servers.getByRole('menuitem', { name: 'Criar servidor' })).toBeVisible()
+  })
+
   test('oferece o fluxo móvel de adicionar amigos por identificador', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
