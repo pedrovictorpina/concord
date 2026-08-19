@@ -64,6 +64,7 @@ button { border: 0; cursor: pointer; }
 
 .workspace-heading { justify-content: space-between; padding: 0 18px; }
 .workspace-heading strong { display: block; margin-top: 3px; font-size: 19px; letter-spacing: -.4px; }
+.workspace-actions { display: flex; gap: 8px; }
 .workspace-heading button { color: var(--color-text-muted); background: transparent; font-size: 18px; }
 .channel-group { padding: 20px 10px 4px; }
 .channel-group > p { margin: 0 8px 9px; color: var(--color-text-faint); font: var(--font-label); letter-spacing: 1.4px; }
@@ -177,6 +178,18 @@ button { border: 0; cursor: pointer; }
 .dialog-submit { position: relative; z-index: 1; padding: 13px; border: var(--border-width) solid var(--color-accent); color: var(--color-accent-contrast); background: var(--color-accent); font: 10px var(--font-mono); letter-spacing: 1px; }
 .dialog-submit:disabled { cursor: wait; opacity: .65; }
 .dialog-feedback { margin: -4px 0 0; color: var(--color-danger); font: 10px var(--font-mono); }
+.people-dialog { width: min(100%, 520px); max-height: calc(100vh - 40px); overflow-y: auto; }
+.people-form { margin-top: 20px; }
+.people-form + .people-form, .people-list { margin-top: 18px; padding-top: 18px; border-top: var(--border-width) solid var(--color-border-soft); }
+.dialog-submit.subdued { color: var(--color-accent); background: var(--color-accent-soft); }
+.people-list > p { margin: 0 0 9px; color: var(--color-text-faint); font: var(--font-label); letter-spacing: 1.2px; }
+.people-list > small, .friends-count { color: var(--color-text-faint); font: 9px var(--font-mono); }
+.person-row { display: flex; align-items: center; gap: 9px; min-height: 42px; padding: 6px 0; }
+.person-row strong { display: grid; min-width: 0; flex: 1; font-size: 12px; }
+.person-row strong small { overflow: hidden; color: var(--color-text-muted); font: 9px var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
+.person-row button { padding: 7px 8px; border: var(--border-width) solid var(--color-accent); color: var(--color-accent); background: var(--color-accent-soft); font: 8px var(--font-mono); letter-spacing: .7px; }
+.person-row button:disabled { cursor: wait; opacity: .55; }
+.friends-count { margin: 18px 0 0; color: var(--color-accent); }
 
 .live-panel { border-right: 0; border-left: var(--border-width) solid var(--color-border); }
 .live-panel > header { justify-content: space-between; padding: 0 18px; color: var(--color-text-muted); font: 9px var(--font-mono); letter-spacing: 1.4px; }

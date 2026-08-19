@@ -13,7 +13,7 @@
 
 ## Proxima acao
 
-Concluir a limpeza das contas temporarias de QA da Etapa 02 e iniciar a interface de amizades e convites.
+Validar o Preview de amizades e convites e decidir se a Etapa 02 segue para moderacao ou para voz e compartilhamento.
 
 Branch atual: `codex/etapa-02-comunidades-texto`.
 
@@ -70,3 +70,12 @@ Branch atual: `codex/etapa-02-comunidades-texto`.
 - integracao remota aprovou criacao, isolamento por RLS, associacao de membro, Realtime e amizade aceita;
 - seis jornadas Playwright, typecheck, lint e verificacao de migrations aprovados;
 - dez contas temporarias de QA e seus dados dependentes foram removidos no Supabase; a verificacao retornou zero registros em `auth.users` e `public.profiles`.
+
+### 2026-08-19
+
+- interface de amizades entregue: busca por `@identificador`, pedidos recebidos, aceite e lista de amigos;
+- convites diretos para servidores implementados com aceite explicito antes de criar a membresia;
+- migration de convites aplicada ao Supabase e aprovada no lint;
+- integracao remota aprovou envio e aceite de convite, incluindo a criacao segura de membro;
+- seis jornadas Playwright, build e lint aprovados;
+- quatro contas temporarias de QA aguardam limpeza pelo manifesto local.

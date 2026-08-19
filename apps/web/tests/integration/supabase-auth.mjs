@@ -221,6 +221,34 @@ try {
     .single()
   assert(!friendshipError && friendship, 'Aceitar solicitacao deve criar a amizade canonica.')
 
+  const { data: inviteOnlyServer, error: inviteOnlyServerError } = await clientA
+    .from('servers')
+    .insert({ owner_id: accountA.userId, name: `Convite QA ${runId}`, description: 'Validacao de convite direto.' })
+    .select('id')
+    .single()
+  assert(!inviteOnlyServerError && inviteOnlyServer, 'O proprietario deve conseguir criar o servidor usado no convite.')
+
+  const { data: serverInvite, error: serverInviteError } = await clientA
+    .from('server_invites')
+    .insert({ server_id: inviteOnlyServer.id, sender_id: accountA.userId, recipient_id: accountB.userId })
+    .select('id')
+    .single()
+  assert(!serverInviteError && serverInvite, 'O proprietario deve conseguir enviar convite de servidor.')
+
+  const { error: acceptInviteError } = await clientB
+    .from('server_invites')
+    .update({ status: 'accepted' })
+    .eq('id', serverInvite.id)
+  assert(!acceptInviteError, 'O destinatario deve conseguir aceitar convite de servidor.')
+
+  const { data: invitedMembership, error: invitedMembershipError } = await clientB
+    .from('server_members')
+    .select('role')
+    .eq('server_id', inviteOnlyServer.id)
+    .eq('user_id', accountB.userId)
+    .single()
+  assert(!invitedMembershipError && invitedMembership?.role === 'member', 'Aceitar convite deve adicionar o destinatario ao servidor.')
+
   await clientA.auth.signOut()
   const { data: signedInAgain, error: signInError } = await clientA.auth.signInWithPassword({
     email: accountA.email,
@@ -244,7 +272,7 @@ try {
     projectRef,
     usersCreated: currentRunUsers.length,
     usersPendingCleanup: createdUsers.length,
-    checks: ['signup', 'profile-trigger', 'login', 'password-update', 'authenticated-read', 'own-update', 'foreign-update-blocked', 'anonymous-read-blocked', 'server-create', 'owner-membership', 'default-channel', 'non-member-server-blocked', 'member-server-read', 'realtime-message', 'friend-request', 'friendship-accept'],
+    checks: ['signup', 'profile-trigger', 'login', 'password-update', 'authenticated-read', 'own-update', 'foreign-update-blocked', 'anonymous-read-blocked', 'server-create', 'owner-membership', 'default-channel', 'non-member-server-blocked', 'member-server-read', 'realtime-message', 'friend-request', 'friendship-accept', 'server-invite', 'server-invite-accept'],
     cleanupManifest: '.qa/supabase-test-users.json',
   }))
 } finally {

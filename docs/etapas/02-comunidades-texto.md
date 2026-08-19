@@ -13,7 +13,7 @@ Transformar o workspace de demonstracao em um servidor real: cada usuario podera
 - versionar a base para solicitacoes de amizade e amizade aceita;
 - preservar o modo demonstracao quando o Supabase nao estiver configurado ou quando o usuario optar por explora-lo.
 
-Convites, interface de amizades, edicao/exclusao de mensagens, cargos e moderacao ficam nos proximos recortes desta mesma etapa.
+Edicao/exclusao de mensagens, cargos e moderacao ficam nos proximos recortes desta mesma etapa.
 
 ## Modelo de dados
 
@@ -54,6 +54,8 @@ As tabelas expostas usam RLS. A leitura de servidores, membros, canais e mensage
 - envio de mensagens persistentes e assinatura Realtime, com cancelamento da assinatura ao sair da tela;
 - contrato compartilhado para resumos de comunidade e mensagem;
 - correcao complementar de RLS para permitir que o criador receba o servidor retornado pelo `insert`.
+- janela unica para buscar usuarios por `@identificador`, enviar e aceitar pedidos de amizade e listar amigos;
+- convites diretos e privados para servidores, aceitos pelo destinatario antes de criar a membresia.
 
 ## Validacoes executadas
 
@@ -68,7 +70,5 @@ Resultado: build e lint aprovados; seis jornadas Playwright aprovadas; integraca
 
 ## Pendencias do proximo recorte
 
-- tela para buscar usuarios, enviar/aceitar solicitacoes e listar amigos;
-- convites para comunidade;
 - edicao, exclusao, respostas e paginacao de mensagens;
 - cargos, permissoes e moderacao.

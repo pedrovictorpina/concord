@@ -8,15 +8,16 @@ type ChannelPanelProps = {
   identity: WorkspaceIdentity
   onChannelChange: (channelId: string) => void
   onExit: () => void
+  onOpenPeople: () => void
   server: ServerSummary | null
 }
 
-export function ChannelPanel({ activeChannelId, channels, identity, onChannelChange, onExit, server }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, channels, identity, onChannelChange, onExit, onOpenPeople, server }: ChannelPanelProps) {
   return (
     <aside className="channel-panel">
       <header className="workspace-heading">
         <div><span className="eyebrow">SERVIDOR PRIVADO</span><strong>{server?.name ?? 'Concord'}</strong></div>
-        <button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button>
+        <div className="workspace-actions"><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
       </header>
 
       <section className="channel-group">

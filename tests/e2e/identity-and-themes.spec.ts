@@ -56,6 +56,10 @@ test.describe('identidade e temas', () => {
     await page.getByRole('textbox', { name: 'Mensagem' }).fill('Temas funcionando')
     await page.getByRole('textbox', { name: 'Mensagem' }).press('Enter')
     await expect(page.getByText('Temas funcionando')).toBeVisible()
+
+    await page.getByRole('button', { name: 'Amigos e convites' }).click()
+    await expect(page.getByRole('heading', { name: 'Pessoas em sintonia.' })).toBeVisible()
+    await page.getByRole('button', { name: 'Fechar pessoas e convites' }).click()
   })
 
   test('mantém a autenticação utilizável em viewport móvel', async ({ page }) => {

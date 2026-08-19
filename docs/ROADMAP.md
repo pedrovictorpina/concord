@@ -27,9 +27,9 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 ## Etapa 02 - Comunidades e texto
 
 - [x] Planejar contratos, RLS e criterios de aceite
-- [ ] Solicitacoes e lista de amigos
+- [x] Solicitacoes e lista de amigos
 - [x] Criacao de servidores
-- [ ] Convites para servidores
+- [x] Convites para servidores
 - [x] Canais de texto
 - [x] Mensagens em tempo real
 - [ ] Edicao, exclusao e respostas
