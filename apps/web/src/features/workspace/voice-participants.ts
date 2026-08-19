@@ -28,6 +28,7 @@ export function mergeVoiceParticipants(
       initials: known?.initials ?? initialsFrom(live.nickname),
       avatarUrl: known?.avatarUrl ?? null,
       microphoneEnabled: live.microphoneEnabled,
+      outputEnabled: known?.outputEnabled ?? true,
       sharingScreen: live.sharingScreen,
       speaking: live.speaking,
     }

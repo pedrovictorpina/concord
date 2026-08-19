@@ -30,7 +30,9 @@ Fontes:
 ## Limites do piloto
 
 - 8 participantes por canal de voz;
-- 1 compartilhamento de tela por canal;
+- varias telas simultaneas por canal, uma por participante (revisado em 2026-08-19; antes era
+  1 tela por canal). O teto pratico continua sendo o de 8 participantes, e o egress cresce com
+  o numero de telas assistidas ao mesmo tempo;
 - 720p a 15 FPS como padrao;
 - sem camera, gravacao ou retransmissao;
 - desligar conexoes abandonadas;

@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { LocalTrack, Participant, RemoteTrack, RemoteTrackPublication, Room } from 'livekit-client'
+import type { LocalTrack, Participant, RemoteTrack, RemoteTrackPublication, Room, TrackPublication } from 'livekit-client'
 import { supabase } from '../../lib/supabase'
 import { screenShareQualities } from './screen-quality'
 import type { ScreenShareQuality } from './screen-quality'
+import type { ScreenShareView } from './screen-shares'
 
 type LiveKitToken = {
   serverUrl: string
@@ -44,6 +45,29 @@ const describeParticipant = (participant: Participant): LiveParticipant => ({
   speaking: participant.isSpeaking,
 })
 
+const shareIdFor = (publication: TrackPublication, participant: Participant) =>
+  publication.trackSid || `${participant.identity}:${publication.source}`
+
+const mergeShare = (current: ScreenShareView[], share: ScreenShareView) => {
+  const known = current.some((item) => item.id === share.id || item.track === share.track)
+  return known
+    ? current.map((item) => item.id === share.id || item.track === share.track ? share : item)
+    : [...current, share]
+}
+
+const describeShare = (
+  track: LocalTrack | RemoteTrack,
+  publication: TrackPublication,
+  participant: Participant,
+  isLocal: boolean,
+): ScreenShareView => ({
+  id: shareIdFor(publication, participant),
+  nickname: participant.name?.trim() || 'Membro',
+  isLocal,
+  track,
+  stream: null,
+})
+
 export function useLiveRoom() {
   const roomRef = useRef<Room | null>(null)
   const audioElementsRef = useRef<HTMLAudioElement[]>([])
@@ -53,7 +77,7 @@ export function useLiveRoom() {
   const [error, setError] = useState('')
   const [microphoneEnabled, setMicrophoneEnabled] = useState(false)
   const [outputEnabled, setOutputEnabled] = useState(true)
-  const [screenTrack, setScreenTrack] = useState<LocalTrack | RemoteTrack | null>(null)
+  const [screenShares, setScreenShares] = useState<ScreenShareView[]>([])
 
   const leave = useCallback(() => {
     const room = roomRef.current
@@ -64,7 +88,7 @@ export function useLiveRoom() {
     setConnectedChannelId(null)
     setParticipants([])
     setMicrophoneEnabled(false)
-    setScreenTrack(null)
+    setScreenShares([])
   }, [])
 
   const join = useCallback(async (channelId: string, options: { microphone: boolean }) => {
@@ -104,9 +128,19 @@ export function useLiveRoom() {
       setParticipants([room.localParticipant, ...room.remoteParticipants.values()].map(describeParticipant))
     }
 
-    room.on(RoomEvent.TrackSubscribed, (track, publication: RemoteTrackPublication) => {
-      if (publication.source === Track.Source.ScreenShare && track.kind === Track.Kind.Video) {
-        setScreenTrack(track as RemoteTrack)
+    const isScreenVideo = (publication: TrackPublication, track: LocalTrack | RemoteTrack) =>
+      publication.source === Track.Source.ScreenShare && track.kind === Track.Kind.Video
+
+    const addShare = (share: ScreenShareView) => {
+      setScreenShares((current) => mergeShare(current, share))
+    }
+    const dropShareByTrack = (track: LocalTrack | RemoteTrack) => {
+      setScreenShares((current) => current.filter((item) => item.track !== track))
+    }
+
+    room.on(RoomEvent.TrackSubscribed, (track, publication: RemoteTrackPublication, participant) => {
+      if (isScreenVideo(publication, track)) {
+        addShare(describeShare(track, publication, participant, false))
       }
       if (track.kind === Track.Kind.Audio) {
         const audio = track.attach() as HTMLAudioElement
@@ -118,18 +152,31 @@ export function useLiveRoom() {
     })
     room.on(RoomEvent.TrackUnsubscribed, (track) => {
       track.detach().forEach((element) => element.remove())
-      setScreenTrack((current) => current === track ? null : current)
+      dropShareByTrack(track)
+      sync()
+    })
+    room.on(RoomEvent.LocalTrackPublished, (publication, participant) => {
+      const track = publication.track
+      if (track && isScreenVideo(publication, track)) {
+        addShare(describeShare(track, publication, participant, true))
+      }
+      sync()
+    })
+    room.on(RoomEvent.LocalTrackUnpublished, (publication) => {
+      if (publication.track) dropShareByTrack(publication.track)
       sync()
     })
     room.on(RoomEvent.ParticipantConnected, sync)
-    room.on(RoomEvent.ParticipantDisconnected, sync)
+    room.on(RoomEvent.ParticipantDisconnected, (participant) => {
+      const sids = new Set([...participant.trackPublications.values()].map((publication) => publication.trackSid))
+      setScreenShares((current) => current.filter((item) => !sids.has(item.id)))
+      sync()
+    })
     room.on(RoomEvent.ParticipantNameChanged, sync)
     room.on(RoomEvent.TrackPublished, sync)
     room.on(RoomEvent.TrackUnpublished, sync)
     room.on(RoomEvent.TrackMuted, sync)
     room.on(RoomEvent.TrackUnmuted, sync)
-    room.on(RoomEvent.LocalTrackPublished, sync)
-    room.on(RoomEvent.LocalTrackUnpublished, sync)
     room.on(RoomEvent.ActiveSpeakersChanged, sync)
     room.on(RoomEvent.Disconnected, () => leave())
 
@@ -164,25 +211,23 @@ export function useLiveRoom() {
     return true
   }, [leave])
 
-  const toggleOutput = useCallback(() => {
-    const nextValue = !outputEnabledRef.current
-    outputEnabledRef.current = nextValue
-    audioElementsRef.current.forEach((element) => { element.muted = !nextValue })
-    setOutputEnabled(nextValue)
+  const setOutput = useCallback((next: boolean) => {
+    outputEnabledRef.current = next
+    audioElementsRef.current.forEach((element) => { element.muted = !next })
+    setOutputEnabled(next)
   }, [])
 
-  const toggleMicrophone = useCallback(async () => {
+  const setMicrophone = useCallback(async (next: boolean) => {
     const room = roomRef.current
     if (!room) return
-    const nextValue = !microphoneEnabled
     try {
-      await room.localParticipant.setMicrophoneEnabled(nextValue)
-      setMicrophoneEnabled(nextValue)
+      await room.localParticipant.setMicrophoneEnabled(next)
+      setMicrophoneEnabled(next)
     } catch (caught) {
       console.error('[voz] falha ao alternar o microfone', caught)
       setError('Permissao de microfone negada ou indisponivel.')
     }
-  }, [microphoneEnabled])
+  }, [])
 
   const startScreenShare = useCallback(async (quality: ScreenShareQuality) => {
     const room = roomRef.current
@@ -194,7 +239,10 @@ export function useLiveRoom() {
         { contentHint: 'detail', resolution, systemAudio: 'include', video: true },
         { degradationPreference: 'maintain-resolution', simulcast: true },
       )
-      if (publication?.track) setScreenTrack(publication.track)
+      if (publication?.track) {
+        const share = describeShare(publication.track, publication, room.localParticipant, true)
+        setScreenShares((current) => mergeShare(current, share))
+      }
     } catch (caught) {
       console.error('[voz] falha ao compartilhar a tela', caught)
       setError('Captura cancelada. Nenhuma tela foi compartilhada.')
@@ -203,7 +251,7 @@ export function useLiveRoom() {
 
   const stopScreenShare = useCallback(async () => {
     await roomRef.current?.localParticipant.setScreenShareEnabled(false)
-    setScreenTrack(null)
+    setScreenShares((current) => current.filter((item) => !item.isLocal))
   }, [])
 
   useEffect(() => leave, [leave])
@@ -216,10 +264,10 @@ export function useLiveRoom() {
     microphoneEnabled,
     outputEnabled,
     participants,
-    screenTrack,
+    screenShares,
+    setMicrophone,
+    setOutput,
     startScreenShare,
     stopScreenShare,
-    toggleMicrophone,
-    toggleOutput,
   }
 }
