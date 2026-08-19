@@ -8,6 +8,7 @@ type ChatPanelProps = {
   identity: WorkspaceIdentity
   loading: boolean
   messages: MessageSummary[]
+  onOpenMobileNavigation: () => void
   onSendMessage: (body: string, authorNickname: string) => Promise<{ ok: boolean; message: string }>
   server: ServerSummary | null
   userId?: string
@@ -20,7 +21,7 @@ const formatTime = (value: string) => new Intl.DateTimeFormat('pt-BR', {
 
 const firstUrl = (body: string) => body.match(/https?:\/\/[^\s]+/)?.[0]
 
-export function ChatPanel({ activeChannel, identity, loading, messages, onSendMessage, server, userId }: ChatPanelProps) {
+export function ChatPanel({ activeChannel, identity, loading, messages, onOpenMobileNavigation, onSendMessage, server, userId }: ChatPanelProps) {
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [feedback, setFeedback] = useState('')
@@ -56,7 +57,7 @@ export function ChatPanel({ activeChannel, identity, loading, messages, onSendMe
   return (
     <section className="transmission">
       <header className="transmission-header">
-        <div className="channel-title"><span>#</span><div><strong>{activeChannel?.name ?? 'canal'}</strong><small>{server.description || 'Conversa direta do servidor'}</small></div></div>
+        <div className="channel-title"><button className="mobile-channel-menu" type="button" aria-label="Abrir canais" onClick={onOpenMobileNavigation}>☰</button><span>#</span><div><strong>{activeChannel?.name ?? 'canal'}</strong><small>{server.description || 'Conversa direta do servidor'}</small></div></div>
         <div className="network-status"><i /> {loading ? 'SINCRONIZANDO' : 'REDE ESTAVEL'} <span>RT</span></div>
       </header>
 

@@ -115,6 +115,15 @@ test.describe('identidade e temas', () => {
     expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth)
   })
 
+  test('abre os canais pela navegação móvel', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: /Canais/ }).click()
+    await expect(page.getByRole('button', { name: 'Fechar canais' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'geral' })).toBeVisible()
+  })
+
   test('expõe o manifesto para instalação como PWA', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/manifest.webmanifest')

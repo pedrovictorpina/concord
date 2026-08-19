@@ -7,6 +7,8 @@ type ChannelPanelProps = {
   activeVoiceChannelId: string | null
   channels: ChannelSummary[]
   identity: WorkspaceIdentity
+  mobileOpen: boolean
+  onCloseMobile: () => void
   onChannelChange: (channelId: string) => void
   onVoiceChannelChange: (channelId: string) => void
   onExit: () => void
@@ -16,12 +18,12 @@ type ChannelPanelProps = {
   unreadByChannel: Record<string, { count: number; mentioned: boolean }>
 }
 
-export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, identity, onChannelChange, onVoiceChannelChange, onExit, onOpenPeople, onOpenSettings, server, unreadByChannel }: ChannelPanelProps) {
+export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, identity, mobileOpen, onCloseMobile, onChannelChange, onVoiceChannelChange, onExit, onOpenPeople, onOpenSettings, server, unreadByChannel }: ChannelPanelProps) {
   return (
-    <aside className="channel-panel">
+    <aside className={mobileOpen ? 'channel-panel mobile-open' : 'channel-panel'}>
       <header className="workspace-heading">
         <div><span className="eyebrow">SERVIDOR PRIVADO</span><strong>{server?.name ?? 'Concord'}</strong></div>
-        <div className="workspace-actions"><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><button type="button" aria-label="Abrir configurações" onClick={onOpenSettings}>⚙</button><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
+        <div className="workspace-actions"><button className="mobile-close" type="button" aria-label="Fechar canais" onClick={onCloseMobile}>←</button><button type="button" aria-label="Amigos e convites" onClick={onOpenPeople}>◎</button><button type="button" aria-label="Abrir configurações" onClick={onOpenSettings}>⚙</button><button type="button" aria-label="Sair do Concord" onClick={onExit}>×</button></div>
       </header>
 
       <section className="channel-group">

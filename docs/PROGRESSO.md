@@ -90,3 +90,4 @@ Branch atual: `codex/etapa-03-voz-tela`.
 - upload de avatar, aceite explícito de convite por link e controles de cargo/permissão foram implementados;
 - notificações push permanecem bloqueadas até existir chave VAPID e cliente instalável em HTTPS.
 - manifesto e service worker adicionados para permitir instalação como PWA em navegadores compatíveis.
+- navegação móvel revisada: barra inferior persistente para canais, pessoas e perfil; lista de canais agora abre como painel lateral em vez de desaparecer em telas pequenas.
