@@ -9,6 +9,25 @@ type LiveKitToken = {
   token: string
 }
 
+const tokenErrorMessages: Record<string, string> = {
+  invalid_session: 'Sua sessao expirou. Entre novamente para usar a voz.',
+  not_a_member: 'Voce nao e membro deste servidor.',
+  cannot_speak: 'Seu cargo nao pode falar neste canal.',
+  channel_not_found: 'Este canal de voz nao existe mais.',
+  livekit_not_configured: 'A voz ainda nao esta configurada nesta instalacao.',
+}
+
+const describeTokenFailure = async (caught: unknown) => {
+  const context = (caught as { context?: Response } | null)?.context
+  if (!context || typeof context.json !== 'function') return null
+  try {
+    const body = await context.clone().json() as { code?: string }
+    return body.code ? tokenErrorMessages[body.code] ?? null : null
+  } catch {
+    return null
+  }
+}
+
 export type LiveParticipant = {
   userId: string
   nickname: string
@@ -59,12 +78,14 @@ export function useLiveRoom() {
 
     let data: LiveKitToken | null = null
     try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('sessao ausente no cliente')
       const response = await supabase.functions.invoke<LiveKitToken>('livekit-token', { body: { channelId } })
       if (response.error || !response.data) throw response.error ?? new Error('resposta vazia do livekit-token')
       data = response.data
     } catch (caught) {
       console.error('[voz] falha ao autorizar entrada no canal', caught)
-      setError('Nao foi possivel autorizar sua entrada no canal de voz.')
+      setError(await describeTokenFailure(caught) ?? 'Nao foi possivel autorizar sua entrada no canal de voz.')
       return false
     }
 

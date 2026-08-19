@@ -53,3 +53,28 @@ Fazer a voz se comportar como no Discord em dois pontos que hoje falham:
 - aplicar no LiveKit as acoes de moderacao ja persistidas no Supabase (corte remoto de microfone).
 - volume individual, selecao de dispositivo e audio de sistema.
 - vaga limite por canal e reordenacao de participantes por tempo de entrada.
+
+## Correcao da autorizacao (2026-08-19)
+
+O QA com duas contas mostrou que a web nao entrava no canal: a Edge Function
+`livekit-token` respondia `401 Sessao invalida.` mesmo com `Authorization` valido.
+
+Causa: a funcao chamava `userClient.auth.getUser()` **sem argumento**, contando com o
+`Authorization` injetado em `global.headers`. No servidor nao existe sessao local, e o
+supabase-js recente resolve `getUser()` pela sessao armazenada, devolvendo erro de sessao
+ausente. O import era `npm:@supabase/supabase-js@2`, sem versao fixa, entao o comportamento
+mudava sozinho entre reinicios da funcao - o que explica ter funcionado antes no celular.
+
+Correcoes:
+
+- token extraido do header e passado explicitamente: `auth.getUser(token)`;
+- `@supabase/supabase-js` fixado em `2.112.3`, a mesma versao do cliente web;
+- chave do cliente de validacao com fallback `SUPABASE_PUBLISHABLE_KEY` -> `SUPABASE_ANON_KEY`
+  -> service role, para nao quebrar em projetos com as chaves legadas desativadas;
+- respostas de erro passam a trazer `code` (`invalid_session`, `not_a_member`, `cannot_speak`,
+  `channel_not_found`, `livekit_not_configured`), que o cliente traduz em texto amigavel;
+- ausencia dos segredos `LIVEKIT_*` deixa de virar erro genarico e responde
+  `503 livekit_not_configured`;
+- cada falha registra `console.error` na funcao e no cliente, sem expor detalhe tecnico na tela.
+
+A funcao precisa ser publicada para a correcao valer: `supabase functions deploy livekit-token`.
