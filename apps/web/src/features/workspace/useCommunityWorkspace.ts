@@ -24,7 +24,11 @@ type MessageRow = {
   profiles: { nickname: string } | Array<{ nickname: string }> | null
 }
 
-type ProfileRow = PersonSummary
+type ProfileRow = { id: string; nickname: string; username: string; avatar_url?: string | null }
+
+const mapProfile = (row: ProfileRow | null): PersonSummary | null => row
+  ? { id: row.id, nickname: row.nickname, username: row.username, avatarUrl: row.avatar_url ?? null }
+  : null
 
 type FriendRequestRow = {
   id: string
@@ -63,14 +67,14 @@ const demoServer: ServerSummary = {
   role: 'owner',
 }
 const demoFriends: PersonSummary[] = [
-  { id: 'demo-moderador', nickname: 'Ari', username: 'ari' },
-  { id: 'demo-amigo', nickname: 'Nina', username: 'nina' },
+  { id: 'demo-moderador', nickname: 'Ari', username: 'ari', avatarUrl: null },
+  { id: 'demo-amigo', nickname: 'Nina', username: 'nina', avatarUrl: null },
 ]
 
 const demoMembers: Array<PersonSummary & { role: ServerMemberRole }> = [
-  { id: 'demo-user', nickname: 'Pedro', username: 'fundador', role: 'owner' },
-  { id: 'demo-moderador', nickname: 'Ari', username: 'ari', role: 'moderator' },
-  { id: 'demo-membro', nickname: 'Rafa', username: 'rafa', role: 'member' },
+  { id: 'demo-user', nickname: 'Pedro', username: 'fundador', avatarUrl: null, role: 'owner' },
+  { id: 'demo-moderador', nickname: 'Ari', username: 'ari', avatarUrl: null, role: 'moderator' },
+  { id: 'demo-membro', nickname: 'Rafa', username: 'rafa', avatarUrl: null, role: 'member' },
 ]
 
 const demoMessageList: MessageSummary[] = initialMessages.map((message) => ({
@@ -101,7 +105,7 @@ const mapMessage = (row: MessageRow): MessageSummary => ({
 export function useCommunityWorkspace({ demoMode, userId, username }: CommunityWorkspaceOptions) {
   const connected = Boolean(supabase && userId && !demoMode)
   const [servers, setServers] = useState<ServerSummary[]>(demoMode ? [demoServer] : [])
-  const [activeServerId, setActiveServerId] = useState<string | null>(demoMode ? demoServer.id : null)
+  const [activeServerId, setActiveServerId] = useState<string | null>(null)
   const [channels, setChannels] = useState<ChannelSummary[]>(demoMode ? demoChannels : [])
   const [activeChannelId, setActiveChannelId] = useState<string | null>(demoMode ? 'geral' : null)
   const [messages, setMessages] = useState<MessageSummary[]>(demoMode ? demoMessageList : [])
@@ -143,7 +147,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     const nextServers = ((data ?? []) as unknown as ServerMembershipRow[])
       .flatMap((membership) => membership.servers ? [{ ...membership.servers, role: membership.role }] : [])
     setServers(nextServers)
-    setActiveServerId((current) => nextServers.some((server) => server.id === current) ? current : nextServers[0]?.id ?? null)
+    setActiveServerId((current) => current && nextServers.some((server) => server.id === current) ? current : null)
   }, [userId])
 
   const loadChannels = useCallback(async (serverId: string | null) => {
@@ -176,14 +180,17 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
       return
     }
     const [membersResult, permissionsResult, linksResult, categoriesResult, moderationResult] = await Promise.all([
-      supabase.from('server_members').select('user_id, role, profiles(id, nickname, username)').eq('server_id', serverId),
+      supabase.from('server_members').select('user_id, role, profiles(id, nickname, username, avatar_url)').eq('server_id', serverId),
       supabase.from('channel_permissions').select('channel_id, role, can_read, can_write, can_speak').in('channel_id', channels.map((channel) => channel.id)),
       supabase.from('server_invite_links').select('id, code, expires_at, max_uses, uses_count').eq('server_id', serverId).is('revoked_at', null).order('created_at', { ascending: false }),
       supabase.from('channel_categories').select('id, name').eq('server_id', serverId).order('position'),
       userId ? supabase.from('server_member_moderation').select('microphone_disabled, output_disabled').eq('server_id', serverId).eq('user_id', userId).maybeSingle() : Promise.resolve({ data: null, error: null }),
     ])
     if (membersResult.error || permissionsResult.error || linksResult.error || categoriesResult.error) return
-    setMembers(((membersResult.data ?? []) as unknown as MemberRow[]).flatMap((member) => member.profiles ? [{ ...member.profiles, role: member.role }] : []))
+    setMembers(((membersResult.data ?? []) as unknown as MemberRow[]).flatMap((member) => {
+      const profile = mapProfile(member.profiles)
+      return profile ? [{ ...profile, role: member.role }] : []
+    }))
     setChannelPermissions(((permissionsResult.data ?? []) as ChannelPermissionRow[]).map((item) => ({ channelId: item.channel_id, role: item.role, canRead: item.can_read, canWrite: item.can_write, canSpeak: item.can_speak })))
     setInviteLinks((linksResult.data ?? []) as InviteLinkRow[])
     setCategories((categoriesResult.data ?? []) as CategoryRow[])
@@ -215,9 +222,9 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     if (!supabase || !userId) return
 
     const [requestsResult, friendshipsResult, invitesResult] = await Promise.all([
-      supabase.from('friend_requests').select('id, sender_id, recipient_id, status, sender:profiles!friend_requests_sender_id_fkey(id, nickname, username), recipient:profiles!friend_requests_recipient_id_fkey(id, nickname, username)').eq('status', 'pending'),
-      supabase.from('friendships').select('user_a_id, user_b_id, person_a:profiles!friendships_user_a_id_fkey(id, nickname, username), person_b:profiles!friendships_user_b_id_fkey(id, nickname, username)').or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`),
-      supabase.from('server_invites').select('id, server_id, status, servers(name), sender:profiles!server_invites_sender_id_fkey(id, nickname, username)').eq('recipient_id', userId).eq('status', 'pending'),
+      supabase.from('friend_requests').select('id, sender_id, recipient_id, status, sender:profiles!friend_requests_sender_id_fkey(id, nickname, username, avatar_url), recipient:profiles!friend_requests_recipient_id_fkey(id, nickname, username, avatar_url)').eq('status', 'pending'),
+      supabase.from('friendships').select('user_a_id, user_b_id, person_a:profiles!friendships_user_a_id_fkey(id, nickname, username, avatar_url), person_b:profiles!friendships_user_b_id_fkey(id, nickname, username, avatar_url)').or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`),
+      supabase.from('server_invites').select('id, server_id, status, servers(name), sender:profiles!server_invites_sender_id_fkey(id, nickname, username, avatar_url)').eq('recipient_id', userId).eq('status', 'pending'),
     ])
 
     if (requestsResult.error || friendshipsResult.error || invitesResult.error) {
@@ -228,17 +235,17 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     setFriendRequests(((requestsResult.data ?? []) as unknown as FriendRequestRow[]).map((request) => ({
       id: request.id,
       direction: request.recipient_id === userId ? 'received' : 'sent',
-      person: request.recipient_id === userId ? request.sender : request.recipient,
+      person: mapProfile(request.recipient_id === userId ? request.sender : request.recipient),
       status: request.status,
     })).filter((request): request is FriendRequestSummary => Boolean(request.person)))
     setFriends(((friendshipsResult.data ?? []) as unknown as FriendshipRow[]).map((friendship) => (
-      friendship.user_a_id === userId ? friendship.person_b : friendship.person_a
+      mapProfile(friendship.user_a_id === userId ? friendship.person_b : friendship.person_a)
     )).filter((person): person is PersonSummary => Boolean(person)))
     setServerInvites(((invitesResult.data ?? []) as unknown as ServerInviteRow[]).map((invite) => ({
       id: invite.id,
       serverId: invite.server_id,
       serverName: invite.servers?.name ?? 'Servidor privado',
-      sender: invite.sender ?? { id: '', nickname: 'Membro', username: 'membro' },
+      sender: mapProfile(invite.sender) ?? { id: '', nickname: 'Membro', username: 'membro', avatarUrl: null },
       status: invite.status,
     })))
   }, [userId])
@@ -524,10 +531,10 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     if (!supabase || !userId) return { ok: false as const, message: 'Conecte sua identidade antes de continuar.' }
     const normalized = username.trim().replace(/^@/, '').toLowerCase()
     if (!normalized) return { ok: false as const, message: 'Informe um identificador como @nome.' }
-    const { data, error: requestError } = await supabase.from('profiles').select('id, nickname, username').eq('username', normalized).maybeSingle()
+    const { data, error: requestError } = await supabase.from('profiles').select('id, nickname, username, avatar_url').eq('username', normalized).maybeSingle()
     if (requestError || !data) return { ok: false as const, message: 'Usuario nao encontrado.' }
     if (data.id === userId) return { ok: false as const, message: 'Escolha outra pessoa.' }
-    return { ok: true as const, profile: data as ProfileRow }
+    return { ok: true as const, profile: mapProfile(data as ProfileRow) as PersonSummary }
   }, [userId])
 
   const sendFriendRequest = useCallback(async (username: string) => {

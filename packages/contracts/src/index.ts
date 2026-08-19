@@ -39,6 +39,14 @@ export type PersonSummary = {
   id: string
   nickname: string
   username: string
+  avatarUrl: string | null
+}
+
+export type FriendPresence = {
+  userId: string
+  status: UserStatus
+  voiceChannelName: string | null
+  voiceServerName: string | null
 }
 
 export type DirectMessageSummary = {

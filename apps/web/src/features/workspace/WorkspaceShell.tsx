@@ -5,6 +5,7 @@ import { ChatPanel } from './ChatPanel'
 import { CreateServerDialog } from './CreateServerDialog'
 import { DirectMessagePanel } from './DirectMessagePanel'
 import { FriendsHome } from './FriendsHome'
+import { HomeSidebar } from './HomeSidebar'
 import { LivePanel } from './LivePanel'
 import { MemberPanel } from './MemberPanel'
 import { InviteFriendsDialog } from './InviteFriendsDialog'
@@ -17,6 +18,7 @@ import { ErrorToast } from '../../components/ui/ErrorToast'
 import type { WorkspaceIdentity } from './workspace-types'
 import type { PersonSummary } from '@concord/contracts'
 import { useCommunityWorkspace } from './useCommunityWorkspace'
+import { useFriendPresence } from './useFriendPresence'
 import { useVoiceSession } from './useVoiceSession'
 import './WorkspaceShell.css'
 
@@ -40,6 +42,8 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
   const [channelCreationKind, setChannelCreationKind] = useState<'text' | 'voice' | null>(null)
   const [settingsTab, setSettingsTab] = useState<'profile' | 'channels' | 'server' | 'servers'>('profile')
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false)
+  const [homeView, setHomeView] = useState<'friends' | 'requests'>('friends')
+  const [homeTab, setHomeTab] = useState('online')
   const [inviteOpen, setInviteOpen] = useState(Boolean(inviteCode && !demoMode))
   const [localIdentity, setLocalIdentity] = useState(identity)
   const workspace = useCommunityWorkspace({ demoMode, userId, username: identity.username })
@@ -53,7 +57,18 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
     userId,
   })
 
+  const friendPresence = useFriendPresence({
+    demoMode,
+    friends: workspace.friends,
+    userId,
+    voice: voice.target ? { channelName: voice.target.channelName, serverName: voice.target.serverName } : null,
+  })
+
   useEffect(() => setLocalIdentity(identity), [identity])
+
+  const openHomeRequests = () => { setDirectFriend(null); setHomeView('requests'); setHomeTab('pending') }
+  const openHomeFriends = () => { setDirectFriend(null); setHomeView('friends'); setHomeTab('online') }
+  const pendingCount = workspace.friendRequests.filter((request) => request.direction === 'received').length + workspace.serverInvites.length
 
   const openConnectedChannel = () => {
     if (!voice.target) return
@@ -89,7 +104,8 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
       />
       {workspace.activeServer ? <><ChannelPanel activeChannelId={workspace.activeChannelId} activeVoiceChannelId={activeVoiceChannelId} channels={workspace.channels} connectedVoiceChannelId={voice.connectedChannelId} identity={localIdentity} mobileOpen={mobileNavigationOpen} onChannelChange={(channelId) => { workspace.setActiveChannelId(channelId); setActiveVoiceChannelId(null); setMobileNavigationOpen(false) }} onCloseMobile={() => setMobileNavigationOpen(false)} onCreateChannel={(kind) => { setMobileNavigationOpen(false); setChannelCreationKind(kind); setSettingsTab('channels'); setSettingsOpen(true) }} onOpenInvite={() => { setMobileNavigationOpen(false); setInviteFriendsOpen(true) }} onOpenServerSettings={() => { setMobileNavigationOpen(false); setSettingsTab('server'); setSettingsOpen(true) }} onOpenPeople={() => { setMobileNavigationOpen(false); setPeopleDialogOpen(true) }} onVoiceChannelChange={(channelId) => { setActiveVoiceChannelId(channelId); setMobileNavigationOpen(false) }} server={workspace.activeServer} unreadByChannel={workspace.unreadByChannel} voiceParticipantsByChannel={voice.participantsByChannel} />
         {activeVoiceChannel ? <LivePanel channel={activeVoiceChannel} connected={voice.connectedChannelId === activeVoiceChannel.id} connecting={voice.connecting} onJoin={() => joinVoiceChannel(activeVoiceChannel)} participants={voice.participantsByChannel[activeVoiceChannel.id] ?? []} screenShares={voice.screenShares} /> : <ChatPanel activeChannel={workspace.activeChannel} identity={localIdentity} loading={workspace.loading} messages={workspace.messages} onOpenMobileNavigation={() => setMobileNavigationOpen(true)} onSendMessage={workspace.sendMessage} server={workspace.activeServer} userId={userId} />}
-        {activeVoiceChannel ? null : <MemberPanel members={workspace.members} server={workspace.activeServer} userId={userId} voiceParticipantsByChannel={voice.participantsByChannel} />}</> : directFriend ? <DirectMessagePanel demoMode={demoMode} friend={directFriend} identity={localIdentity} onBack={() => setDirectFriend(null)} userId={userId} /> : <FriendsHome friendRequests={workspace.friendRequests} friends={workspace.friends} onAcceptFriendRequest={workspace.acceptFriendRequest} onAcceptServerInvite={workspace.acceptServerInvite} onAddFriend={() => setPeopleDialogOpen(true)} onOpenFriend={setDirectFriend} serverInvites={workspace.serverInvites} />}
+        {activeVoiceChannel ? null : <MemberPanel members={workspace.members} server={workspace.activeServer} userId={userId} voiceParticipantsByChannel={voice.participantsByChannel} />}</> : <><HomeSidebar activeFriendId={directFriend?.id ?? null} friends={workspace.friends} identity={localIdentity} onOpenFriend={setDirectFriend} onOpenProfile={() => { setSettingsTab('profile'); setSettingsOpen(true) }} onOpenSearch={() => setPeopleDialogOpen(true)} onShowFriends={openHomeFriends} onShowRequests={openHomeRequests} pendingCount={pendingCount} presenceByUser={friendPresence} view={homeView} />
+        {directFriend ? <DirectMessagePanel demoMode={demoMode} friend={directFriend} identity={localIdentity} onBack={() => setDirectFriend(null)} userId={userId} /> : <FriendsHome friendRequests={workspace.friendRequests} friends={workspace.friends} onAcceptFriendRequest={workspace.acceptFriendRequest} onAcceptServerInvite={workspace.acceptServerInvite} onOpenFriend={setDirectFriend} onSendFriendRequest={workspace.sendFriendRequest} onTabChange={(next) => { setHomeTab(next); setHomeView(next === 'pending' ? 'requests' : 'friends') }} presenceByUser={friendPresence} serverInvites={workspace.serverInvites} tab={homeTab} />}</>}
       <ErrorToast message={workspace.error} />
       {inviteFriendsOpen && workspace.activeServer ? <InviteFriendsDialog channelKind={activeVoiceChannel ? 'voice' : 'text'} channelName={activeVoiceChannel?.name ?? workspace.activeChannel?.name ?? null} friends={workspace.friends} inviteLinks={workspace.inviteLinks} members={workspace.members} onClose={() => setInviteFriendsOpen(false)} onCreateInviteLink={workspace.createInviteLink} onOpenPeople={() => { setInviteFriendsOpen(false); setPeopleDialogOpen(true) }} onSendServerInvite={workspace.sendServerInvite} server={workspace.activeServer} /> : null}
       {createDialogOpen ? <CreateServerDialog onClose={() => setCreateDialogOpen(false)} onCreate={workspace.createServer} /> : null}

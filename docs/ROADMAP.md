@@ -41,6 +41,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Mensagens privadas entre amigos confirmados
 - [x] Moderacao basica: banimento, timeout e restricoes de microfone/audio
 - [ ] Edicao, exclusao e respostas
+- [x] Home de amigos no formato do Discord, com presenca online e conversas diretas
 - [ ] Cargos e permissoes pela lista de membros, com transferencia de propriedade
 - [ ] Convidar pessoa que ainda nao e amiga, com busca de perfis no proprio dialogo
 - [ ] Nao lidas por canal revisadas: leitura confiavel, badge por servidor e mencao sem falso positivo

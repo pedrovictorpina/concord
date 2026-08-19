@@ -136,3 +136,7 @@ Branch atual: `main`.
 - faixa de audio da tela virou informacao visivel: `ScreenShareView` ganhou `participantId` e `hasAudio`, o tile mostra `COM SOM` e o dock avisa quando o navegador devolve a tela sem audio, lembrando de marcar "Compartilhar audio" na janela de selecao.
 - reproducao bloqueada por autoplay deixou de ser silenciosa: `AudioPlaybackStatusChanged` e a falha de `play()` acendem o botao "Tocar o som da chamada", que chama `room.startAudio()` dentro do clique.
 - validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (21/21). O som em si depende do roteiro manual em `docs/qa/08-audio-na-transmissao.md`, ainda nao executado.
+- o cliente passou a abrir na home. Antes, `loadServers` selecionava o primeiro servidor da lista e a tela de amigos so aparecia ao clicar no icone inicial; agora `activeServerId` comeca nulo e so muda por escolha explicita.
+- home reescrita no formato do Discord: coluna de conversas (`HomeSidebar`) com busca, atalhos de Amigos e Solicitacoes, lista de mensagens diretas e rodape de identidade; centro com as abas Disponivel, Todos, Pendente e Adicionar amigo, busca e acoes por pessoa; coluna `Ativo agora` com quem esta em chamada.
+- presenca online passou a existir: `useFriendPresence` publica estado e canal de voz atual em um canal Realtime unico e alimenta as bolinhas de status, a aba Disponivel e o `Ativo agora`. `PersonSummary` ganhou `avatarUrl`, entao amigos, pedidos, convites e membros exibem foto real.
+- validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (21/21, com as jornadas de home reescritas).
