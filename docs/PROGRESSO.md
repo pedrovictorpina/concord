@@ -6,16 +6,16 @@
 | --- | --- | --- |
 | 00 - Fundacao | Concluida e publicada | 2026-08-17 |
 | 01 - Identidade e temas | Concluida e publicada | 2026-08-17 |
-| 02 - Comunidades e texto | Em andamento | 2026-08-18 |
+| 02 - Comunidades e texto | Concluida e publicada | 2026-08-19 |
 | 03 - Voz e compartilhamento | Em andamento | 2026-08-19 |
 | 04 - Aplicativos | Nao iniciada | - |
 | 05 - Qualidade e lancamento | Nao iniciada | - |
 
 ## Proxima acao
 
-Aplicar a migration de preferências e validar a administração do servidor com uma conta autenticada.
+Configurar o projeto LiveKit Cloud e os segredos da Edge Function para validar voz multiusuário real com duas contas autenticadas. A lista priorizada, critérios de aceite e caminhos de QA estão em `docs/PROXIMOS_PASSOS.md`.
 
-Branch atual: `codex/etapa-03-voz-tela`.
+Branch atual: `main`.
 
 ## Historico
 

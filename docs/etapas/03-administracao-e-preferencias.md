@@ -16,11 +16,15 @@ Completar o uso cotidiano do servidor sem introduzir cargos complexos no MVP.
 - controles independentes de microfone e áudio recebido na chamada.
 - convite por link revogável, com aceite explícito;
 - cargos de proprietário, moderador e membro; permissões de leitura, escrita e voz por canal.
+- mensagens privadas entre amigos confirmados, isoladas por RLS e atualização em tempo real.
+- moderação de membros: banimento, timeout e bloqueios de microfone e áudio; pessoas banidas não retornam por convite.
 - manifesto e service worker básicos para instalação como PWA.
 
 ## Próximos itens desta frente
 
 - [ ] notificação push após configurar chaves VAPID e aplicativos instaláveis;
+- [ ] aplicar bloqueios de microfone e áudio no servidor de mídia LiveKit após sua ativação;
+- [ ] validar a moderação com duas contas autenticadas no ambiente remoto.
 
 ## Critérios de aceite
 

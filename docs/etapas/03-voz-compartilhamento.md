@@ -4,12 +4,14 @@
 
 Permitir que membros de um mesmo servidor entrem em canais de voz, publiquem microfone e compartilhem tela pelo LiveKit Cloud, sem expor chaves administrativas no cliente.
 
-## Primeiro recorte
+## Estado atual
 
 - canal `#voz` criado para servidores novos e existentes;
 - cliente web com entrada no canal, microfone e compartilhamento de tela;
 - Edge Function `livekit-token` que valida sessao, canal de voz e membresia antes de emitir token de 10 minutos;
 - midia trafega diretamente entre navegador e LiveKit Cloud.
+- interface web publicada com tela dedicada de voz, entrada explícita, controles de microfone/áudio/tela e seletor de qualidade;
+- ativação multiusuário pendente da criação do projeto LiveKit Cloud e dos segredos abaixo.
 
 ## Qualidade da transmissao
 
@@ -44,3 +46,9 @@ Configure na Edge Function, nunca no `.env` do Vite:
 - volume individual e selecao de dispositivo;
 - selecao efetiva de qualidade automatica, alta, media e baixa, incluindo 1080p/30 FPS;
 - aplicativos Electron e mobile.
+
+## Próxima validação
+
+1. Configurar os três segredos no Supabase e publicar a Edge Function.
+2. Validar duas contas autenticadas no mesmo canal de voz.
+3. Aplicar no LiveKit as ações de moderação já persistidas no Supabase.

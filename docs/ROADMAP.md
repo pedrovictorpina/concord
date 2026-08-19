@@ -38,8 +38,9 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Convites para servidor por link revogável
 - [x] Contadores persistentes de mensagens não lidas e menções
 - [x] Cargos de moderador e permissões básicas por canal
+- [x] Mensagens privadas entre amigos confirmados
+- [x] Moderacao basica: banimento, timeout e restricoes de microfone/audio
 - [ ] Edicao, exclusao e respostas
-- [ ] Cargos e moderacao basica
 
 ## Etapa 03 - Voz e compartilhamento
 
@@ -52,6 +53,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Seletor de qualidade automatica, alta, media e baixa antes da transmissao
 - [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS
 - [ ] Reconexao e encerramento automatico
+- [ ] Aplicar restrições de moderação também no servidor de mídia LiveKit
 
 ## Etapa 04 - Aplicativos
 
