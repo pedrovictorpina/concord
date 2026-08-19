@@ -98,3 +98,5 @@ Branch atual: `codex/etapa-03-voz-tela`.
 - compartilhamento de tela em PWA móvel identificado como indisponível pela ausência de `getDisplayMedia`; transmissão móvel real permanece dependente do app Android nativo com MediaProjection.
 - entrada em canal de voz simplificada para um clique direto no canal; estado de conexão e controles foram movidos para o rodapé da lista de canais, acima do perfil do usuário.
 - participantes fictícios removidos da lista de voz; o usuário conectado agora é exibido somente dentro do canal de voz em que a conexão foi confirmada.
+- tela inicial de mensagens adicionada: lista de amigos, pedidos recebidos e atalho para adicionar amigo, acessível pelo ícone inicial e pela barra móvel.
+- fluxo móvel de amizades revisado com tela de mensagens e adição por identificador em tela cheia; ações sem suporte real, como sincronização de contatos, permanecem fora da interface.

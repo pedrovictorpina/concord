@@ -21,6 +21,7 @@ export function PeopleDialog({ friendRequests, friends, onAcceptFriendRequest, o
   const [inviteUsername, setInviteUsername] = useState('')
   const [feedback, setFeedback] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
 
   const run = async (action: () => Promise<ActionResult>) => {
     setSubmitting(true)
@@ -49,12 +50,36 @@ export function PeopleDialog({ friendRequests, friends, onAcceptFriendRequest, o
     })
   }
 
+  if (showAddForm) {
+    return (
+      <div className="server-dialog-backdrop" role="presentation">
+        <section className="server-dialog people-dialog mobile-add-form" role="dialog" aria-modal="true" aria-labelledby="add-friend-title">
+          <button className="mobile-back" type="button" aria-label="Voltar para adicionar amigos" onClick={() => setShowAddForm(false)}>←</button>
+          <h2 id="add-friend-title">Adicionar via nome de usuário</h2>
+          <form className="people-form" onSubmit={sendFriend}>
+            <label><span>Quem você quer adicionar como amigo?</span><input autoFocus required value={friendUsername} onChange={(event) => setFriendUsername(event.target.value)} placeholder="Insira um nome de usuário" /></label>
+            <button className="dialog-submit" type="submit" disabled={submitting || !friendUsername.trim()}>ENVIAR PEDIDO DE AMIZADE</button>
+          </form>
+          {feedback ? <p className="dialog-feedback" role="status">{feedback}</p> : null}
+        </section>
+      </div>
+    )
+  }
+
   return (
     <div className="server-dialog-backdrop" role="presentation">
       <section className="server-dialog people-dialog" role="dialog" aria-modal="true" aria-labelledby="people-dialog-title">
         <button className="dialog-close" type="button" aria-label="Fechar pessoas e convites" onClick={onClose}>×</button>
         <span className="eyebrow">CONEXOES PRIVADAS</span>
         <h2 id="people-dialog-title">Pessoas<br />em sintonia.</h2>
+
+        <section className="mobile-add-friend" aria-label="Adicionar amigos">
+          <header><button type="button" aria-label="Fechar adicionar amigos" onClick={onClose}>←</button><h2>Adicionar amigos</h2></header>
+          <button className="mobile-add-option" type="button" onClick={() => setShowAddForm(true)}><span>@</span><strong>Adicionar via nome de usuário</strong><i>›</i></button>
+          <div className="mobile-friends-signal" aria-hidden="true"><span>◌</span><span>+</span><span>◖</span></div>
+          <h3>Encontre sua turma</h3>
+          <p>Envie um pedido usando o identificador do seu amigo. Quando ele aceitar, a conexão aparece aqui.</p>
+        </section>
 
         <form className="people-form" onSubmit={sendFriend}>
           <label><span>Adicionar amigo por identificador</span><input required value={friendUsername} onChange={(event) => setFriendUsername(event.target.value)} placeholder="@nome" /></label>

@@ -90,6 +90,17 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Fechar pessoas e convites' }).click()
   })
 
+  test('exibe a tela inicial de mensagens e o atalho para adicionar amigo', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Inicio do Concord' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Mensagens' })).toBeVisible()
+    await expect(page.getByText('Sua lista está pronta.')).toBeVisible()
+    await page.getByRole('button', { name: 'ADICIONAR AMIGO', exact: true }).click()
+    await expect(page.getByRole('heading', { name: 'Pessoas em sintonia.' })).toBeVisible()
+  })
+
   test('administra canais e preferências pela central de configurações', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
@@ -137,6 +148,19 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: /Canais/ }).click()
     await expect(page.getByRole('button', { name: 'Fechar canais' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'geral' })).toBeVisible()
+  })
+
+  test('oferece o fluxo móvel de adicionar amigos por identificador', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: /Mensagens/ }).click()
+    await expect(page.getByRole('heading', { name: 'Mensagens' })).toBeVisible()
+    await page.locator('.friends-add').click()
+    await expect(page.getByRole('heading', { name: 'Adicionar amigos' })).toBeVisible()
+    await page.getByRole('button', { name: 'Adicionar via nome de usuário' }).click()
+    await expect(page.getByRole('heading', { name: 'Adicionar via nome de usuário' })).toBeVisible()
+    await expect(page.getByPlaceholder('Insira um nome de usuário')).toBeVisible()
   })
 
   test('expõe o manifesto para instalação como PWA', async ({ page }) => {
