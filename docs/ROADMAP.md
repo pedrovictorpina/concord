@@ -41,6 +41,13 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Mensagens privadas entre amigos confirmados
 - [x] Moderacao basica: banimento, timeout e restricoes de microfone/audio
 - [ ] Edicao, exclusao e respostas
+- [x] Home de amigos no formato do Discord, com presenca online e conversas diretas
+- [x] Cargos e permissoes pela lista de membros, com transferencia de propriedade
+- [x] Convidar pessoa que ainda nao e amiga, com busca de perfis no proprio dialogo
+- [x] Menu de contexto por pessoa, com volume individual e acoes de moderacao
+- [ ] Nao lidas por canal revisadas: leitura confiavel, badge por servidor e mencao sem falso positivo
+- [ ] Servidor publico ou privado, com descoberta de servidores publicos
+- [x] Menu do servidor no cabecalho com cargos, notificacoes, marcar como lido e sair do servidor
 
 ## Etapa 03 - Voz e compartilhamento
 
@@ -52,10 +59,12 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Silenciar microfone
 - [x] Compartilhar tela ou janela
 - [x] Assistir varias telas ao mesmo tempo, com destaque e tela cheia por transmissao
-- [ ] Audio do sistema no Windows
+- [ ] Audio do sistema no Windows (captura publicada junto com a tela; falta validar com duas contas)
 - [x] Seletor de qualidade automatica, alta, media e baixa antes da transmissao
 - [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS
 - [ ] Reconexao e encerramento automatico
+- [ ] Oferecer reconexao ao canal de voz depois de recarregar a pagina
+- [ ] Supressao de ruido, cancelamento de eco e teste de microfone nas preferencias de voz
 - [ ] Aplicar restrições de moderação também no servidor de mídia LiveKit
 
 ## Etapa 04 - Aplicativos

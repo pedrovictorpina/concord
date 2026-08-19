@@ -68,6 +68,7 @@ test.describe('identidade e temas', () => {
   test('abre a demonstração da comunidade e envia uma mensagem local', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
     await expect(page.getByRole('heading', { name: /Concord\. Em sintonia\./ })).toBeVisible()
     await page.getByRole('textbox', { name: 'Mensagem' }).fill('Temas funcionando')
@@ -77,7 +78,6 @@ test.describe('identidade e temas', () => {
     await expect(page.locator('.voice-member')).toHaveCount(0)
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'sala-da-madrugada' })).toBeVisible()
-    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const voiceLayout = await page.locator('.app-shell').evaluate((app) => {
@@ -107,6 +107,7 @@ test.describe('identidade e temas', () => {
   test('encerra a sessão pelas configurações', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Sair do Concord' })).toHaveCount(0)
 
     await page.getByRole('button', { name: 'Abrir configurações' }).click()
@@ -120,6 +121,7 @@ test.describe('identidade e temas', () => {
   test('convida amigos para o servidor pelo atalho do cabeçalho', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
     await page.getByRole('button', { name: 'Convidar amigos' }).click()
 
     const dialog = page.getByRole('dialog', { name: /Convidar/ })
@@ -131,11 +133,11 @@ test.describe('identidade e temas', () => {
     const convidar = dialog.getByRole('button', { name: 'CONVIDAR' })
     await expect(convidar).toHaveCount(1)
 
-    await dialog.getByLabel('Buscar amigos').fill('nina')
+    await dialog.getByLabel('Buscar pessoas').fill('nina')
     await expect(dialog.getByText('@nina')).toBeVisible()
     await expect(dialog.getByText('@ari')).toHaveCount(0)
 
-    await dialog.getByLabel('Buscar amigos').fill('zzz')
+    await dialog.getByLabel('Buscar pessoas').fill('zzz')
     await expect(dialog.getByText('Nenhum amigo corresponde a essa busca.')).toBeVisible()
 
     await dialog.getByRole('button', { name: 'GERAR LINK DE CONVITE' }).click()
@@ -148,6 +150,7 @@ test.describe('identidade e temas', () => {
   test('lista os membros do servidor e seus cargos', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
     const panel = page.getByRole('complementary', { name: 'Membros do servidor' })
     await expect(panel).toContainText('3 NO SERVIDOR')
@@ -162,12 +165,45 @@ test.describe('identidade e temas', () => {
     await expect(panel).toHaveCount(0)
   })
 
+  test('administra um membro pelo painel de membros', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
+
+    const memberPanel = page.getByRole('complementary', { name: 'Membros do servidor' })
+    await expect(memberPanel).toContainText('Rafa')
+    await memberPanel.getByRole('button', { name: 'Administrar Rafa' }).click()
+    await page.getByRole('menuitem', { name: 'Remover do servidor' }).click()
+
+    await expect(page.getByRole('dialog')).toContainText('Remover do servidor')
+    await page.getByRole('button', { name: 'REMOVER' }).click()
+    await expect(memberPanel).not.toContainText('Rafa')
+  })
+
+  test('abre o menu de contexto de um membro com o botão direito', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
+
+    const memberPanel = page.getByRole('complementary', { name: 'Membros do servidor' })
+    await memberPanel.getByText('Rafa', { exact: true }).click({ button: 'right' })
+
+    const menu = page.getByRole('menu', { name: 'Opções de Rafa' })
+    await expect(menu).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Promover a moderador' })).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Silenciar voz no servidor' })).toBeVisible()
+    await expect(menu.getByRole('menuitem', { name: 'Banir do servidor' })).toBeVisible()
+
+    await page.keyboard.press('Escape')
+    await expect(menu).toHaveCount(0)
+  })
+
   test('mantém a conexão de voz ao navegar entre canais', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
-    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
@@ -191,9 +227,9 @@ test.describe('identidade e temas', () => {
   test('mutar o áudio também muta o microfone', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
-    await page.getByRole('button', { name: 'Entrar na chamada de voz' }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
@@ -214,13 +250,16 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
 
-    await expect(page.getByRole('heading', { name: 'Mensagens' })).toBeVisible()
-    await expect(page.getByRole('tab', { name: 'Amigos' })).toBeVisible()
-    await page.getByRole('tab', { name: 'Convites' }).click()
+    await expect(page.getByRole('heading', { name: 'Amigos' })).toBeVisible()
+    await expect(page.getByRole('tab', { name: 'Disponível' })).toBeVisible()
+    await page.getByRole('tab', { name: /Pendente/ }).click()
     await expect(page.getByText('Nenhum convite de servidor pendente.')).toBeVisible()
-    await page.getByRole('tab', { name: 'Amigos' }).click()
-    await expect(page.getByRole('button', { name: /Ari/ })).toBeVisible()
-    await page.locator('.friends-add').click()
+    await page.getByRole('tab', { name: 'Disponível' }).click()
+    await expect(page.getByRole('button', { name: 'Enviar mensagem para Ari' })).toBeVisible()
+    await page.getByRole('tab', { name: 'Adicionar amigo' }).click()
+    await expect(page.getByRole('heading', { name: 'Adicionar amigo' })).toBeVisible()
+    await expect(page.getByLabel('Identificador')).toBeVisible()
+    await page.getByRole('button', { name: 'Encontre ou comece uma conversa' }).click()
     await expect(page.getByRole('heading', { name: 'Pessoas em sintonia.' })).toBeVisible()
   })
 
@@ -228,7 +267,7 @@ test.describe('identidade e temas', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
-    await page.getByRole('button', { name: /Ari/ }).click()
+    await page.getByRole('button', { name: 'Enviar mensagem para Ari' }).click()
     await expect(page.getByText('Conversa com Ari')).toBeVisible()
     await page.getByLabel('Mensagem privada').fill('Sinal privado')
     await page.getByLabel('Mensagem privada').press('Enter')
@@ -238,6 +277,7 @@ test.describe('identidade e temas', () => {
   test('administra canais e preferências pela central de configurações', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
     await page.getByRole('button', { name: 'Abrir configurações' }).click()
 
     await expect(page.getByRole('heading', { name: 'Configurações.' })).toBeVisible()
@@ -281,6 +321,8 @@ test.describe('identidade e temas', () => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Trocar servidor' }).click()
+    await page.getByRole('menuitem', { name: 'Concord' }).click()
     await page.getByRole('button', { name: /Canais/ }).click()
     await expect(page.getByRole('button', { name: 'Fechar canais' })).toBeVisible()
     await expect(page.getByRole('button', { name: 'geral' })).toBeVisible()
@@ -301,6 +343,8 @@ test.describe('identidade e temas', () => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Trocar servidor' }).click()
+    await page.getByRole('menuitem', { name: 'Concord' }).click()
     await page.getByRole('button', { name: /Canais/ }).click()
     await page.getByRole('button', { name: 'Convidar amigos' }).click()
 
@@ -319,12 +363,12 @@ test.describe('identidade e temas', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: /Mensagens/ }).click()
-    await expect(page.getByRole('heading', { name: 'Mensagens' })).toBeVisible()
-    await page.locator('.friends-add').click()
-    await expect(page.getByRole('heading', { name: 'Adicionar amigos' })).toBeVisible()
-    await page.getByRole('button', { name: 'Adicionar via nome de usuário' }).click()
-    await expect(page.getByRole('heading', { name: 'Adicionar via nome de usuário' })).toBeVisible()
-    await expect(page.getByPlaceholder('Insira um nome de usuário')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Amigos' })).toBeVisible()
+    await page.getByRole('tab', { name: 'Adicionar amigo' }).click()
+    await expect(page.getByRole('heading', { name: 'Adicionar amigo' })).toBeVisible()
+    await expect(page.getByPlaceholder('@identificador')).toBeVisible()
+    await page.getByPlaceholder('@identificador').fill('@amiga')
+    await expect(page.getByRole('button', { name: 'Enviar pedido' })).toBeEnabled()
   })
 
   test('expõe o manifesto para instalação como PWA', async ({ page }) => {

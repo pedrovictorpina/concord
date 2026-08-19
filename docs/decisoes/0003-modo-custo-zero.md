@@ -30,6 +30,7 @@ Fontes:
 ## Limites do piloto
 
 - 8 participantes por canal de voz;
+- a tela publica tambem o audio do sistema quando o navegador entrega, o que soma ao egress;
 - varias telas simultaneas por canal, uma por participante (revisado em 2026-08-19; antes era
   1 tela por canal). O teto pratico continua sendo o de 8 participantes, e o egress cresce com
   o numero de telas assistidas ao mesmo tempo;

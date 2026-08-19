@@ -24,7 +24,11 @@ type MessageRow = {
   profiles: { nickname: string } | Array<{ nickname: string }> | null
 }
 
-type ProfileRow = PersonSummary
+type ProfileRow = { id: string; nickname: string; username: string; avatar_url?: string | null }
+
+const mapProfile = (row: ProfileRow | null): PersonSummary | null => row
+  ? { id: row.id, nickname: row.nickname, username: row.username, avatarUrl: row.avatar_url ?? null }
+  : null
 
 type FriendRequestRow = {
   id: string
@@ -56,6 +60,11 @@ type ChannelPermissionRow = { channel_id: string; role: Exclude<ServerMemberRole
 type InviteLinkRow = { id: string; code: string; expires_at: string | null; max_uses: number | null; uses_count: number }
 type CategoryRow = { id: string; name: string }
 
+const mentionPattern = (username: string) => {
+  const safe = username.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return new RegExp(`@${safe}(?![\\p{L}\\p{N}_])`, 'iu')
+}
+
 const demoServer: ServerSummary = {
   id: 'demo-concord',
   name: 'Concord',
@@ -63,14 +72,14 @@ const demoServer: ServerSummary = {
   role: 'owner',
 }
 const demoFriends: PersonSummary[] = [
-  { id: 'demo-moderador', nickname: 'Ari', username: 'ari' },
-  { id: 'demo-amigo', nickname: 'Nina', username: 'nina' },
+  { id: 'demo-moderador', nickname: 'Ari', username: 'ari', avatarUrl: null },
+  { id: 'demo-amigo', nickname: 'Nina', username: 'nina', avatarUrl: null },
 ]
 
 const demoMembers: Array<PersonSummary & { role: ServerMemberRole }> = [
-  { id: 'demo-user', nickname: 'Pedro', username: 'fundador', role: 'owner' },
-  { id: 'demo-moderador', nickname: 'Ari', username: 'ari', role: 'moderator' },
-  { id: 'demo-membro', nickname: 'Rafa', username: 'rafa', role: 'member' },
+  { id: 'demo-user', nickname: 'Pedro', username: 'fundador', avatarUrl: null, role: 'owner' },
+  { id: 'demo-moderador', nickname: 'Ari', username: 'ari', avatarUrl: null, role: 'moderator' },
+  { id: 'demo-membro', nickname: 'Rafa', username: 'rafa', avatarUrl: null, role: 'member' },
 ]
 
 const demoMessageList: MessageSummary[] = initialMessages.map((message) => ({
@@ -101,7 +110,7 @@ const mapMessage = (row: MessageRow): MessageSummary => ({
 export function useCommunityWorkspace({ demoMode, userId, username }: CommunityWorkspaceOptions) {
   const connected = Boolean(supabase && userId && !demoMode)
   const [servers, setServers] = useState<ServerSummary[]>(demoMode ? [demoServer] : [])
-  const [activeServerId, setActiveServerId] = useState<string | null>(demoMode ? demoServer.id : null)
+  const [activeServerId, setActiveServerId] = useState<string | null>(null)
   const [channels, setChannels] = useState<ChannelSummary[]>(demoMode ? demoChannels : [])
   const [activeChannelId, setActiveChannelId] = useState<string | null>(demoMode ? 'geral' : null)
   const [messages, setMessages] = useState<MessageSummary[]>(demoMode ? demoMessageList : [])
@@ -143,7 +152,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     const nextServers = ((data ?? []) as unknown as ServerMembershipRow[])
       .flatMap((membership) => membership.servers ? [{ ...membership.servers, role: membership.role }] : [])
     setServers(nextServers)
-    setActiveServerId((current) => nextServers.some((server) => server.id === current) ? current : nextServers[0]?.id ?? null)
+    setActiveServerId((current) => current && nextServers.some((server) => server.id === current) ? current : null)
   }, [userId])
 
   const loadChannels = useCallback(async (serverId: string | null) => {
@@ -176,14 +185,17 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
       return
     }
     const [membersResult, permissionsResult, linksResult, categoriesResult, moderationResult] = await Promise.all([
-      supabase.from('server_members').select('user_id, role, profiles(id, nickname, username)').eq('server_id', serverId),
+      supabase.from('server_members').select('user_id, role, profiles(id, nickname, username, avatar_url)').eq('server_id', serverId),
       supabase.from('channel_permissions').select('channel_id, role, can_read, can_write, can_speak').in('channel_id', channels.map((channel) => channel.id)),
       supabase.from('server_invite_links').select('id, code, expires_at, max_uses, uses_count').eq('server_id', serverId).is('revoked_at', null).order('created_at', { ascending: false }),
       supabase.from('channel_categories').select('id, name').eq('server_id', serverId).order('position'),
       userId ? supabase.from('server_member_moderation').select('microphone_disabled, output_disabled').eq('server_id', serverId).eq('user_id', userId).maybeSingle() : Promise.resolve({ data: null, error: null }),
     ])
     if (membersResult.error || permissionsResult.error || linksResult.error || categoriesResult.error) return
-    setMembers(((membersResult.data ?? []) as unknown as MemberRow[]).flatMap((member) => member.profiles ? [{ ...member.profiles, role: member.role }] : []))
+    setMembers(((membersResult.data ?? []) as unknown as MemberRow[]).flatMap((member) => {
+      const profile = mapProfile(member.profiles)
+      return profile ? [{ ...profile, role: member.role }] : []
+    }))
     setChannelPermissions(((permissionsResult.data ?? []) as ChannelPermissionRow[]).map((item) => ({ channelId: item.channel_id, role: item.role, canRead: item.can_read, canWrite: item.can_write, canSpeak: item.can_speak })))
     setInviteLinks((linksResult.data ?? []) as InviteLinkRow[])
     setCategories((categoriesResult.data ?? []) as CategoryRow[])
@@ -215,9 +227,9 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     if (!supabase || !userId) return
 
     const [requestsResult, friendshipsResult, invitesResult] = await Promise.all([
-      supabase.from('friend_requests').select('id, sender_id, recipient_id, status, sender:profiles!friend_requests_sender_id_fkey(id, nickname, username), recipient:profiles!friend_requests_recipient_id_fkey(id, nickname, username)').eq('status', 'pending'),
-      supabase.from('friendships').select('user_a_id, user_b_id, person_a:profiles!friendships_user_a_id_fkey(id, nickname, username), person_b:profiles!friendships_user_b_id_fkey(id, nickname, username)').or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`),
-      supabase.from('server_invites').select('id, server_id, status, servers(name), sender:profiles!server_invites_sender_id_fkey(id, nickname, username)').eq('recipient_id', userId).eq('status', 'pending'),
+      supabase.from('friend_requests').select('id, sender_id, recipient_id, status, sender:profiles!friend_requests_sender_id_fkey(id, nickname, username, avatar_url), recipient:profiles!friend_requests_recipient_id_fkey(id, nickname, username, avatar_url)').eq('status', 'pending'),
+      supabase.from('friendships').select('user_a_id, user_b_id, person_a:profiles!friendships_user_a_id_fkey(id, nickname, username, avatar_url), person_b:profiles!friendships_user_b_id_fkey(id, nickname, username, avatar_url)').or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`),
+      supabase.from('server_invites').select('id, server_id, status, servers(name), sender:profiles!server_invites_sender_id_fkey(id, nickname, username, avatar_url)').eq('recipient_id', userId).eq('status', 'pending'),
     ])
 
     if (requestsResult.error || friendshipsResult.error || invitesResult.error) {
@@ -228,17 +240,17 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     setFriendRequests(((requestsResult.data ?? []) as unknown as FriendRequestRow[]).map((request) => ({
       id: request.id,
       direction: request.recipient_id === userId ? 'received' : 'sent',
-      person: request.recipient_id === userId ? request.sender : request.recipient,
+      person: mapProfile(request.recipient_id === userId ? request.sender : request.recipient),
       status: request.status,
     })).filter((request): request is FriendRequestSummary => Boolean(request.person)))
     setFriends(((friendshipsResult.data ?? []) as unknown as FriendshipRow[]).map((friendship) => (
-      friendship.user_a_id === userId ? friendship.person_b : friendship.person_a
+      mapProfile(friendship.user_a_id === userId ? friendship.person_b : friendship.person_a)
     )).filter((person): person is PersonSummary => Boolean(person)))
     setServerInvites(((invitesResult.data ?? []) as unknown as ServerInviteRow[]).map((invite) => ({
       id: invite.id,
       serverId: invite.server_id,
       serverName: invite.servers?.name ?? 'Servidor privado',
-      sender: invite.sender ?? { id: '', nickname: 'Membro', username: 'membro' },
+      sender: mapProfile(invite.sender) ?? { id: '', nickname: 'Membro', username: 'membro', avatarUrl: null },
       status: invite.status,
     })))
   }, [userId])
@@ -295,13 +307,16 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
         filter: `channel_id=eq.${activeChannelId}`,
       }, () => {
         void loadMessages(activeChannelId)
+        if (userId && document.visibilityState === 'visible') {
+          void client.from('channel_read_states').upsert({ channel_id: activeChannelId, user_id: userId, last_read_at: new Date().toISOString() })
+        }
       })
       .subscribe()
 
     return () => {
       void client.removeChannel(realtimeChannel)
     }
-  }, [activeChannelId, demoMode, loadMessages])
+  }, [activeChannelId, demoMode, loadMessages, userId])
 
   useEffect(() => {
     if (!supabase || demoMode || !activeServerId || !userId) return
@@ -312,8 +327,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
         const message = payload.new as { channel_id?: string; author_id?: string; body?: string }
         if (!message.channel_id || message.author_id === userId || message.channel_id === activeChannelId || serverMuted) return
         if (!channels.some((channel) => channel.id === message.channel_id)) return
-        const body = message.body?.toLowerCase() ?? ''
-        const mentioned = Boolean(username && body.includes(`@${username.toLowerCase()}`))
+        const mentioned = Boolean(username && mentionPattern(username).test(message.body ?? ''))
         setUnreadByChannel((current) => ({
           ...current,
           [message.channel_id!]: { count: (current[message.channel_id!]?.count ?? 0) + 1, mentioned: current[message.channel_id!]?.mentioned || mentioned },
@@ -346,11 +360,19 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
       const readAt = new Map((states ?? []).map((state) => [state.channel_id, state.last_read_at]))
       const results = await Promise.all(channels.filter((channel) => channel.id !== activeChannelId && channel.kind === 'text').map(async (channel) => {
         const since = readAt.get(channel.id) ?? '1970-01-01T00:00:00.000Z'
-        const [countResult, mentionResult] = await Promise.all([
-          client.from('messages').select('*', { count: 'exact', head: true }).eq('channel_id', channel.id).neq('author_id', userId).gt('created_at', since),
-          username ? client.from('messages').select('*', { count: 'exact', head: true }).eq('channel_id', channel.id).neq('author_id', userId).gt('created_at', since).ilike('body', `%@${username}%`) : Promise.resolve({ count: 0 }),
-        ])
-        return [channel.id, { count: countResult.count ?? 0, mentioned: (mentionResult.count ?? 0) > 0 }] as const
+        const { data: unread } = await client
+          .from('messages')
+          .select('body')
+          .eq('channel_id', channel.id)
+          .neq('author_id', userId)
+          .gt('created_at', since)
+          .limit(99)
+        const rows = (unread ?? []) as Array<{ body: string | null }>
+        const pattern = username ? mentionPattern(username) : null
+        return [channel.id, {
+          count: rows.length,
+          mentioned: Boolean(pattern && rows.some((row) => pattern.test(row.body ?? ''))),
+        }] as const
       }))
       setUnreadByChannel(Object.fromEntries(results.filter(([, value]) => value.count > 0)))
     })()
@@ -398,7 +420,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
       setChannels((current) => channel.id ? current.map((item) => item.id === channel.id ? { ...item, name, kind: channel.kind } : item) : [...current, { id: `demo-${Date.now()}`, name, kind: channel.kind }])
       return { ok: true, message: channel.id ? 'Canal atualizado.' : 'Canal criado.' }
     }
-    if (!supabase || !activeServer || activeServer.role !== 'owner' || !userId) return { ok: false, message: 'Somente o proprietario pode administrar canais.' }
+    if (!supabase || !activeServer || !['owner', 'moderator'].includes(activeServer.role) || !userId) return { ok: false, message: 'Somente quem administra o servidor pode alterar canais.' }
     const request = channel.id
       ? supabase.from('channels').update({ name, kind: channel.kind }).eq('id', channel.id)
       : supabase.from('channels').insert({ server_id: activeServer.id, name, kind: channel.kind, position: channels.length, created_by: userId })
@@ -413,7 +435,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
       setChannels((current) => current.filter((channel) => channel.id !== channelId))
       return { ok: true, message: 'Canal removido.' }
     }
-    if (!supabase || !activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietario pode remover canais.' }
+    if (!supabase || !activeServer || !['owner', 'moderator'].includes(activeServer.role)) return { ok: false, message: 'Somente quem administra o servidor pode remover canais.' }
     const { error: requestError } = await supabase.from('channels').delete().eq('id', channelId)
     if (requestError) return { ok: false, message: 'Nao foi possivel remover o canal.' }
     await loadChannels(activeServer.id)
@@ -455,6 +477,27 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     return { ok: true, message: action === 'ban' ? 'Membro banido.' : action === 'timeout' ? 'Timeout de 10 minutos aplicado.' : action === 'microphone' ? 'Microfone desativado.' : 'Áudio desativado.' }
   }, [activeServer, demoMode, loadServerControls, loadServers])
 
+  const removeMember = useCallback(async (memberId: string) => {
+    if (demoMode) {
+      setMembers((current) => current.filter((member) => member.id !== memberId))
+      return { ok: true, message: 'Membro removido.' }
+    }
+    if (!supabase || !activeServer || !['owner', 'moderator'].includes(activeServer.role)) return { ok: false, message: 'Sem permissão para remover membros.' }
+    const { error: requestError } = await supabase.rpc('remove_server_member', { target_server_id: activeServer.id, target_user_id: memberId })
+    if (requestError) return { ok: false, message: 'Não foi possível remover o membro.' }
+    await loadServerControls(activeServer.id)
+    return { ok: true, message: 'Membro removido do servidor.' }
+  }, [activeServer, demoMode, loadServerControls])
+
+  const transferOwnership = useCallback(async (memberId: string) => {
+    if (demoMode) return { ok: false, message: 'A demonstração não transfere servidores.' }
+    if (!supabase || !activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietário pode transferir o servidor.' }
+    const { error: requestError } = await supabase.rpc('transfer_server_ownership', { target_server_id: activeServer.id, target_user_id: memberId })
+    if (requestError) return { ok: false, message: 'Não foi possível transferir o servidor.' }
+    await Promise.all([loadServerControls(activeServer.id), loadServers()])
+    return { ok: true, message: 'Servidor transferido. Você agora é moderador.' }
+  }, [activeServer, demoMode, loadServerControls, loadServers])
+
   const saveChannelPermissions = useCallback(async (channelId: string, role: Exclude<ServerMemberRole, 'owner'>, permissions: Omit<ChannelPermission, 'channelId' | 'role'>) => {
     if (!supabase || !activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietário pode alterar permissões.' }
     const { error: requestError } = await supabase.from('channel_permissions').upsert({ channel_id: channelId, role, can_read: permissions.canRead, can_write: permissions.canWrite, can_speak: permissions.canSpeak })
@@ -463,10 +506,11 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     return { ok: true, message: 'Permissões do canal atualizadas.' }
   }, [activeServer, loadServerControls])
 
-  const createInviteLink = useCallback(async () => {
+  const createInviteLink = useCallback(async (options?: { expiresInHours?: number | null; maxUses?: number | null }) => {
     if (!supabase || !userId) return { ok: false, message: 'Entre com sua conta para gerar links de convite.', url: '' }
-    if (!activeServer || activeServer.role !== 'owner') return { ok: false, message: 'Somente o proprietário pode criar links.', url: '' }
-    const { data, error: requestError } = await supabase.from('server_invite_links').insert({ server_id: activeServer.id, created_by: userId }).select('code').single()
+    if (!activeServer || !['owner', 'moderator'].includes(activeServer.role)) return { ok: false, message: 'Somente quem administra o servidor pode criar links.', url: '' }
+    const expiresAt = options?.expiresInHours ? new Date(Date.now() + options.expiresInHours * 60 * 60 * 1000).toISOString() : null
+    const { data, error: requestError } = await supabase.from('server_invite_links').insert({ server_id: activeServer.id, created_by: userId, expires_at: expiresAt, max_uses: options?.maxUses ?? null }).select('code').single()
     if (requestError || !data) return { ok: false, message: 'Não foi possível criar o link.', url: '' }
     await loadServerControls(activeServer.id)
     return { ok: true, message: 'Link de convite criado.', url: `${window.location.origin}/?invite=${data.code}` }
@@ -479,6 +523,13 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     await loadServerControls(activeServer.id)
     return { ok: true, message: 'Link revogado.' }
   }, [activeServer, loadServerControls])
+
+  const inspectInviteLink = useCallback(async (code: string) => {
+    if (!supabase) return null
+    const { data, error: requestError } = await supabase.rpc('inspect_server_invite_link', { target_code: code }).maybeSingle()
+    if (requestError || !data) return null
+    return data as { server_id: string; server_name: string }
+  }, [])
 
   const redeemInviteLink = useCallback(async (code: string) => {
     if (!supabase) return { ok: false, message: 'Conecte sua identidade antes de aceitar o convite.' }
@@ -520,14 +571,30 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     return { ok: true, message: 'Categoria criada.' }
   }, [activeServer, categories.length, loadServerControls])
 
+  const searchProfiles = useCallback(async (term: string) => {
+    const normalized = term.trim().replace(/^@/, '').toLowerCase()
+    if (demoMode || !supabase || !userId || normalized.length < 2) return [] as PersonSummary[]
+    const { data, error: requestError } = await supabase
+      .from('profiles')
+      .select('id, nickname, username, avatar_url')
+      .or(`username.ilike.%${normalized}%,nickname.ilike.%${normalized}%`)
+      .neq('id', userId)
+      .limit(10)
+    if (requestError || !data) return [] as PersonSummary[]
+    return (data as ProfileRow[]).flatMap((row) => {
+      const profile = mapProfile(row)
+      return profile ? [profile] : []
+    })
+  }, [demoMode, userId])
+
   const findProfile = useCallback(async (username: string) => {
     if (!supabase || !userId) return { ok: false as const, message: 'Conecte sua identidade antes de continuar.' }
     const normalized = username.trim().replace(/^@/, '').toLowerCase()
     if (!normalized) return { ok: false as const, message: 'Informe um identificador como @nome.' }
-    const { data, error: requestError } = await supabase.from('profiles').select('id, nickname, username').eq('username', normalized).maybeSingle()
+    const { data, error: requestError } = await supabase.from('profiles').select('id, nickname, username, avatar_url').eq('username', normalized).maybeSingle()
     if (requestError || !data) return { ok: false as const, message: 'Usuario nao encontrado.' }
     if (data.id === userId) return { ok: false as const, message: 'Escolha outra pessoa.' }
-    return { ok: true as const, profile: data as ProfileRow }
+    return { ok: true as const, profile: mapProfile(data as ProfileRow) as PersonSummary }
   }, [userId])
 
   const sendFriendRequest = useCallback(async (username: string) => {
@@ -617,6 +684,7 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     serverMuted,
     inviteLinks,
     sendMessage,
+    searchProfiles,
     sendFriendRequest,
     sendServerInvite,
     servers,
@@ -629,12 +697,15 @@ export function useCommunityWorkspace({ demoMode, userId, username }: CommunityW
     deleteServer,
     saveChannel,
     deleteChannel,
+    inspectInviteLink,
     redeemInviteLink,
     revokeInviteLink,
     saveChannelPermissions,
     saveServerNickname,
+    removeMember,
     setMemberRole,
     moderateMember,
     setMuted,
+    transferOwnership,
   }
 }
