@@ -51,6 +51,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Conexao de voz persistente ao navegar entre canais e servidores
 - [x] Silenciar microfone
 - [x] Compartilhar tela ou janela
+- [x] Assistir varias telas ao mesmo tempo, com destaque e tela cheia por transmissao
 - [ ] Audio do sistema no Windows
 - [x] Seletor de qualidade automatica, alta, media e baixa antes da transmissao
 - [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS

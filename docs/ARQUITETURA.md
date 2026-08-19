@@ -67,7 +67,8 @@ Durante desenvolvimento e piloto fechado, o sistema deve permanecer dentro dos p
 - sem dominio pago inicialmente;
 - sem gravacao, egress, transcodificacao ou video de camera;
 - compartilhamento padrao em 720p e 15 FPS;
-- maximo inicial de 8 participantes por canal de voz e 1 tela publicada;
+- maximo inicial de 8 participantes por canal de voz e uma tela publicada por participante,
+  todas assistiveis ao mesmo tempo;
 - anexos pequenos e limites por usuario;
 - alertas e revisao de consumo antes de abrir o piloto.
 

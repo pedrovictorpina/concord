@@ -5,6 +5,7 @@ import { useScreenShare } from './useScreenShare'
 import { useVoicePresence } from './useVoicePresence'
 import { mergeVoiceParticipants } from './voice-participants'
 import type { ScreenShareQuality } from './screen-quality'
+import type { ScreenShareView } from './screen-shares'
 import type { WorkspaceIdentity } from './workspace-types'
 
 export type VoiceTarget = {
@@ -32,9 +33,16 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
 
   const microphoneEnabled = demoMode ? demoPreferences.microphoneEnabled : liveRoom.microphoneEnabled
   const outputEnabled = demoMode ? demoPreferences.outputEnabled : liveRoom.outputEnabled
-  const sharing = demoMode ? Boolean(demoShare.stream) : Boolean(liveRoom.screenTrack)
   const error = demoMode ? demoShare.error : liveRoom.error
   const connectedChannelId = target?.channelId ?? null
+
+  const screenShares = useMemo<ScreenShareView[]>(() => {
+    if (!demoMode) return liveRoom.screenShares
+    if (!demoShare.stream) return []
+    return [{ id: 'demo-screen', nickname: identity.nickname, isLocal: true, track: null, stream: demoShare.stream }]
+  }, [demoMode, demoShare.stream, identity.nickname, liveRoom.screenShares])
+
+  const sharing = screenShares.some((share) => share.isLocal)
 
   useEffect(() => {
     if (demoMode || !target || liveRoom.connectedChannelId === target.channelId) return
@@ -147,11 +155,10 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
     microphoneEnabled,
     outputEnabled,
     participantsByChannel,
-    screenTrack: liveRoom.screenTrack,
+    screenShares,
     sharing,
     startScreenShare,
     stopScreenShare,
-    stream: demoShare.stream,
     target,
     toggleMicrophone,
     toggleOutput,
