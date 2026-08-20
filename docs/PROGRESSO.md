@@ -180,4 +180,11 @@ Branch atual: `main`.
 - barra de identidade do usuario ganhou icones de microfone, fone e configuracoes; o de configuracoes abre as configuracoes do servidor, microfone e fone ainda sao visuais.
 - barra de envio ganhou botoes de presente, GIF e emoji (visuais) e um botao de enviar dedicado, alem do Enter.
 - validacoes: `pnpm check` e `pnpm lint` aprovados; verificacao visual com Playwright nos temas claro e escuro, incluindo busca de canais, busca de membros e alternancia do painel de membros sem sobra de coluna vazia.
-
+- tela de mensagens diretas redesenhada: cabecalho mostra presenca real do amigo (reaproveitando o mesmo `statusLabel` da tela de Amigos, extraido para `presence.ts`), com espaco para chamada de voz/video/fixados (desabilitados, com dica "em breve"), busca nas mensagens carregadas e menu "Copiar identificador".
+- mensagens passaram a ser agrupadas por autor em janelas de 5 minutos (sem repetir avatar/cabecalho) e ganharam separadores reais de data (Hoje/Ontem/data completa); mensagens recebidas usam estrutura aberta (avatar + texto) e mensagens proprias continuam em bubble, seguindo a referencia aprovada sem copiar as cores da imagem.
+- composer virou textarea com crescimento automatico ate ~132px, Enter envia e Shift+Enter quebra linha; anexo, emoji e GIF ficam visiveis e desabilitados ("em breve") em vez de fingir suporte.
+- lista de conversas na `HomeSidebar` passou a mostrar o status de presenca (Disponivel/Ausente/Em voz) no lugar do `@identificador`, e o campo de busca ganhou icone.
+- estado vazio da conversa ganhou avatar grande, nome, identificador e o texto "Este e o comeco da sua conversa com @identificador", no lugar do simbolo generico anterior; erro ao abrir a conversa passou a ocupar o centro da tela e erro de envio ganha botao "Tentar novamente".
+- scroll passou a fixar no fim da conversa e a mostrar "↓ Novas mensagens" quando o usuario esta lendo mensagens antigas e uma nova chega.
+- envio otimista e reactions ficaram fora do escopo desta etapa, como o proprio documento da etapa permite.
+- validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (26/26, com o teste de mensagem privada atualizado para o novo estado vazio) aprovados; conferencia visual manual via Playwright em desktop, mobile (390px) e tema escuro.

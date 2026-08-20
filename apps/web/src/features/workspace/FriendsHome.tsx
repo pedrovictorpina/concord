@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { DropdownMenu, Tabs } from 'radix-ui'
 import type { FriendPresence, FriendRequestSummary, PersonSummary, ServerInviteSummary } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
+import { statusClass, statusLabel } from './presence'
 
 type ActionResult = { ok: boolean; message: string }
 
@@ -19,14 +20,6 @@ type FriendsHomeProps = {
 }
 
 const initialsFrom = (name: string) => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase()
-
-const statusLabel = (presence: FriendPresence | undefined) => {
-  if (!presence) return 'Offline'
-  if (presence.voiceChannelName) return `Em voz · ${presence.voiceChannelName}`
-  if (presence.status === 'away') return 'Ausente'
-  if (presence.status === 'busy') return 'Não perturbe'
-  return 'Disponível'
-}
 
 export function FriendsHome({ friendRequests, friends, onAcceptFriendRequest, onAcceptServerInvite, onOpenFriend, onSendFriendRequest, presenceByUser, serverInvites, tab, onTabChange }: FriendsHomeProps) {
   const [search, setSearch] = useState('')
@@ -69,7 +62,7 @@ export function FriendsHome({ friendRequests, friends, onAcceptFriendRequest, on
           const presence = presenceByUser[friend.id]
           return (
             <li className="friend-person" key={friend.id}>
-              <span className={presence ? `avatar-slot status-${presence.status}` : 'avatar-slot status-offline'}>
+              <span className={statusClass(presence)}>
                 <Avatar initials={initialsFrom(friend.nickname)} url={friend.avatarUrl} />
               </span>
               <div><strong>{friend.nickname}</strong><small>{statusLabel(presence)}</small></div>
