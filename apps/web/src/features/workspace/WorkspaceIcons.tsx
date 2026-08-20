@@ -101,3 +101,54 @@ export function EmojiIcon() {
     </svg>
   )
 }
+
+export function ChevronDownIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M5 8.5l7 7 7-7" />
+    </svg>
+  )
+}
+
+export function GearIcon() {
+  return (
+    <svg {...iconProps}>
+      <circle cx="12" cy="12" r="3.2" />
+      <path d="M12 3.5v2.4M12 18.1v2.4M20.5 12h-2.4M5.9 12H3.5M17.7 6.3l-1.7 1.7M8 16l-1.7 1.7M17.7 17.7L16 16M8 8L6.3 6.3" />
+    </svg>
+  )
+}
+
+export function SpeakerIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M5 9.5h3.2L13 6v12l-4.8-3.5H5z" />
+      <path d="M16 9.3a4 4 0 0 1 0 5.4" />
+    </svg>
+  )
+}
+
+export function CrownIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 18h16l1-9-4.5 3-4.5-6-4.5 6L3 9z" />
+    </svg>
+  )
+}
+
+export function SendIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4.5 12L19 5l-6 14-2.3-6.3z" />
+      <path d="M13 12.7L19 5" />
+    </svg>
+  )
+}
+
+export function BackIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
+  )
+}

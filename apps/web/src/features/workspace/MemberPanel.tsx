@@ -5,7 +5,7 @@ import { Avatar } from '../../components/ui/Avatar'
 import { Modal } from '../../components/ui/Modal'
 import { MemberContextMenu } from './MemberContextMenu'
 import { initialsFrom } from './voice-participants'
-import { SearchIcon } from './WorkspaceIcons'
+import { CrownIcon, SearchIcon, SpeakerIcon } from './WorkspaceIcons'
 
 type ServerMember = PersonSummary & { role: ServerMemberRole }
 
@@ -13,6 +13,8 @@ type ActionResult = { ok: boolean; message: string }
 
 type MemberPanelProps = {
   members: ServerMember[]
+  mobileOpen: boolean
+  onCloseMobile: () => void
   onModerateMember: (memberId: string, action: 'ban' | 'timeout' | 'microphone' | 'audio') => Promise<ActionResult>
   onRemoveMember: (memberId: string) => Promise<ActionResult>
   onSetMemberRole: (memberId: string, role: ServerMemberRole) => Promise<ActionResult>
@@ -45,7 +47,7 @@ const confirmCopy: Record<PendingAction['kind'], { title: string; description: s
   transfer: { title: 'Transferir o servidor', description: 'A outra pessoa passa a ser a proprietária e você continua como moderador.', action: 'TRANSFERIR' },
 }
 
-export function MemberPanel({ members, onModerateMember, onRemoveMember, onSetMemberRole, onTransferOwnership, server, userId, voiceParticipantsByChannel }: MemberPanelProps) {
+export function MemberPanel({ members, mobileOpen, onCloseMobile, onModerateMember, onRemoveMember, onSetMemberRole, onTransferOwnership, server, userId, voiceParticipantsByChannel }: MemberPanelProps) {
   const [pending, setPending] = useState<PendingAction | null>(null)
   const [feedback, setFeedback] = useState('')
   const [memberQuery, setMemberQuery] = useState('')
@@ -74,8 +76,8 @@ export function MemberPanel({ members, onModerateMember, onRemoveMember, onSetMe
   }
 
   return (
-    <aside className="member-panel" aria-label="Membros do servidor">
-      <header><strong>Membros</strong><small>{members.length} NO SERVIDOR</small></header>
+    <aside className={mobileOpen ? 'member-panel mobile-open' : 'member-panel'} aria-label="Membros do servidor">
+      <header><button aria-label="Fechar membros" className="member-mobile-close" type="button" onClick={onCloseMobile}>←</button><strong>Membros</strong><small>{members.length} NO SERVIDOR</small></header>
       <div className="member-search">
         <SearchIcon />
         <input aria-label="Buscar membros" placeholder="Buscar membros" type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} />
@@ -105,10 +107,10 @@ export function MemberPanel({ members, onModerateMember, onRemoveMember, onSetMe
                 <div className={inVoice.has(member.id) ? 'member-row in-voice' : 'member-row'}>
                   <Avatar initials={initialsFrom(member.nickname)} tone={member.role === 'member' ? 'amber' : 'green'} url={member.avatarUrl} />
                   <div>
-                    <strong>{member.nickname}{member.id === userId ? ' (você)' : ''}</strong>
+                    <strong>{member.nickname}{member.id === userId ? ' (você)' : ''}{member.role === 'owner' ? <i aria-label="Proprietário" className="member-crown"><CrownIcon /></i> : null}</strong>
                     <small>@{member.username} · {roleLabels[member.role]}</small>
                   </div>
-                  {inVoice.has(member.id) ? <i aria-label="Em voz">◖</i> : null}
+                  {inVoice.has(member.id) ? <i aria-label="Em voz" className="member-in-voice"><SpeakerIcon /></i> : null}
                   {canModerate(member) ? (
                     <DropdownMenu.Root>
                       <DropdownMenu.Trigger aria-label={`Administrar ${member.nickname}`} className="member-menu-trigger">⋮</DropdownMenu.Trigger>
