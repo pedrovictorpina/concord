@@ -91,11 +91,11 @@ test.describe('identidade e temas', () => {
     })
     expect(voiceLayout.contentHeight).toBeCloseTo(voiceLayout.appHeight, 0)
 
-    const dockForShare = page.getByRole('complementary', { name: 'Conexao de voz' })
-    await expect(dockForShare.getByRole('button', { name: 'TELA' })).toBeEnabled()
+    const roomControls = page.locator('.voice-room-controls')
+    await expect(roomControls.getByRole('button', { name: 'TELA' })).toBeEnabled()
     await expect(page.locator('.voice-member')).toContainText('conectado')
     await expect(page.getByText('Concord Bot')).toHaveCount(0)
-    await dockForShare.getByRole('button', { name: 'TELA' }).click()
+    await roomControls.getByRole('button', { name: 'TELA' }).click()
     await expect(page.getByRole('dialog', { name: 'Qualidade da transmissao' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Automatica/ })).toBeVisible()
     await page.getByRole('button', { name: 'Fechar seletor de qualidade' }).click()
@@ -228,8 +228,8 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
-    const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
-    await dock.getByRole('button', { name: 'TELA' }).click()
+    const roomControls = page.locator('.voice-room-controls')
+    await roomControls.getByRole('button', { name: 'TELA' }).click()
     await page.getByRole('button', { name: /Automatica/ }).click()
 
     const tile = page.locator('.voice-stage-share').first()
@@ -280,7 +280,7 @@ test.describe('identidade e temas', () => {
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
-    await expect(dock).toContainText('sala-da-madrugada')
+    await expect(page.locator('.voice-room > header')).toContainText('sala-da-madrugada')
     await expect(page.locator('.voice-member')).toHaveCount(1)
 
     await page.getByRole('button', { name: '# geral', exact: true }).click()
@@ -305,16 +305,16 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
-    const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
-    await dock.getByRole('button', { name: 'Áudio ligado' }).click()
+    const roomControls = page.locator('.voice-room-controls')
+    await roomControls.getByRole('button', { name: 'Áudio ligado' }).click()
 
-    await expect(dock.getByRole('button', { name: 'Microfone mutado' })).toBeVisible()
+    await expect(roomControls.getByRole('button', { name: 'Microfone mutado' })).toBeVisible()
     await expect(page.locator('.voice-member')).toContainText('sem áudio')
     await expect(page.locator('.voice-member .voice-flag[aria-label="Áudio mutado"]')).toBeVisible()
     await expect(page.locator('.voice-member .voice-flag[aria-label="Microfone mutado"]')).toBeVisible()
 
-    await dock.getByRole('button', { name: 'Áudio mutado' }).click()
-    await expect(dock.getByRole('button', { name: 'Microfone ligado' })).toBeVisible()
+    await roomControls.getByRole('button', { name: 'Áudio mutado' }).click()
+    await expect(roomControls.getByRole('button', { name: 'Microfone ligado' })).toBeVisible()
     await expect(page.locator('.voice-member')).toContainText('conectado')
   })
 

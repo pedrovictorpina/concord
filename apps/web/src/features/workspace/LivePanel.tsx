@@ -1,32 +1,48 @@
-import { useEffect, useState } from 'react'
-import type { FormEvent } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { FormEvent, KeyboardEvent } from 'react'
 import type { ChannelSummary, MessageSummary, VoiceParticipant } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
 import { MemberContextMenu } from './MemberContextMenu'
+import { ScreenShareButton } from './ScreenShareButton'
 import { ScreenShareTile } from './ScreenShareTile'
+import type { ScreenShareQuality } from './screen-quality'
 import type { ScreenShareView } from './screen-shares'
-import { VoiceStateFlags } from './VoiceStateIcons'
+import { AudioIcon, AudioOffIcon, ChatIcon, MicIcon, MicOffIcon, ScreenIcon, SpeakerIcon, VoiceStateFlags } from './VoiceStateIcons'
 import type { WorkspaceIdentity } from './workspace-types'
 
 type LivePanelProps = {
   channel: ChannelSummary
+  chatVisible: boolean
   connected: boolean
   connecting: boolean
   identity: WorkspaceIdentity
   messages: MessageSummary[]
+  microphoneDisabled: boolean
+  microphoneEnabled: boolean
   onJoin: () => void
+  onLeave: () => void
   onSendMessage: (body: string, authorNickname: string) => Promise<{ ok: boolean; message: string }>
   onSetParticipantVolume: (userId: string, volume: number) => void
   onSetShareVolume: (participantId: string, volume: number) => void
+  onStartScreenShare: (quality: ScreenShareQuality) => void
+  onStopScreenShare: () => void
+  onToggleChat: () => void
+  onToggleMicrophone: () => void
+  onToggleOutput: () => void
   onToggleShareSound: (participantId: string, muted: boolean) => void
+  outputDisabled: boolean
+  outputEnabled: boolean
   screenAudioMuted: Record<string, boolean>
   screenVolumeByUser: Record<string, number>
   onWatchShare: (participantId: string, watched: boolean) => void
   participants: VoiceParticipant[]
   screenShares: ScreenShareView[]
+  sharing: boolean
   userId?: string
   volumeByUser: Record<string, number>
 }
+
+const MAX_COMPOSER_HEIGHT = 132
 
 const formatTime = (value: string) => new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' }).format(new Date(value))
 
@@ -38,14 +54,17 @@ const statusFor = (participant: VoiceParticipant) => {
   return 'conectado'
 }
 
-export function LivePanel({ channel, connected, connecting, identity, messages, onJoin, onSendMessage, onSetParticipantVolume, onSetShareVolume, onToggleShareSound, screenAudioMuted, screenVolumeByUser, onWatchShare, participants, screenShares, userId, volumeByUser }: LivePanelProps) {
+export function LivePanel({ channel, chatVisible, connected, connecting, identity, messages, microphoneDisabled, microphoneEnabled, onJoin, onLeave, onSendMessage, onSetParticipantVolume, onSetShareVolume, onStartScreenShare, onStopScreenShare, onToggleChat, onToggleMicrophone, onToggleOutput, onToggleShareSound, outputDisabled, outputEnabled, screenAudioMuted, screenVolumeByUser, onWatchShare, participants, screenShares, sharing, userId, volumeByUser }: LivePanelProps) {
   const [focusedShareId, setFocusedShareId] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [chatFeedback, setChatFeedback] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const sendMessage = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const microphoneOff = microphoneDisabled || !microphoneEnabled
+  const outputOff = outputDisabled || !outputEnabled
+
+  const submitDraft = async () => {
     const body = draft.trim()
     if (!body) return
     setSending(true)
@@ -55,6 +74,26 @@ export function LivePanel({ channel, connected, connecting, identity, messages, 
     if (result.ok) setDraft('')
     else setChatFeedback(result.message)
   }
+
+  const handleSubmit = (event: FormEvent) => {
+    event.preventDefault()
+    void submitDraft()
+  }
+
+  const onComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      void submitDraft()
+    }
+  }
+
+  useEffect(() => {
+    const node = textareaRef.current
+    if (!node) return
+    node.style.height = 'auto'
+    node.style.height = `${Math.min(node.scrollHeight, MAX_COMPOSER_HEIGHT)}px`
+  }, [draft])
+
   const focusedShare = screenShares.find((share) => share.id === focusedShareId) ?? null
 
   useEffect(() => {
@@ -78,9 +117,15 @@ export function LivePanel({ channel, connected, connecting, identity, messages, 
   return (
     <>
       <section className="voice-room">
-        <header><div><span>◖</span><strong>{channel.name}</strong></div><small>{connected ? 'CONECTADO' : 'CANAL DE VOZ'}</small></header>
+        <header>
+          <div><SpeakerIcon /><strong>{channel.name}</strong></div>
+          <div className="voice-room-header-actions">
+            <small>{participants.length === 0 ? 'Ninguém em voz' : `${participants.length} ${participants.length === 1 ? 'participante' : 'participantes'}`}</small>
+            <button aria-label={chatVisible ? 'Ocultar chat de voz' : 'Mostrar chat de voz'} aria-pressed={chatVisible} className={chatVisible ? 'active' : ''} type="button" onClick={onToggleChat}><ChatIcon /></button>
+          </div>
+        </header>
         <div className="voice-room-stage">
-          {participants.length === 0 ? <span className="voice-room-icon">◖</span> : null}
+          {participants.length === 0 ? <span className="voice-room-icon"><SpeakerIcon /></span> : null}
           <h1>{channel.name}</h1>
           {screenShares.length > 0 ? (
             <ul className={focusedShare ? 'voice-stage-shares has-focus' : 'voice-stage-shares'} data-count={Math.min(screenShares.length, 4)}>
@@ -104,7 +149,7 @@ export function LivePanel({ channel, connected, connecting, identity, messages, 
             <ul className="voice-stage-available" aria-label="Transmissões disponíveis">
               {availableShares.map((participant) => (
                 <li key={participant.userId}>
-                  <button type="button" onClick={() => onWatchShare(participant.userId, true)}>▣ Ver a tela de {participant.nickname}</button>
+                  <button type="button" onClick={() => onWatchShare(participant.userId, true)}><ScreenIcon /> Ver a tela de {participant.nickname}</button>
                 </li>
               ))}
             </ul>
@@ -124,7 +169,7 @@ export function LivePanel({ channel, connected, connecting, identity, messages, 
                 >
                   <li className={participant.speaking ? 'voice-tile speaking' : 'voice-tile'}>
                     <Avatar initials={participant.initials} url={participant.avatarUrl} />
-                    <strong>{participant.nickname}</strong>
+                    <strong>{participant.nickname}{participant.userId === userId ? ' (você)' : ''}</strong>
                     <small>{statusFor(participant)}</small>
                     <VoiceStateFlags microphoneEnabled={participant.microphoneEnabled} outputEnabled={participant.outputEnabled} sharingScreen={participant.sharingScreen} />
                   </li>
@@ -135,8 +180,18 @@ export function LivePanel({ channel, connected, connecting, identity, messages, 
           <p>{summary}</p>
           {!connected ? <button aria-busy={connecting} className="voice-room-join" disabled={connecting} type="button" onClick={onJoin}>{connecting ? 'Entrando na chamada…' : 'Entrar na chamada de voz'}</button> : null}
         </div>
+        {connected ? (
+          <footer className="voice-room-controls">
+            <div className="voice-controls">
+              <button aria-label={microphoneDisabled ? 'Microfone desativado pela moderação' : microphoneOff ? 'Microfone mutado' : 'Microfone ligado'} aria-pressed={microphoneOff} className={microphoneOff ? 'disabled' : ''} disabled={microphoneDisabled} type="button" onClick={onToggleMicrophone}><span>{microphoneOff ? <MicOffIcon /> : <MicIcon />}</span>MIC</button>
+              <button aria-label={outputDisabled ? 'Áudio desativado pela moderação' : outputOff ? 'Áudio mutado' : 'Áudio ligado'} aria-pressed={outputOff} className={outputOff ? 'disabled' : ''} disabled={outputDisabled} type="button" onClick={onToggleOutput}><span>{outputOff ? <AudioOffIcon /> : <AudioIcon />}</span>ÁUDIO</button>
+              <ScreenShareButton onStart={onStartScreenShare} onStop={onStopScreenShare} sharing={sharing} />
+              <button className="leave-voice" type="button" onClick={onLeave}><span>×</span>SAIR</button>
+            </div>
+          </footer>
+        ) : null}
       </section>
-      <aside className="voice-chat-side">
+      <aside className={chatVisible ? 'voice-chat-side' : 'voice-chat-side collapsed'}>
         <header><strong>Chat de voz</strong><small>#{channel.name}</small></header>
         <div className="voice-chat-messages" aria-live="polite">
           {messages.map((message) => (
@@ -150,9 +205,18 @@ export function LivePanel({ channel, connected, connecting, identity, messages, 
           ))}
           {!messages.length ? <p className="channel-empty">Sem mensagens ainda. Este chat acompanha a chamada.</p> : null}
         </div>
-        <form className="composer" onSubmit={(event) => void sendMessage(event)}>
-          <input aria-label="Mensagem do canal de voz" disabled={sending} value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={`Transmitir em ${channel.name}`} />
-          <span>{sending ? 'ENVIANDO' : 'ENTER ↵'}</span>
+        <form className="composer" onSubmit={handleSubmit}>
+          <textarea
+            aria-label="Mensagem do canal de voz"
+            disabled={sending}
+            placeholder={`Transmitir em ${channel.name}`}
+            ref={textareaRef}
+            rows={1}
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={onComposerKeyDown}
+          />
+          <button className="composer-send" type="submit" aria-label="Enviar mensagem" disabled={sending || !draft.trim()}>➤</button>
         </form>
         {chatFeedback ? <p className="composer-feedback" role="status">{chatFeedback}</p> : null}
       </aside>
