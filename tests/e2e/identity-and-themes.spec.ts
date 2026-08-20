@@ -198,6 +198,21 @@ test.describe('identidade e temas', () => {
     await expect(menu).toHaveCount(0)
   })
 
+  test('mantém o dock de voz acima do perfil na tela inicial', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
+    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await expect(page.getByText('Você está em voz.')).toBeVisible()
+    await page.getByRole('button', { name: 'Inicio do Concord' }).click()
+
+    const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
+    const identity = page.locator('.home-sidebar .identity-strip')
+    const dockBox = await dock.boundingBox()
+    const identityBox = await identity.boundingBox()
+    expect(dockBox!.y + dockBox!.height).toBeLessThanOrEqual(identityBox!.y + 1)
+  })
+
   test('ajusta a supressão de ruído nas configurações de voz', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
