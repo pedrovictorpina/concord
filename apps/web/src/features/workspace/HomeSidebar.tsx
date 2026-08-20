@@ -1,5 +1,7 @@
-import type { PersonSummary } from '@concord/contracts'
+import type { FriendPresence, PersonSummary } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
+import { statusClass, statusLabel } from './presence'
+import { SearchIcon } from './WorkspaceIcons'
 import type { WorkspaceIdentity } from './workspace-types'
 
 type HomeSidebarProps = {
@@ -12,7 +14,7 @@ type HomeSidebarProps = {
   onShowFriends: () => void
   onShowRequests: () => void
   pendingCount: number
-  presenceByUser: Record<string, { status: string }>
+  presenceByUser: Record<string, FriendPresence>
   view: 'friends' | 'requests'
 }
 
@@ -22,7 +24,7 @@ export function HomeSidebar({ activeFriendId, friends, identity, onOpenFriend, o
   return (
     <aside className="home-sidebar" aria-label="Mensagens diretas">
       <div className="home-sidebar-search">
-        <button type="button" onClick={onOpenSearch}>Encontre ou comece uma conversa</button>
+        <button type="button" onClick={onOpenSearch}><SearchIcon />Encontre ou comece uma conversa</button>
       </div>
       <nav className="home-sidebar-nav" aria-label="Seções de mensagens">
         <button aria-current={view === 'friends' && !activeFriendId} className={view === 'friends' && !activeFriendId ? 'active' : ''} type="button" onClick={onShowFriends}>
@@ -42,10 +44,10 @@ export function HomeSidebar({ activeFriendId, friends, identity, onOpenFriend, o
             type="button"
             onClick={() => onOpenFriend(friend)}
           >
-            <span className={`avatar-slot status-${presenceByUser[friend.id]?.status ?? 'offline'}`}>
+            <span className={statusClass(presenceByUser[friend.id])}>
               <Avatar initials={initialsFrom(friend.nickname)} url={friend.avatarUrl} />
             </span>
-            <div><strong>{friend.nickname}</strong><small>@{friend.username}</small></div>
+            <div><strong>{friend.nickname}</strong><small>{statusLabel(presenceByUser[friend.id])}</small></div>
           </button>
         ))}
         {!friends.length ? <p className="home-sidebar-empty">Suas conversas aparecem aqui depois do primeiro amigo.</p> : null}

@@ -250,7 +250,7 @@ test.describe('identidade e temas', () => {
     await page.getByRole('tab', { name: 'Voz' }).click()
 
     const suppression = page.getByLabel('Supressão de ruído')
-    await expect(page.getByRole('radio', { name: /Isolamento de voz/ })).toHaveAttribute('aria-checked', 'true')
+    await expect(page.getByRole('radio', { name: /^Voz/ })).toHaveAttribute('aria-checked', 'true')
     await expect(suppression).toBeDisabled()
 
     await page.getByRole('radio', { name: /Personalizado/ }).click()
@@ -267,7 +267,7 @@ test.describe('identidade e temas', () => {
     await page.getByRole('navigation', { name: 'Servidores' }).getByRole('button', { name: 'Abrir configurações' }).click()
     await page.getByRole('tab', { name: 'Voz' }).click()
 
-    await expect(page.getByLabel('Supressão de ruído')).toHaveValue('standard')
+    await expect(page.getByLabel('Supressão de ruído')).toHaveValue('webrtc')
     await expect(page.getByRole('checkbox', { name: 'Ganho automático' })).not.toBeChecked()
   })
 
@@ -341,7 +341,7 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
     await page.getByRole('button', { name: 'Enviar mensagem para Ari' }).click()
-    await expect(page.getByText('Conversa com Ari')).toBeVisible()
+    await expect(page.getByText('Este é o começo da sua conversa com @ari.')).toBeVisible()
     await page.getByLabel('Mensagem privada').fill('Sinal privado')
     await page.getByLabel('Mensagem privada').press('Enter')
     await expect(page.getByText('Sinal privado')).toBeVisible()

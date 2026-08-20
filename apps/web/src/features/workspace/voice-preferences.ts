@@ -1,32 +1,39 @@
 export type VoiceProfile = 'voice' | 'studio' | 'custom'
 
-export type NoiseSuppressionLevel = 'off' | 'standard' | 'high'
+export type NoiseSuppressionMode = 'off' | 'webrtc' | 'rnnoise'
 
 export type VoiceProcessing = {
   autoGainControl: boolean
   echoCancellation: boolean
   inputDeviceId: string
-  noiseSuppression: boolean
+  noiseSuppressionMode: NoiseSuppressionMode
   outputDeviceId: string
   outputVolume: number
   profile: VoiceProfile
-  suppressionLevel: NoiseSuppressionLevel
-  voiceIsolation: boolean
 }
 
 export const defaultVoiceProcessing: VoiceProcessing = {
   autoGainControl: true,
   echoCancellation: true,
   inputDeviceId: '',
-  noiseSuppression: true,
+  noiseSuppressionMode: 'webrtc',
   outputDeviceId: '',
   outputVolume: 1,
   profile: 'voice',
-  suppressionLevel: 'standard',
-  voiceIsolation: false,
 }
 
-const storageKey = 'concord.voice.v1'
+const storageKeyV1 = 'concord.voice.v1'
+const storageKey = 'concord.voice.v2'
+
+type LegacyVoiceProcessingV1 = {
+  autoGainControl?: boolean
+  echoCancellation?: boolean
+  inputDeviceId?: string
+  outputDeviceId?: string
+  outputVolume?: number
+  profile?: VoiceProfile
+  suppressionLevel?: 'off' | 'standard' | 'high'
+}
 
 export const voiceIsolationSupported = () =>
   typeof navigator !== 'undefined'
@@ -43,9 +50,7 @@ export function profilePreset(profile: VoiceProfile, current: VoiceProcessing): 
       profile,
       autoGainControl: true,
       echoCancellation: true,
-      noiseSuppression: true,
-      suppressionLevel: voiceIsolationSupported() ? 'high' : 'standard',
-      voiceIsolation: voiceIsolationSupported(),
+      noiseSuppressionMode: 'webrtc',
     }
   }
   if (profile === 'studio') {
@@ -54,42 +59,61 @@ export function profilePreset(profile: VoiceProfile, current: VoiceProcessing): 
       profile,
       autoGainControl: false,
       echoCancellation: false,
-      noiseSuppression: false,
-      suppressionLevel: 'off',
-      voiceIsolation: false,
+      noiseSuppressionMode: 'off',
     }
   }
   return { ...current, profile }
 }
 
-export function withSuppressionLevel(value: VoiceProcessing, level: NoiseSuppressionLevel): VoiceProcessing {
+export function withNoiseSuppressionMode(value: VoiceProcessing, mode: NoiseSuppressionMode): VoiceProcessing {
+  return { ...value, noiseSuppressionMode: mode }
+}
+
+const clampVolume = (value: unknown) => typeof value === 'number' ? Math.min(1, Math.max(0, value)) : 1
+
+const isNoiseSuppressionMode = (value: unknown): value is NoiseSuppressionMode =>
+  value === 'off' || value === 'webrtc' || value === 'rnnoise'
+
+export function normalizeVoiceProcessing(parsed: Partial<VoiceProcessing>): VoiceProcessing {
   return {
-    ...value,
-    suppressionLevel: level,
-    noiseSuppression: level !== 'off',
-    voiceIsolation: level === 'high' && voiceIsolationSupported(),
+    autoGainControl: parsed.autoGainControl ?? defaultVoiceProcessing.autoGainControl,
+    echoCancellation: parsed.echoCancellation ?? defaultVoiceProcessing.echoCancellation,
+    inputDeviceId: parsed.inputDeviceId ?? '',
+    noiseSuppressionMode: isNoiseSuppressionMode(parsed.noiseSuppressionMode) ? parsed.noiseSuppressionMode : defaultVoiceProcessing.noiseSuppressionMode,
+    outputDeviceId: parsed.outputDeviceId ?? '',
+    outputVolume: clampVolume(parsed.outputVolume),
+    profile: parsed.profile ?? defaultVoiceProcessing.profile,
   }
 }
+
+// v1 off -> v2 off; v1 standard/high -> v2 webrtc (nunca migra automaticamente para rnnoise)
+export function migrateLegacyVoiceProcessing(parsed: LegacyVoiceProcessingV1): VoiceProcessing {
+  return {
+    autoGainControl: parsed.autoGainControl ?? defaultVoiceProcessing.autoGainControl,
+    echoCancellation: parsed.echoCancellation ?? defaultVoiceProcessing.echoCancellation,
+    inputDeviceId: parsed.inputDeviceId ?? '',
+    noiseSuppressionMode: parsed.suppressionLevel === 'off' ? 'off' : 'webrtc',
+    outputDeviceId: parsed.outputDeviceId ?? '',
+    outputVolume: clampVolume(parsed.outputVolume),
+    profile: parsed.profile ?? defaultVoiceProcessing.profile,
+  }
+}
+
+// Desativada nao sobrevive a reabertura do Concord (exceto no perfil Estudio, onde e o padrao):
+// evita que o usuario esqueca a supressao desligada de uma sessao para a outra.
+const withTransientOffReset = (value: VoiceProcessing): VoiceProcessing =>
+  value.noiseSuppressionMode === 'off' && value.profile !== 'studio'
+    ? { ...value, noiseSuppressionMode: 'webrtc' }
+    : value
 
 export function readVoiceProcessing(): VoiceProcessing {
   if (typeof window === 'undefined') return defaultVoiceProcessing
   try {
-    const stored = window.localStorage.getItem(storageKey)
-    if (!stored) return defaultVoiceProcessing
-    const parsed = JSON.parse(stored) as Partial<VoiceProcessing>
-    const profile = parsed.profile ?? defaultVoiceProcessing.profile
-    const level = profile === 'studio' ? 'off' : parsed.suppressionLevel === 'off' ? 'standard' : parsed.suppressionLevel ?? defaultVoiceProcessing.suppressionLevel
-    return {
-      autoGainControl: parsed.autoGainControl ?? defaultVoiceProcessing.autoGainControl,
-      echoCancellation: parsed.echoCancellation ?? defaultVoiceProcessing.echoCancellation,
-      inputDeviceId: parsed.inputDeviceId ?? '',
-      noiseSuppression: profile === 'studio' ? false : true,
-      outputDeviceId: parsed.outputDeviceId ?? '',
-      outputVolume: typeof parsed.outputVolume === 'number' ? Math.min(1, Math.max(0, parsed.outputVolume)) : 1,
-      profile,
-      suppressionLevel: level,
-      voiceIsolation: (parsed.voiceIsolation ?? false) && voiceIsolationSupported(),
-    }
+    const storedV2 = window.localStorage.getItem(storageKey)
+    if (storedV2) return withTransientOffReset(normalizeVoiceProcessing(JSON.parse(storedV2) as Partial<VoiceProcessing>))
+    const storedV1 = window.localStorage.getItem(storageKeyV1)
+    if (storedV1) return withTransientOffReset(migrateLegacyVoiceProcessing(JSON.parse(storedV1) as LegacyVoiceProcessingV1))
+    return defaultVoiceProcessing
   } catch {
     return defaultVoiceProcessing
   }
@@ -105,12 +129,13 @@ export function writeVoiceProcessing(value: VoiceProcessing) {
 }
 
 export function audioCaptureOptions(value: VoiceProcessing) {
+  const webrtc = value.noiseSuppressionMode === 'webrtc'
   const options: Record<string, unknown> = {
     autoGainControl: value.autoGainControl,
     echoCancellation: value.echoCancellation,
-    noiseSuppression: value.noiseSuppression,
+    noiseSuppression: webrtc,
   }
   if (value.inputDeviceId) options.deviceId = value.inputDeviceId
-  if (voiceIsolationSupported()) options.voiceIsolation = value.voiceIsolation
+  if (voiceIsolationSupported()) options.voiceIsolation = webrtc && value.profile === 'voice'
   return options
 }
