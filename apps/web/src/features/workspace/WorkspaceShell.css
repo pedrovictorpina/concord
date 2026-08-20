@@ -463,14 +463,6 @@ button { border: 0; cursor: pointer; }
 .voice-chat-message time { color: var(--color-text-faint); font: 8px var(--font-mono); }
 .voice-chat-message p { margin: 3px 0 0; overflow-wrap: anywhere; font-size: 13px; line-height: 1.45; }
 .voice-chat-side .composer { margin: 0 12px 12px; }
-.voice-stage-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 20px; }
-.voice-stage-controls button { display: grid; min-width: 74px; gap: 5px; place-items: center; padding: 12px 10px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text-muted); background: var(--color-surface-raised); font: 8px var(--font-mono); letter-spacing: .7px; }
-.voice-stage-controls button span { display: inline-flex; align-items: center; justify-content: center; min-height: 18px; color: var(--color-accent); font-size: 15px; }
-.voice-stage-controls button span svg { width: 18px; height: 18px; }
-.voice-stage-controls button:hover { border-color: var(--color-accent); color: var(--color-text); }
-.voice-stage-controls button.disabled, .voice-stage-controls button.disabled span { color: var(--color-danger); }
-.voice-stage-controls .leave-voice, .voice-stage-controls .leave-voice span { color: var(--color-danger); }
-.voice-stage-controls .leave-voice:hover { border-color: var(--color-danger); }
 .voice-dock { position: fixed; z-index: 10; bottom: 53px; left: 74px; width: 264px; padding: 8px; border-top: var(--border-width) solid var(--color-border); background: var(--color-surface-raised); }
 .voice-dock.floating { bottom: 66px; left: 82px; width: 232px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); box-shadow: var(--shadow-panel); }
 .voice-dock-channel { display: flex; align-items: center; gap: 9px; width: 100%; padding: 7px 6px; color: var(--color-text); background: transparent; text-align: left; }

@@ -3,11 +3,9 @@ import type { FormEvent } from 'react'
 import type { ChannelSummary, MessageSummary, VoiceParticipant } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
 import { MemberContextMenu } from './MemberContextMenu'
-import { ScreenShareButton } from './ScreenShareButton'
 import { ScreenShareTile } from './ScreenShareTile'
-import type { ScreenShareQuality } from './screen-quality'
 import type { ScreenShareView } from './screen-shares'
-import { AudioIcon, AudioOffIcon, MicIcon, MicOffIcon, VoiceStateFlags } from './VoiceStateIcons'
+import { VoiceStateFlags } from './VoiceStateIcons'
 import type { WorkspaceIdentity } from './workspace-types'
 
 type LivePanelProps = {
@@ -16,24 +14,14 @@ type LivePanelProps = {
   connecting: boolean
   identity: WorkspaceIdentity
   messages: MessageSummary[]
-  microphoneDisabled: boolean
-  microphoneEnabled: boolean
   onJoin: () => void
-  onLeave: () => void
   onSendMessage: (body: string, authorNickname: string) => Promise<{ ok: boolean; message: string }>
   onSetParticipantVolume: (userId: string, volume: number) => void
   onToggleShareSound: (participantId: string, muted: boolean) => void
   screenAudioMuted: Record<string, boolean>
-  onStartScreenShare: (quality: ScreenShareQuality) => void
-  onStopScreenShare: () => void
-  onToggleMicrophone: () => void
-  onToggleOutput: () => void
   onWatchShare: (participantId: string, watched: boolean) => void
-  outputDisabled: boolean
-  outputEnabled: boolean
   participants: VoiceParticipant[]
   screenShares: ScreenShareView[]
-  sharing: boolean
   userId?: string
   volumeByUser: Record<string, number>
 }
@@ -48,13 +36,11 @@ const statusFor = (participant: VoiceParticipant) => {
   return 'conectado'
 }
 
-export function LivePanel({ channel, connected, connecting, identity, messages, microphoneDisabled, microphoneEnabled, onJoin, onLeave, onSendMessage, onSetParticipantVolume, onStartScreenShare, onToggleShareSound, screenAudioMuted, onStopScreenShare, onToggleMicrophone, onToggleOutput, onWatchShare, outputDisabled, outputEnabled, participants, screenShares, sharing, userId, volumeByUser }: LivePanelProps) {
+export function LivePanel({ channel, connected, connecting, identity, messages, onJoin, onSendMessage, onSetParticipantVolume, onToggleShareSound, screenAudioMuted, onWatchShare, participants, screenShares, userId, volumeByUser }: LivePanelProps) {
   const [focusedShareId, setFocusedShareId] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
   const [chatFeedback, setChatFeedback] = useState('')
-  const microphoneOff = microphoneDisabled || !microphoneEnabled
-  const outputOff = outputDisabled || !outputEnabled
 
   const sendMessage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -143,16 +129,7 @@ export function LivePanel({ channel, connected, connecting, identity, messages, 
             </ul>
           ) : null}
           <p>{summary}</p>
-          {connected ? (
-            <div className="voice-stage-controls">
-              <button aria-label={microphoneDisabled ? 'Microfone desativado pela moderação' : microphoneOff ? 'Microfone mutado' : 'Microfone ligado'} aria-pressed={microphoneOff} className={microphoneOff ? 'disabled' : ''} disabled={microphoneDisabled} type="button" onClick={onToggleMicrophone}><span>{microphoneOff ? <MicOffIcon /> : <MicIcon />}</span>MIC</button>
-              <button aria-label={outputDisabled ? 'Áudio desativado pela moderação' : outputOff ? 'Áudio mutado' : 'Áudio ligado'} aria-pressed={outputOff} className={outputOff ? 'disabled' : ''} disabled={outputDisabled} type="button" onClick={onToggleOutput}><span>{outputOff ? <AudioOffIcon /> : <AudioIcon />}</span>ÁUDIO</button>
-              <ScreenShareButton onStart={onStartScreenShare} onStop={onStopScreenShare} sharing={sharing} />
-              <button className="leave-voice" type="button" onClick={onLeave}><span>×</span>SAIR</button>
-            </div>
-          ) : (
-            <button aria-busy={connecting} className="voice-room-join" disabled={connecting} type="button" onClick={onJoin}>{connecting ? 'Entrando na chamada…' : 'Entrar na chamada de voz'}</button>
-          )}
+          {!connected ? <button aria-busy={connecting} className="voice-room-join" disabled={connecting} type="button" onClick={onJoin}>{connecting ? 'Entrando na chamada…' : 'Entrar na chamada de voz'}</button> : null}
         </div>
       </section>
       <aside className="voice-chat-side">
