@@ -19,6 +19,8 @@ import type { WorkspaceIdentity } from './workspace-types'
 import type { PersonSummary } from '@concord/contracts'
 import { useCommunityWorkspace } from './useCommunityWorkspace'
 import { useFriendPresence } from './useFriendPresence'
+import { readVoiceProcessing, writeVoiceProcessing } from './voice-preferences'
+import type { VoiceProcessing } from './voice-preferences'
 import { useVoiceSession } from './useVoiceSession'
 import './WorkspaceShell.css'
 
@@ -40,10 +42,11 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
   const [directFriend, setDirectFriend] = useState<PersonSummary | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [channelCreationKind, setChannelCreationKind] = useState<'text' | 'voice' | null>(null)
-  const [settingsTab, setSettingsTab] = useState<'profile' | 'channels' | 'server' | 'servers' | 'permissions'>('profile')
+  const [settingsTab, setSettingsTab] = useState<'profile' | 'channels' | 'server' | 'servers' | 'permissions' | 'voice'>('profile')
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false)
   const [homeView, setHomeView] = useState<'friends' | 'requests'>('friends')
   const [homeTab, setHomeTab] = useState('online')
+  const [voiceProcessing, setVoiceProcessing] = useState<VoiceProcessing>(() => readVoiceProcessing())
   const [inviteOpen, setInviteOpen] = useState(Boolean(inviteCode && !demoMode))
   const [localIdentity, setLocalIdentity] = useState(identity)
   const workspace = useCommunityWorkspace({ demoMode, userId, username: identity.username })
@@ -65,6 +68,12 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
   })
 
   useEffect(() => setLocalIdentity(identity), [identity])
+
+  const changeVoiceProcessing = (next: VoiceProcessing) => {
+    setVoiceProcessing(next)
+    writeVoiceProcessing(next)
+    void voice.applyVoiceProcessing(next)
+  }
 
   const openHomeRequests = () => { setDirectFriend(null); setHomeView('requests'); setHomeTab('pending') }
   const openHomeFriends = () => { setDirectFriend(null); setHomeView('friends'); setHomeTab('online') }
@@ -110,7 +119,7 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
       {inviteFriendsOpen && workspace.activeServer ? <InviteFriendsDialog channelKind={activeVoiceChannel ? 'voice' : 'text'} channelName={activeVoiceChannel?.name ?? workspace.activeChannel?.name ?? null} friends={workspace.friends} inviteLinks={workspace.inviteLinks} members={workspace.members} onClose={() => setInviteFriendsOpen(false)} onCreateInviteLink={workspace.createInviteLink} onOpenPeople={() => { setInviteFriendsOpen(false); setPeopleDialogOpen(true) }} onSearchProfiles={workspace.searchProfiles} onSendServerInvite={workspace.sendServerInvite} server={workspace.activeServer} /> : null}
       {createDialogOpen ? <CreateServerDialog onClose={() => setCreateDialogOpen(false)} onCreate={workspace.createServer} /> : null}
       {peopleDialogOpen ? <PeopleDialog friendRequests={workspace.friendRequests} friends={workspace.friends} onAcceptFriendRequest={workspace.acceptFriendRequest} onAcceptServerInvite={workspace.acceptServerInvite} onClose={() => setPeopleDialogOpen(false)} onSendFriendRequest={workspace.sendFriendRequest} onSendServerInvite={workspace.sendServerInvite} server={workspace.activeServer} serverInvites={workspace.serverInvites} /> : null}
-      {settingsOpen ? <SettingsDialog categories={workspace.categories} exitLabel={demoMode ? 'SAIR DA DEMONSTRAÇÃO' : 'SAIR DA CONTA'} onExit={onExit} channels={workspace.channels} channelPermissions={workspace.channelPermissions} identity={localIdentity} initialChannelKind={channelCreationKind ?? 'text'} initialTab={settingsTab} inviteLinks={workspace.inviteLinks} key={`${workspace.activeServerId}-${settingsTab}`} members={workspace.members} onClose={() => { setSettingsOpen(false); setChannelCreationKind(null); setSettingsTab('profile') }} onCreateCategory={workspace.createCategory} onCreateInviteLink={workspace.createInviteLink} onDeleteChannel={workspace.deleteChannel} onDeleteServer={workspace.deleteServer} onLeaveServer={workspace.leaveServer} onMarkServerRead={workspace.markServerRead} onModerateMember={workspace.moderateMember} onRevokeInviteLink={workspace.revokeInviteLink} onSaveChannel={workspace.saveChannel} onSaveChannelPermissions={workspace.saveChannelPermissions} onSaveProfile={saveProfile} onSaveServer={workspace.saveServer} onSaveServerNickname={workspace.saveServerNickname} onSelectServer={(serverId) => { workspace.setActiveServerId(serverId); setSettingsTab('server') }} onSetMemberRole={workspace.setMemberRole} onSetMuted={workspace.setMuted} onUploadAvatar={onUploadAvatar} server={workspace.activeServer} serverMuted={workspace.serverMuted} servers={workspace.servers} userId={userId} /> : null}
+      {settingsOpen ? <SettingsDialog categories={workspace.categories} onChangeVoiceProcessing={changeVoiceProcessing} voiceProcessing={voiceProcessing} exitLabel={demoMode ? 'SAIR DA DEMONSTRAÇÃO' : 'SAIR DA CONTA'} onExit={onExit} channels={workspace.channels} channelPermissions={workspace.channelPermissions} identity={localIdentity} initialChannelKind={channelCreationKind ?? 'text'} initialTab={settingsTab} inviteLinks={workspace.inviteLinks} key={`${workspace.activeServerId}-${settingsTab}`} members={workspace.members} onClose={() => { setSettingsOpen(false); setChannelCreationKind(null); setSettingsTab('profile') }} onCreateCategory={workspace.createCategory} onCreateInviteLink={workspace.createInviteLink} onDeleteChannel={workspace.deleteChannel} onDeleteServer={workspace.deleteServer} onLeaveServer={workspace.leaveServer} onMarkServerRead={workspace.markServerRead} onModerateMember={workspace.moderateMember} onRevokeInviteLink={workspace.revokeInviteLink} onSaveChannel={workspace.saveChannel} onSaveChannelPermissions={workspace.saveChannelPermissions} onSaveProfile={saveProfile} onSaveServer={workspace.saveServer} onSaveServerNickname={workspace.saveServerNickname} onSelectServer={(serverId) => { workspace.setActiveServerId(serverId); setSettingsTab('server') }} onSetMemberRole={workspace.setMemberRole} onSetMuted={workspace.setMuted} onUploadAvatar={onUploadAvatar} server={workspace.activeServer} serverMuted={workspace.serverMuted} servers={workspace.servers} userId={userId} /> : null}
       {inviteOpen && inviteCode ? <InviteLinkDialog code={inviteCode} onAccept={workspace.redeemInviteLink} onInspect={workspace.inspectInviteLink} onClose={() => { setInviteOpen(false); const url = new URL(window.location.href); url.searchParams.delete('invite'); window.history.replaceState({}, '', `${url.pathname}${url.search}`) }} /> : null}
       {voice.target ? <VoiceDock audioBlocked={voice.audioBlocked} channelName={voice.target.channelName} demoMode={demoMode} error={voice.error} floating={!workspace.activeServer} notice={voice.notice} onEnableAudioPlayback={() => { void voice.enableAudioPlayback() }} microphoneDisabled={workspace.voiceRestrictions.microphoneDisabled} microphoneEnabled={voice.microphoneEnabled} onLeave={voice.leave} onOpenChannel={openConnectedChannel} onStartScreenShare={(quality) => { void voice.startScreenShare(quality) }} onStopScreenShare={voice.stopScreenShare} onToggleMicrophone={voice.toggleMicrophone} onToggleOutput={voice.toggleOutput} outputDisabled={workspace.voiceRestrictions.outputDisabled} outputEnabled={voice.outputEnabled} serverName={voice.target.serverName} sharing={voice.sharing} /> : null}
       <nav className="mobile-you-bar" aria-label="Navegação móvel">

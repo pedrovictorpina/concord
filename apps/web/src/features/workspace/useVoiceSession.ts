@@ -170,6 +170,7 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
   }, [demoMode, demoShare, liveRoom])
 
   return {
+    applyVoiceProcessing: liveRoom.applyVoiceProcessing,
     audioBlocked: demoMode ? false : liveRoom.audioBlocked,
     connectedChannelId,
     connecting,

@@ -4,6 +4,8 @@ import { supabase } from '../../lib/supabase'
 import { screenShareQualities } from './screen-quality'
 import type { ScreenShareQuality } from './screen-quality'
 import type { ScreenShareView } from './screen-shares'
+import { audioCaptureOptions, readVoiceProcessing } from './voice-preferences'
+import type { VoiceProcessing } from './voice-preferences'
 
 type LiveKitToken = {
   serverUrl: string
@@ -80,6 +82,7 @@ export function useLiveRoom() {
   const audioElementsRef = useRef<HTMLAudioElement[]>([])
   const outputEnabledRef = useRef(true)
   const screenAudioRef = useRef(new Set<string>())
+  const processingRef = useRef<VoiceProcessing>(readVoiceProcessing())
   const [connectedChannelId, setConnectedChannelId] = useState<string | null>(null)
   const [participants, setParticipants] = useState<LiveParticipant[]>([])
   const [error, setError] = useState('')
@@ -230,7 +233,7 @@ export function useLiveRoom() {
         setError('Seu navegador so libera o microfone em conexoes seguras. Voce entrou sem audio.')
       } else {
         try {
-          await room.localParticipant.setMicrophoneEnabled(true)
+          await room.localParticipant.setMicrophoneEnabled(true, audioCaptureOptions(processingRef.current))
           setMicrophoneEnabled(true)
         } catch (caught) {
           console.error('[voz] falha ao publicar o microfone', caught)
@@ -253,7 +256,7 @@ export function useLiveRoom() {
     const room = roomRef.current
     if (!room) return
     try {
-      await room.localParticipant.setMicrophoneEnabled(next)
+      await room.localParticipant.setMicrophoneEnabled(next, next ? audioCaptureOptions(processingRef.current) : undefined)
       setMicrophoneEnabled(next)
     } catch (caught) {
       console.error('[voz] falha ao alternar o microfone', caught)
@@ -306,6 +309,22 @@ export function useLiveRoom() {
     setNotice('')
   }, [])
 
+  const applyVoiceProcessing = useCallback(async (next: VoiceProcessing) => {
+    processingRef.current = next
+    const room = roomRef.current
+    const client = clientRef.current
+    if (!room || !client) return
+    const publication = room.localParticipant.getTrackPublication(client.Track.Source.Microphone)
+    const track = publication?.audioTrack
+    if (!track) return
+    try {
+      await track.restartTrack(audioCaptureOptions(next))
+    } catch (caught) {
+      console.error('[voz] falha ao aplicar o tratamento de audio', caught)
+      setError('Nao foi possivel aplicar o tratamento de audio no microfone.')
+    }
+  }, [])
+
   const setParticipantVolume = useCallback((userId: string, volume: number) => {
     const room = roomRef.current
     if (!room) return
@@ -342,6 +361,7 @@ export function useLiveRoom() {
     screenShares,
     setMicrophone,
     setOutput,
+    applyVoiceProcessing,
     setParticipantVolume,
     startScreenShare,
     stopScreenShare,

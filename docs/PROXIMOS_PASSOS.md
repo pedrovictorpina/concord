@@ -84,14 +84,14 @@ Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a 
   real ao canal.
 - QA: entrar em voz -> recarregar -> aceitar -> conferir que a outra conta ve a volta.
 
-### 4.7 Supressao de ruido no microfone
+### 4.7 Supressao de ruido no microfone — FEITO em 19/08/2026
 
 - Hoje: o microfone e publicado com as opcoes padrao do navegador. Nao ha ajuste na interface nem
   teste de microfone.
-- Implementacao restante: controle de supressao de ruido, cancelamento de eco e ganho automatico
-  nas preferencias de voz, aplicado na publicacao do microfone; medidor para testar a captura.
-  A supressao usada e a do proprio navegador (`noiseSuppression` do getUserMedia) - filtros de
-  terceiros como o Krisp do Discord sao licenciados e ficam fora do modo custo zero.
+- Entregue: aba Voz nas configuracoes com supressao de ruido, cancelamento de eco, ganho
+  automatico e isolamento de voz (quando o navegador suporta), persistidos em `concord.voice.v1`,
+  aplicados na publicacao do microfone e em chamada via `restartTrack`, mais um teste de
+  microfone com medidor de nivel. Detalhes em `docs/etapas/10-supressao-de-ruido.md`.
 - Criterio de aceite: alternar a supressao muda a captura sem derrubar a chamada, e a escolha
   sobrevive a proxima entrada em um canal.
 - Teste: Playwright para o controle e a persistencia; conferencia manual do efeito no audio.
