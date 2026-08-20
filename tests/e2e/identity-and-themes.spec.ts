@@ -249,10 +249,14 @@ test.describe('identidade e temas', () => {
     await page.getByRole('navigation', { name: 'Servidores' }).getByRole('button', { name: 'Abrir configurações' }).click()
     await page.getByRole('tab', { name: 'Voz' }).click()
 
-    const suppression = page.getByRole('checkbox', { name: 'Supressão de ruído' })
-    await expect(suppression).toBeChecked()
-    await suppression.click()
-    await expect(suppression).not.toBeChecked()
+    const suppression = page.getByLabel('Supressão de ruído')
+    await expect(page.getByRole('radio', { name: /Isolamento de voz/ })).toHaveAttribute('aria-checked', 'true')
+    await expect(suppression).toBeDisabled()
+
+    await page.getByRole('radio', { name: /Personalizado/ }).click()
+    await expect(suppression).toBeEnabled()
+    await suppression.selectOption('off')
+    await expect(suppression).toHaveValue('off')
 
     const gain = page.getByRole('checkbox', { name: 'Ganho automático' })
     await gain.click()
@@ -262,7 +266,8 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('navigation', { name: 'Servidores' }).getByRole('button', { name: 'Abrir configurações' }).click()
     await page.getByRole('tab', { name: 'Voz' }).click()
-    await expect(page.getByRole('checkbox', { name: 'Supressão de ruído' })).toBeChecked()
+
+    await expect(page.getByLabel('Supressão de ruído')).toHaveValue('standard')
     await expect(page.getByRole('checkbox', { name: 'Ganho automático' })).not.toBeChecked()
   })
 

@@ -1,21 +1,36 @@
 import { useEffect, useRef, useState } from 'react'
 import { Toggle } from '../../components/ui/Toggle'
-import { audioCaptureOptions, voiceIsolationSupported } from './voice-preferences'
-import type { VoiceProcessing } from './voice-preferences'
+import { audioCaptureOptions, outputDeviceSupported, profilePreset, voiceIsolationSupported, withSuppressionLevel } from './voice-preferences'
+import type { NoiseSuppressionLevel, VoiceProcessing, VoiceProfile } from './voice-preferences'
 
 type VoiceSettingsProps = {
   onChange: (value: VoiceProcessing) => void
   value: VoiceProcessing
 }
 
+const profiles: ReadonlyArray<readonly [VoiceProfile, string, string]> = [
+  ['voice', 'Isolamento de voz', 'Só a sua voz: o navegador equaliza e corta o resto.'],
+  ['studio', 'Estúdio', 'Áudio puro: microfone aberto e sem processamento.'],
+  ['custom', 'Personalizado', 'Modo avançado: cada filtro no controle separado.'],
+]
+
+const levels: ReadonlyArray<readonly [NoiseSuppressionLevel, string]> = [
+  ['off', 'Desligada'],
+  ['standard', 'Padrão do navegador'],
+  ['high', 'Alta (isolamento de voz)'],
+]
+
 export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
   const [testing, setTesting] = useState(false)
   const [level, setLevel] = useState(0)
   const [error, setError] = useState('')
+  const [inputs, setInputs] = useState<MediaDeviceInfo[]>([])
+  const [outputs, setOutputs] = useState<MediaDeviceInfo[]>([])
   const streamRef = useRef<MediaStream | null>(null)
   const contextRef = useRef<AudioContext | null>(null)
   const frameRef = useRef(0)
   const isolationSupported = voiceIsolationSupported()
+  const sinkSupported = outputDeviceSupported()
 
   const stopTest = () => {
     window.cancelAnimationFrame(frameRef.current)
@@ -29,6 +44,23 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
 
   useEffect(() => stopTest, [])
 
+  useEffect(() => {
+    if (!navigator.mediaDevices?.enumerateDevices) return
+    let active = true
+    const load = async () => {
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      if (!active) return
+      setInputs(devices.filter((device) => device.kind === 'audioinput'))
+      setOutputs(devices.filter((device) => device.kind === 'audiooutput'))
+    }
+    void load()
+    navigator.mediaDevices.addEventListener?.('devicechange', load)
+    return () => {
+      active = false
+      navigator.mediaDevices.removeEventListener?.('devicechange', load)
+    }
+  }, [])
+
   const startTest = async () => {
     setError('')
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -36,7 +68,7 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
       return
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: audioCaptureOptions(value) })
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: audioCaptureOptions(value) as MediaTrackConstraints })
       streamRef.current = stream
       const context = new AudioContext()
       contextRef.current = context
@@ -59,8 +91,7 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
     }
   }
 
-  const update = (patch: Partial<VoiceProcessing>) => {
-    const next = { ...value, ...patch }
+  const update = (next: VoiceProcessing) => {
     onChange(next)
     if (testing) {
       stopTest()
@@ -68,39 +99,89 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
     }
   }
 
+  const patch = (changes: Partial<VoiceProcessing>) => update({ ...value, ...changes })
+
   return (
     <section>
       <h3>Voz e microfone</h3>
       <p>O tratamento é o do próprio navegador e vale para toda chamada, inclusive as próximas.</p>
-      <Toggle
-        checked={value.noiseSuppression}
-        className="settings-toggle"
-        description="Reduz ruído constante, como ventilador, teclado e ar-condicionado. Volta ligada sempre que você abre o Concord."
-        label="Supressão de ruído"
-        onChange={(checked) => update({ noiseSuppression: checked })}
-      />
-      <Toggle
-        checked={value.echoCancellation}
-        className="settings-toggle"
-        description="Evita que o som das caixas volte pelo microfone."
-        label="Cancelamento de eco"
-        onChange={(checked) => update({ echoCancellation: checked })}
-      />
-      <Toggle
-        checked={value.autoGainControl}
-        className="settings-toggle"
-        description="Equilibra o volume quando você fala mais perto ou mais longe."
-        label="Ganho automático"
-        onChange={(checked) => update({ autoGainControl: checked })}
-      />
-      <Toggle
-        checked={value.voiceIsolation}
-        className="settings-toggle"
-        description={isolationSupported ? 'Filtro mais agressivo: mantém a voz e corta o resto.' : 'Seu navegador ainda não oferece este filtro.'}
-        disabled={!isolationSupported}
-        label="Isolamento de voz"
-        onChange={(checked) => update({ voiceIsolation: checked })}
-      />
+
+      <div className="voice-device-grid">
+        <label>
+          <span>Microfone</span>
+          <select value={value.inputDeviceId} onChange={(event) => patch({ inputDeviceId: event.target.value })}>
+            <option value="">Padrão do sistema</option>
+            {inputs.map((device) => <option key={device.deviceId} value={device.deviceId}>{device.label || 'Microfone sem nome'}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>Alto-falante</span>
+          <select disabled={!sinkSupported} value={value.outputDeviceId} onChange={(event) => patch({ outputDeviceId: event.target.value })}>
+            <option value="">Padrão do sistema</option>
+            {outputs.map((device) => <option key={device.deviceId} value={device.deviceId}>{device.label || 'Saída sem nome'}</option>)}
+          </select>
+        </label>
+      </div>
+      {!sinkSupported ? <p className="mic-test-hint">Este navegador não deixa escolher a saída de áudio: use o padrão do sistema.</p> : null}
+
+      <label className="voice-output-volume">
+        <span>Volume da chamada · {Math.round(value.outputVolume * 100)}%</span>
+        <input max={1} min={0} step={0.02} type="range" value={value.outputVolume} onChange={(event) => patch({ outputVolume: Number(event.target.value) })} />
+      </label>
+
+      <h4 className="settings-subtitle">Perfil de entrada</h4>
+      <div className="voice-profile-list" role="radiogroup" aria-label="Perfil de entrada">
+        {profiles.map(([id, label, detail]) => (
+          <button
+            aria-checked={value.profile === id}
+            className={value.profile === id ? 'voice-profile active' : 'voice-profile'}
+            key={id}
+            role="radio"
+            type="button"
+            onClick={() => update(profilePreset(id, value))}
+          >
+            <strong>{label}</strong>
+            <small>{detail}</small>
+          </button>
+        ))}
+      </div>
+
+      <label className="voice-suppression">
+        <span>Supressão de ruído</span>
+        <select
+          disabled={value.profile !== 'custom'}
+          value={value.suppressionLevel}
+          onChange={(event) => update(withSuppressionLevel(value, event.target.value as NoiseSuppressionLevel))}
+        >
+          {levels.map(([id, label]) => (
+            <option disabled={id === 'high' && !isolationSupported} key={id} value={id}>{label}</option>
+          ))}
+        </select>
+      </label>
+      <p className="mic-test-hint">
+        {value.profile === 'custom'
+          ? 'A supressão é a do navegador. O nível alto usa o isolamento de voz, quando o navegador oferece.'
+          : 'Escolha o perfil Personalizado para mudar o nível da supressão.'}
+      </p>
+
+      {value.profile === 'custom' ? (
+        <>
+          <Toggle
+            checked={value.echoCancellation}
+            className="settings-toggle"
+            description="Evita que o som das caixas volte pelo microfone."
+            label="Cancelamento de eco"
+            onChange={(checked) => patch({ echoCancellation: checked })}
+          />
+          <Toggle
+            checked={value.autoGainControl}
+            className="settings-toggle"
+            description="Equilibra o volume quando você fala mais perto ou mais longe."
+            label="Ganho automático"
+            onChange={(checked) => patch({ autoGainControl: checked })}
+          />
+        </>
+      ) : null}
 
       <h4 className="settings-subtitle">Testar microfone</h4>
       <div className="mic-test">
@@ -109,7 +190,7 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
         </button>
         <div aria-hidden="true" className="mic-test-meter"><span style={{ transform: `scaleX(${level})` }} /></div>
       </div>
-      <p className="mic-test-hint">{testing ? 'Fale ou faça barulho: a barra acompanha o que o microfone captura depois do tratamento.' : 'O teste usa as mesmas opções da chamada.'}</p>
+      <p className="mic-test-hint">{testing ? 'Fale ou faça barulho: a barra acompanha o que o microfone captura depois do tratamento.' : 'O teste usa o mesmo microfone e os mesmos filtros da chamada.'}</p>
       {error ? <p className="dialog-feedback" role="status">{error}</p> : null}
     </section>
   )

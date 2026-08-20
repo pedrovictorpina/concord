@@ -122,6 +122,19 @@ começando sempre ligada.
 - QA: A transmite com som usando caixa de som -> B e C conferem se as proprias vozes voltam;
   repetir com A de fone.
 
+### 4.9 Processamento proprio de microfone
+
+- Hoje: a aba Voz cobre dispositivos, perfis, nivel de supressao, cancelamento de eco, ganho
+  automatico e teste de microfone, tudo com o processamento do navegador.
+- Implementacao restante: volume de entrada do microfone, sensibilidade de entrada (gate) e
+  apertar para falar. Os tres precisam de um `TrackProcessor` no caminho de captura do LiveKit,
+  com um `GainNode` e um analisador antes da publicacao.
+- Criterio de aceite: falar baixo com o gate ligado nao transmite; o volume de entrada muda o que
+  os outros ouvem; a tecla de apertar para falar corta e devolve o microfone sem derrubar a
+  chamada.
+- Teste: Playwright para os controles; conferencia manual com duas contas para o efeito no audio.
+- QA: configuracoes -> Voz -> ajustar entrada -> confirmar do outro lado.
+
 ## 5. Aplicativos nativos
 
 - Windows: Electron, instalador, atualização e áudio de sistema quando suportado.

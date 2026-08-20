@@ -44,3 +44,21 @@ um dia isso mudar, o caminho no LiveKit e um `TrackProcessor` em `AudioCaptureOp
 - `pnpm check`, `pnpm lint`, `pnpm test:e2e` 24/24, com jornada nova que desliga a supressao e
   confere a persistencia depois de recarregar;
 - efeito sonoro real depende de conferencia manual com duas contas.
+
+## Ampliacao em 19/08/2026
+
+A aba Voz passou a ter o formato que o usuario ja conhece do Discord:
+
+- escolha do microfone e da saida de audio, com `Room.switchActiveDevice` e queda para o padrao do
+  sistema quando o navegador nao deixa escolher a saida (`setSinkId` ausente);
+- volume da chamada, aplicado como multiplicador sobre o volume de cada pessoa e de cada tela;
+- perfis de entrada: **Isolamento de voz** (tudo ligado, com isolamento onde existe), **Estudio**
+  (microfone aberto, sem processamento) e **Personalizado** (cada filtro exposto);
+- nivel da supressao em lista - desligada, padrao do navegador ou alta com isolamento de voz -,
+  editavel apenas no perfil Personalizado;
+- teste de microfone usando o dispositivo e os filtros escolhidos.
+
+Ficaram fora, por dependerem de processamento proprio de audio: volume de entrada do microfone,
+sensibilidade de entrada (gate) e apertar para falar. Todos exigem um `TrackProcessor` no caminho
+de captura, que e o proximo passo natural se a fila pedir.
+

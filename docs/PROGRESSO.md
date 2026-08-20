@@ -168,4 +168,6 @@ Branch atual: `main`.
 - audio duplicado corrigido: a mixagem WebAudio propria criava um segundo caminho de reproducao junto com o elemento anexado, entao cada voz tocava duas vezes. O `RemoteAudioTrack` do livekit ja tem contexto, `gainNode` e `setVolume` internos, entao a sala passou a usar `webAudioMix: true` e o volume passou a ser aplicado pela propria faixa, com um unico caminho de som.
 - faixas do proprio participante deixaram de ser reproduzidas por garantia, e o volume passou a ir de 0 a 100% com curva quadratica, para o meio da barra soar como metade em vez de quase igual.
 - aviso ao transmitir com som ficou especifico: quando a captura e de tela inteira (`displaySurface === 'monitor'`), o texto explica que o navegador leva tudo que sai das caixas, inclusive a chamada e outras janelas do Concord, e sugere fone ou compartilhar uma guia.
+- aba Voz ganhou o formato do Discord: escolha de microfone e de saida de audio via `switchActiveDevice`, volume da chamada, perfis de entrada (Isolamento de voz, Estudio e Personalizado) e o nivel da supressao em lista, editavel so no perfil Personalizado. Antes existiam quatro interruptores soltos, sem dispositivo nem perfil.
+- volume de entrada, sensibilidade e apertar para falar ficaram fora e viraram o item 4.9: os tres exigem um `TrackProcessor` no caminho de captura, nao apenas constraints do navegador.
 

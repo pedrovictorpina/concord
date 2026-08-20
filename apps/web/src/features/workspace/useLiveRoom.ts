@@ -91,6 +91,7 @@ export function useLiveRoom() {
   const outputEnabledRef = useRef(true)
   const screenAudioRef = useRef(new Set<string>())
   const processingRef = useRef<VoiceProcessing>(readVoiceProcessing())
+  const outputVolumeRef = useRef(readVoiceProcessing().outputVolume)
   const [connectedChannelId, setConnectedChannelId] = useState<string | null>(null)
   const [participants, setParticipants] = useState<LiveParticipant[]>([])
   const [error, setError] = useState('')
@@ -107,11 +108,12 @@ export function useLiveRoom() {
 
   const effectiveVolume = (participantId: string, screen: boolean) => {
     if (!outputEnabledRef.current) return 0
+    const master = perceived(outputVolumeRef.current)
     if (screen) {
       if (screenMutedRef.current[participantId] === true) return 0
-      return perceived(screenVolumeRef.current[participantId] ?? 1)
+      return master * perceived(screenVolumeRef.current[participantId] ?? 1)
     }
-    return perceived(volumeRef.current[participantId] ?? 1)
+    return master * perceived(volumeRef.current[participantId] ?? 1)
   }
 
   const applyVolumes = useCallback(() => {
@@ -366,20 +368,38 @@ export function useLiveRoom() {
   }, [])
 
   const applyVoiceProcessing = useCallback(async (next: VoiceProcessing) => {
+    const previous = processingRef.current
     processingRef.current = next
+    outputVolumeRef.current = next.outputVolume
+    applyVolumes()
+
     const room = roomRef.current
     const client = clientRef.current
     if (!room || !client) return
+
+    if (next.outputDeviceId !== previous.outputDeviceId) {
+      try {
+        await room.switchActiveDevice('audiooutput', next.outputDeviceId || 'default')
+      } catch (caught) {
+        console.error('[voz] falha ao trocar a saida de audio', caught)
+        setError('Nao foi possivel usar essa saida de audio.')
+      }
+    }
+
     const publication = room.localParticipant.getTrackPublication(client.Track.Source.Microphone)
     const track = publication?.audioTrack
     if (!track) return
+
     try {
+      if (next.inputDeviceId !== previous.inputDeviceId) {
+        await room.switchActiveDevice('audioinput', next.inputDeviceId || 'default')
+      }
       await track.restartTrack(audioCaptureOptions(next))
     } catch (caught) {
       console.error('[voz] falha ao aplicar o tratamento de audio', caught)
       setError('Nao foi possivel aplicar o tratamento de audio no microfone.')
     }
-  }, [])
+  }, [applyVolumes])
 
   const setScreenAudioSilenced = useCallback((participantId: string, silenced: boolean) => {
     screenMutedRef.current = { ...screenMutedRef.current, [participantId]: silenced }
