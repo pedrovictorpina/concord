@@ -180,4 +180,10 @@ Branch atual: `main`.
 - barra de identidade do usuario ganhou icones de microfone, fone e configuracoes; o de configuracoes abre as configuracoes do servidor, microfone e fone ainda sao visuais.
 - barra de envio ganhou botoes de presente, GIF e emoji (visuais) e um botao de enviar dedicado, alem do Enter.
 - validacoes: `pnpm check` e `pnpm lint` aprovados; verificacao visual com Playwright nos temas claro e escuro, incluindo busca de canais, busca de membros e alternancia do painel de membros sem sobra de coluna vazia.
-
+- Home/Amigos redesenhada: as antigas abas Disponivel/Todos/Pendente/Adicionar viraram dois conceitos separados — filtro de presenca (Todos/Online/Ausentes/Offline, com contador por opcao) e navegacao (lista/solicitacoes/adicionar). Ocupado conta como online ate existir um filtro proprio, porque nada no app produz esse status hoje.
+- lista de amigos agrupa por presenca (Online/Ausentes/Offline) e cada linha ganhou selecao: clicar no nome abre um painel de detalhes a direita (avatar grande, status, `Mensagem`, menu e atividade em voz quando existir); clicar no icone de mensagem continua abrindo a DM direto, sem exigir selecao primeiro.
+- quando nenhum amigo esta selecionado, o painel direito volta a mostrar "Ativo agora" (recurso existente) mais um resumo das duas primeiras solicitacoes e dois primeiros convites de servidor, com "Ver todas" levando a tela cheia de Solicitacoes.
+- no mobile, onde nao ha espaco para o painel lateral, selecionar um amigo abre um overlay dedicado (mesmo componente do painel de detalhes, so reposicionado por CSS) com botao de voltar, replicando o mockup aprovado.
+- `presence.ts` criado com o mesmo `statusLabel`/`statusClass` que a tela de amigos ja usava, reaproveitado tambem pela nova logica de filtro/agrupamento por presenca.
+- sugestoes de amizade, amigos em comum, jogo atual e recusar solicitacao ficaram de fora por decisao do proprio documento da etapa: nao existem dados reais para isso hoje.
+- validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (26/26, dois testes atualizados porque as antigas abas Disponivel/Pendente/Adicionar amigo viraram botoes) aprovados; conferencia visual manual via Playwright em desktop, mobile (390px) e tema escuro, incluindo lista, painel de detalhes, solicitacoes e adicionar amigo.

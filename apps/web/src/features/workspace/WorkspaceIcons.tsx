@@ -101,3 +101,29 @@ export function EmojiIcon() {
     </svg>
   )
 }
+
+export function MessageIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 5.5h16v11H9.5L5 20v-3.5H4z" />
+    </svg>
+  )
+}
+
+export function MoreIcon() {
+  return (
+    <svg {...iconProps}>
+      <circle cx="12" cy="5.5" r="1.4" />
+      <circle cx="12" cy="12" r="1.4" />
+      <circle cx="12" cy="18.5" r="1.4" />
+    </svg>
+  )
+}
+
+export function BackIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M15 5l-7 7 7 7" />
+    </svg>
+  )
+}

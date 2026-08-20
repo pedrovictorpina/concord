@@ -5,6 +5,7 @@ import { ChatPanel } from './ChatPanel'
 import { CreateServerDialog } from './CreateServerDialog'
 import { DirectMessagePanel } from './DirectMessagePanel'
 import { FriendsHome } from './FriendsHome'
+import type { FriendsHomeTab } from './FriendsHome'
 import { HomeSidebar } from './HomeSidebar'
 import { LivePanel } from './LivePanel'
 import { MemberPanel } from './MemberPanel'
@@ -46,7 +47,7 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
   const [mobileNavigationOpen, setMobileNavigationOpen] = useState(false)
   const [membersPanelVisible, setMembersPanelVisible] = useState(true)
   const [homeView, setHomeView] = useState<'friends' | 'requests'>('friends')
-  const [homeTab, setHomeTab] = useState('online')
+  const [homeTab, setHomeTab] = useState<FriendsHomeTab>('friends')
   const [voiceProcessing, setVoiceProcessing] = useState<VoiceProcessing>(() => readVoiceProcessing())
   const [inviteOpen, setInviteOpen] = useState(Boolean(inviteCode && !demoMode))
   const [localIdentity, setLocalIdentity] = useState(identity)
@@ -77,7 +78,7 @@ export function WorkspaceShell({ demoMode, identity, onExit, onUpdateProfile, on
   }
 
   const openHomeRequests = () => { setDirectFriend(null); setHomeView('requests'); setHomeTab('pending') }
-  const openHomeFriends = () => { setDirectFriend(null); setHomeView('friends'); setHomeTab('online') }
+  const openHomeFriends = () => { setDirectFriend(null); setHomeView('friends'); setHomeTab('friends') }
   const pendingCount = workspace.friendRequests.filter((request) => request.direction === 'received').length + workspace.serverInvites.length
 
   const openConnectedChannel = () => {
