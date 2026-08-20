@@ -56,9 +56,9 @@ export function ScreenShareTile({ focused, muted, onSetVolume, onStopWatching, o
             </button>
             <input
               aria-label={`Volume da tela de ${author}`}
-              max={2}
+              max={1}
               min={0}
-              step={0.05}
+              step={0.02}
               type="range"
               value={muted ? 0 : volume}
               onChange={(event) => onSetVolume(Number(event.target.value))}

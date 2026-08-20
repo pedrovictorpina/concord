@@ -83,11 +83,8 @@ export function useLiveRoom() {
     element: HTMLAudioElement
     participantId: string
     screen: boolean
-    gain: GainNode | null
-    source: MediaStreamAudioSourceNode | null
+    track: RemoteTrack
   }>>([])
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const masterGainRef = useRef<GainNode | null>(null)
   const volumeRef = useRef<Record<string, number>>({})
   const screenVolumeRef = useRef<Record<string, number>>({})
   const screenMutedRef = useRef<Record<string, boolean>>({})
@@ -106,41 +103,27 @@ export function useLiveRoom() {
   const [screenAudioMuted, setScreenAudioMuted] = useState<Record<string, boolean>>({})
   const [screenVolumeByUser, setScreenVolumeByUser] = useState<Record<string, number>>({})
 
-  const ensureAudioContext = useCallback(() => {
-    if (audioContextRef.current) return audioContextRef.current
-    const AudioContextClass = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
-    if (!AudioContextClass) return null
-    try {
-      const context = new AudioContextClass()
-      const master = context.createGain()
-      master.gain.value = outputEnabledRef.current ? 1 : 0
-      master.connect(context.destination)
-      audioContextRef.current = context
-      masterGainRef.current = master
-      return context
-    } catch (caught) {
-      console.error('[voz] falha ao criar o contexto de audio', caught)
-      return null
-    }
-  }, [])
+  const perceived = (value: number) => value * value
 
-  const gainFor = (participantId: string, screen: boolean) => {
+  const effectiveVolume = (participantId: string, screen: boolean) => {
+    if (!outputEnabledRef.current) return 0
     if (screen) {
-      const muted = screenMutedRef.current[participantId] === true
-      return muted ? 0 : screenVolumeRef.current[participantId] ?? 1
+      if (screenMutedRef.current[participantId] === true) return 0
+      return perceived(screenVolumeRef.current[participantId] ?? 1)
     }
-    return volumeRef.current[participantId] ?? 1
+    return perceived(volumeRef.current[participantId] ?? 1)
   }
 
-  const applyGains = useCallback(() => {
+  const applyVolumes = useCallback(() => {
     audioElementsRef.current.forEach((item) => {
-      const value = gainFor(item.participantId, item.screen)
-      if (item.gain) {
-        item.gain.gain.value = value
+      const value = effectiveVolume(item.participantId, item.screen)
+      const track = item.track as unknown as { setVolume?: (volume: number) => void }
+      if (typeof track.setVolume === 'function') {
+        track.setVolume(value)
         return
       }
       item.element.volume = Math.min(1, value)
-      item.element.muted = !outputEnabledRef.current || value === 0
+      item.element.muted = value === 0
     })
   }, [])
 
@@ -150,13 +133,6 @@ export function useLiveRoom() {
     room?.disconnect()
     audioElementsRef.current.forEach((item) => item.element.remove())
     audioElementsRef.current = []
-    audioElementsRef.current.forEach((item) => {
-      item.source?.disconnect()
-      item.gain?.disconnect()
-    })
-    void audioContextRef.current?.close().catch(() => undefined)
-    audioContextRef.current = null
-    masterGainRef.current = null
     volumeRef.current = {}
     screenVolumeRef.current = {}
     screenMutedRef.current = {}
@@ -204,7 +180,7 @@ export function useLiveRoom() {
     }
 
     const { Room, RoomEvent, Track } = client
-    const room = new Room({ adaptiveStream: true })
+    const room = new Room({ adaptiveStream: true, webAudioMix: true })
     const sync = () => {
       setParticipants([room.localParticipant, ...room.remoteParticipants.values()].map(describeParticipant))
     }
@@ -231,51 +207,20 @@ export function useLiveRoom() {
         addShare(describeShare(track, publication, participant, false, screenAudioRef.current.has(participant.identity)))
       }
       if (isScreenAudio(publication)) markScreenAudio(participant, true)
-      if (track.kind === Track.Kind.Audio) {
+      if (track.kind === Track.Kind.Audio && participant.identity !== room.localParticipant.identity) {
         const fromScreen = isScreenAudio(publication)
         const audio = track.attach() as HTMLAudioElement
-        const value = gainFor(participant.identity, fromScreen)
-        const context = ensureAudioContext()
-        const master = masterGainRef.current
-        let gain: GainNode | null = null
-        let source: MediaStreamAudioSourceNode | null = null
-
-        if (context && master && track.mediaStreamTrack) {
-          try {
-            source = context.createMediaStreamSource(new MediaStream([track.mediaStreamTrack]))
-            gain = context.createGain()
-            gain.gain.value = value
-            source.connect(gain)
-            gain.connect(master)
-            audio.muted = true
-          } catch (caught) {
-            console.error('[voz] falha ao rotear o audio pelo contexto', caught)
-            source = null
-            gain = null
-          }
-        }
-
-        if (!gain) {
-          audio.muted = !outputEnabledRef.current || value === 0
-          audio.volume = Math.min(1, value)
-        }
-
-        audioElementsRef.current.push({ element: audio, participantId: participant.identity, screen: fromScreen, gain, source })
+        audioElementsRef.current.push({ element: audio, participantId: participant.identity, screen: fromScreen, track })
         document.body.append(audio)
+        applyVolumes()
         void audio.play().catch(() => setAudioBlocked(true))
-        if (context?.state === 'suspended') setAudioBlocked(true)
       }
       sync()
     })
     room.on(RoomEvent.TrackUnsubscribed, (track, publication: RemoteTrackPublication, participant) => {
       const detached = track.detach()
       detached.forEach((element) => element.remove())
-      audioElementsRef.current = audioElementsRef.current.filter((item) => {
-        if (!detached.includes(item.element)) return true
-        item.source?.disconnect()
-        item.gain?.disconnect()
-        return false
-      })
+      audioElementsRef.current = audioElementsRef.current.filter((item) => !detached.includes(item.element))
       dropShareByTrack(track)
       if (isScreenAudio(publication)) markScreenAudio(participant, false)
       sync()
@@ -341,17 +286,13 @@ export function useLiveRoom() {
     }
 
     return true
-  }, [ensureAudioContext, leave])
+  }, [applyVolumes, leave])
 
   const setOutput = useCallback((next: boolean) => {
     outputEnabledRef.current = next
-    if (masterGainRef.current) masterGainRef.current.gain.value = next ? 1 : 0
-    audioElementsRef.current.forEach((item) => {
-      if (item.gain) return
-      item.element.muted = !next || gainFor(item.participantId, item.screen) === 0
-    })
+    applyVolumes()
     setOutputEnabled(next)
-  }, [])
+  }, [applyVolumes])
 
   const setMicrophone = useCallback(async (next: boolean) => {
     const room = roomRef.current
@@ -397,9 +338,15 @@ export function useLiveRoom() {
         },
       )
       const audioPublication = room.localParticipant.getTrackPublication(client.Track.Source.ScreenShareAudio)
-      if (audioPublication) screenAudioRef.current.add(room.localParticipant.identity)
-      else setNotice('Sua tela foi compartilhada sem som. Marque "Compartilhar audio" na janela do navegador para levar o audio junto.')
-      if (audioPublication) setNotice('Tela transmitindo com som. Se voce ouve a chamada pela caixa de som, use fone: o navegador pode devolver as vozes junto com o audio da tela.')
+      const surface = (publication?.track?.mediaStreamTrack.getSettings() as { displaySurface?: string } | undefined)?.displaySurface
+      if (audioPublication) {
+        screenAudioRef.current.add(room.localParticipant.identity)
+        setNotice(surface === 'monitor'
+          ? 'Transmitindo a tela inteira com som: o navegador captura tudo que sai das caixas, inclusive esta chamada e outras janelas do Concord. Use fone ou compartilhe uma guia para o som nao voltar em eco.'
+          : 'Tela transmitindo com som. Se voce ouve a chamada pela caixa de som, use fone: o navegador pode devolver as vozes junto com o audio da tela.')
+      } else {
+        setNotice('Sua tela foi compartilhada sem som. Marque "Compartilhar audio" na janela do navegador para levar o audio junto.')
+      }
       if (publication?.track) {
         const share = describeShare(publication.track, publication, room.localParticipant, true, Boolean(audioPublication))
         setScreenShares((current) => mergeShare(current, share))
@@ -436,9 +383,9 @@ export function useLiveRoom() {
 
   const setScreenAudioSilenced = useCallback((participantId: string, silenced: boolean) => {
     screenMutedRef.current = { ...screenMutedRef.current, [participantId]: silenced }
-    applyGains()
+    applyVolumes()
     setScreenAudioMuted((current) => ({ ...current, [participantId]: silenced }))
-  }, [applyGains])
+  }, [applyVolumes])
 
   const setScreenShareWatched = useCallback((participantId: string, watched: boolean) => {
     const room = roomRef.current
@@ -451,35 +398,35 @@ export function useLiveRoom() {
   }, [])
 
   const setParticipantVolume = useCallback((userId: string, volume: number) => {
-    const safe = Math.min(2, Math.max(0, volume))
+    const safe = Math.min(1, Math.max(0, volume))
     volumeRef.current = { ...volumeRef.current, [userId]: safe }
-    applyGains()
+    applyVolumes()
     setVolumeByUser((current) => ({ ...current, [userId]: safe }))
-  }, [applyGains])
+  }, [applyVolumes])
 
   const setScreenAudioVolume = useCallback((participantId: string, volume: number) => {
-    const safe = Math.min(2, Math.max(0, volume))
+    const safe = Math.min(1, Math.max(0, volume))
     screenVolumeRef.current = { ...screenVolumeRef.current, [participantId]: safe }
     if (safe > 0 && screenMutedRef.current[participantId]) {
       screenMutedRef.current = { ...screenMutedRef.current, [participantId]: false }
       setScreenAudioMuted((current) => ({ ...current, [participantId]: false }))
     }
-    applyGains()
+    applyVolumes()
     setScreenVolumeByUser((current) => ({ ...current, [participantId]: safe }))
-  }, [applyGains])
+  }, [applyVolumes])
 
   const enableAudioPlayback = useCallback(async () => {
     const room = roomRef.current
     if (!room) return
     try {
       await room.startAudio()
-      await audioContextRef.current?.resume().catch(() => undefined)
       audioElementsRef.current.forEach((item) => { void item.element.play().catch(() => undefined) })
-      setAudioBlocked(!room.canPlaybackAudio || audioContextRef.current?.state === 'suspended')
+      applyVolumes()
+      setAudioBlocked(!room.canPlaybackAudio)
     } catch (caught) {
       console.error('[voz] falha ao liberar a reproducao de audio', caught)
     }
-  }, [])
+  }, [applyVolumes])
 
   useEffect(() => leave, [leave])
 
