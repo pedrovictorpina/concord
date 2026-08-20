@@ -186,4 +186,11 @@ Branch atual: `main`.
 - falha ao iniciar o RNNoise (WASM, worklet ou `AudioContext`) cai automaticamente para WebRTC sem derrubar a chamada, com aviso nao bloqueante; a faixa de audio da tela nunca passa pelo RNNoise.
 - Vitest adicionado ao `apps/web` (antes o projeto so tinha `pnpm check`, lint e Playwright) para cobrir a logica pura de preferencias, migracao e constraints com 12 casos.
 - validacoes: `pnpm test:unit` (12/12), `pnpm check` e `pnpm lint` aprovados. Qualidade real do RNNoise (voz cortada, som metalico, latencia, CPU) e o teste em Firefox/Safari/mobile dependem do roteiro manual, ainda nao executado.
-
+- tela de mensagens diretas redesenhada: cabecalho mostra presenca real do amigo (reaproveitando o mesmo `statusLabel` da tela de Amigos, extraido para `presence.ts`), com espaco para chamada de voz/video/fixados (desabilitados, com dica "em breve"), busca nas mensagens carregadas e menu "Copiar identificador".
+- mensagens passaram a ser agrupadas por autor em janelas de 5 minutos (sem repetir avatar/cabecalho) e ganharam separadores reais de data (Hoje/Ontem/data completa); mensagens recebidas usam estrutura aberta (avatar + texto) e mensagens proprias continuam em bubble, seguindo a referencia aprovada sem copiar as cores da imagem.
+- composer virou textarea com crescimento automatico ate ~132px, Enter envia e Shift+Enter quebra linha; anexo, emoji e GIF ficam visiveis e desabilitados ("em breve") em vez de fingir suporte.
+- lista de conversas na `HomeSidebar` passou a mostrar o status de presenca (Disponivel/Ausente/Em voz) no lugar do `@identificador`, e o campo de busca ganhou icone.
+- estado vazio da conversa ganhou avatar grande, nome, identificador e o texto "Este e o comeco da sua conversa com @identificador", no lugar do simbolo generico anterior; erro ao abrir a conversa passou a ocupar o centro da tela e erro de envio ganha botao "Tentar novamente".
+- scroll passou a fixar no fim da conversa e a mostrar "↓ Novas mensagens" quando o usuario esta lendo mensagens antigas e uma nova chega.
+- envio otimista e reactions ficaram fora do escopo desta etapa, como o proprio documento da etapa permite.
+- validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (26/26, com o teste de mensagem privada atualizado para o novo estado vazio) aprovados; conferencia visual manual via Playwright em desktop, mobile (390px) e tema escuro.

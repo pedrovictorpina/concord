@@ -341,7 +341,7 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
     await page.getByRole('button', { name: 'Enviar mensagem para Ari' }).click()
-    await expect(page.getByText('Conversa com Ari')).toBeVisible()
+    await expect(page.getByText('Este é o começo da sua conversa com @ari.')).toBeVisible()
     await page.getByLabel('Mensagem privada').fill('Sinal privado')
     await page.getByLabel('Mensagem privada').press('Enter')
     await expect(page.getByText('Sinal privado')).toBeVisible()
