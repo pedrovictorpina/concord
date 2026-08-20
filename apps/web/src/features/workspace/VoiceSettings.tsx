@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Toggle } from '../../components/ui/Toggle'
-import { audioCaptureOptions, outputDeviceSupported, profilePreset, voiceIsolationSupported, withSuppressionLevel } from './voice-preferences'
-import type { NoiseSuppressionLevel, VoiceProcessing, VoiceProfile } from './voice-preferences'
+import { rnnoiseSupported } from './audio/rnnoise-support'
+import type { RnnoiseGraph } from './audio/rnnoise-graph'
+import { audioCaptureOptions, outputDeviceSupported, profilePreset, withNoiseSuppressionMode } from './voice-preferences'
+import type { NoiseSuppressionMode, VoiceProcessing, VoiceProfile } from './voice-preferences'
 
 type VoiceSettingsProps = {
   onChange: (value: VoiceProcessing) => void
@@ -9,15 +11,15 @@ type VoiceSettingsProps = {
 }
 
 const profiles: ReadonlyArray<readonly [VoiceProfile, string, string]> = [
-  ['voice', 'Isolamento de voz', 'Só a sua voz: o navegador equaliza e corta o resto.'],
+  ['voice', 'Voz', 'Só a sua voz: o navegador equaliza e corta o resto.'],
   ['studio', 'Estúdio', 'Áudio puro: microfone aberto e sem processamento.'],
   ['custom', 'Personalizado', 'Modo avançado: cada filtro no controle separado.'],
 ]
 
-const levels: ReadonlyArray<readonly [NoiseSuppressionLevel, string]> = [
-  ['off', 'Desligada'],
-  ['standard', 'Padrão do navegador'],
-  ['high', 'Alta (isolamento de voz)'],
+const modes: ReadonlyArray<readonly [NoiseSuppressionMode, string]> = [
+  ['off', 'Desativada'],
+  ['webrtc', 'Padrão (navegador)'],
+  ['rnnoise', 'Aprimorada (Beta)'],
 ]
 
 export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
@@ -28,12 +30,15 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
   const [outputs, setOutputs] = useState<MediaDeviceInfo[]>([])
   const streamRef = useRef<MediaStream | null>(null)
   const contextRef = useRef<AudioContext | null>(null)
+  const rnnoiseGraphRef = useRef<RnnoiseGraph | null>(null)
   const frameRef = useRef(0)
-  const isolationSupported = voiceIsolationSupported()
+  const rnnoiseAvailable = rnnoiseSupported()
   const sinkSupported = outputDeviceSupported()
 
   const stopTest = () => {
     window.cancelAnimationFrame(frameRef.current)
+    rnnoiseGraphRef.current?.destroy()
+    rnnoiseGraphRef.current = null
     streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
     void contextRef.current?.close()
@@ -74,7 +79,24 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
       contextRef.current = context
       const analyser = context.createAnalyser()
       analyser.fftSize = 1024
-      context.createMediaStreamSource(stream).connect(analyser)
+
+      let analyserSource: AudioNode
+      if (value.noiseSuppressionMode === 'rnnoise' && rnnoiseAvailable) {
+        try {
+          const { createRnnoiseGraph } = await import('./audio/rnnoise-graph')
+          const [inputTrack] = stream.getAudioTracks()
+          const graph = await createRnnoiseGraph(context, inputTrack)
+          rnnoiseGraphRef.current = graph
+          analyserSource = context.createMediaStreamSource(new MediaStream([graph.outputTrack]))
+        } catch (caught) {
+          console.error('[voz] falha ao testar com a supressao aprimorada', caught)
+          setError('Não foi possível usar a supressão aprimorada no teste. Mostrando o áudio sem esse processamento.')
+          analyserSource = context.createMediaStreamSource(stream)
+        }
+      } else {
+        analyserSource = context.createMediaStreamSource(stream)
+      }
+      analyserSource.connect(analyser)
       const samples = new Uint8Array(analyser.frequencyBinCount)
       setTesting(true)
       const tick = () => {
@@ -150,18 +172,20 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
         <span>Supressão de ruído</span>
         <select
           disabled={value.profile !== 'custom'}
-          value={value.suppressionLevel}
-          onChange={(event) => update(withSuppressionLevel(value, event.target.value as NoiseSuppressionLevel))}
+          value={value.noiseSuppressionMode}
+          onChange={(event) => update(withNoiseSuppressionMode(value, event.target.value as NoiseSuppressionMode))}
         >
-          {levels.map(([id, label]) => (
-            <option disabled={id === 'high' && !isolationSupported} key={id} value={id}>{label}</option>
+          {modes.map(([id, label]) => (
+            <option disabled={id === 'rnnoise' && !rnnoiseAvailable} key={id} value={id}>
+              {id === 'rnnoise' && !rnnoiseAvailable ? `${label} — indisponível neste navegador` : label}
+            </option>
           ))}
         </select>
       </label>
       <p className="mic-test-hint">
         {value.profile === 'custom'
-          ? 'A supressão é a do navegador. O nível alto usa o isolamento de voz, quando o navegador oferece.'
-          : 'Escolha o perfil Personalizado para mudar o nível da supressão.'}
+          ? 'Padrão usa o processamento do navegador. Aprimorada roda RNNoise localmente e usa mais CPU.'
+          : 'Escolha o perfil Personalizado para mudar o modo de supressão.'}
       </p>
 
       {value.profile === 'custom' ? (
