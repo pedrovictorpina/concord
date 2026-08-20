@@ -33,7 +33,8 @@ um dia isso mudar, o caminho no LiveKit e um `TrackProcessor` em `AudioCaptureOp
 ## Criterios de aceite
 
 1. Alternar a supressao muda a captura sem derrubar a chamada.
-2. A escolha sobrevive ao recarregar e vale para a proxima entrada em um canal.
+2. A supressao de ruido volta ligada a cada abertura do Concord, mesmo que tenha sido desligada
+   na sessao anterior; os demais controles seguem o que foi salvo.
 3. O teste de microfone mostra o nivel e para ao sair da aba.
 4. Isolamento de voz aparece desabilitado quando o navegador nao suporta.
 5. Funciona nos tres temas, nos dois modos de cor e no mobile.

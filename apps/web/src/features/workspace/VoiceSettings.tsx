@@ -75,7 +75,7 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
       <Toggle
         checked={value.noiseSuppression}
         className="settings-toggle"
-        description="Reduz ruído constante, como ventilador, teclado e ar-condicionado."
+        description="Reduz ruído constante, como ventilador, teclado e ar-condicionado. Volta ligada sempre que você abre o Concord."
         label="Supressão de ruído"
         onChange={(checked) => update({ noiseSuppression: checked })}
       />

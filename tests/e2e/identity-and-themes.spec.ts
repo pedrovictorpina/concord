@@ -225,11 +225,16 @@ test.describe('identidade e temas', () => {
     await suppression.click()
     await expect(suppression).not.toBeChecked()
 
+    const gain = page.getByRole('checkbox', { name: 'Ganho automático' })
+    await gain.click()
+    await expect(gain).not.toBeChecked()
+
     await page.reload()
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('navigation', { name: 'Servidores' }).getByRole('button', { name: 'Abrir configurações' }).click()
     await page.getByRole('tab', { name: 'Voz' }).click()
-    await expect(page.getByRole('checkbox', { name: 'Supressão de ruído' })).not.toBeChecked()
+    await expect(page.getByRole('checkbox', { name: 'Supressão de ruído' })).toBeChecked()
+    await expect(page.getByRole('checkbox', { name: 'Ganho automático' })).not.toBeChecked()
   })
 
   test('mantém a conexão de voz ao navegar entre canais', async ({ page }) => {

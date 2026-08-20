@@ -28,7 +28,7 @@ export function readVoiceProcessing(): VoiceProcessing {
     return {
       autoGainControl: parsed.autoGainControl ?? defaultVoiceProcessing.autoGainControl,
       echoCancellation: parsed.echoCancellation ?? defaultVoiceProcessing.echoCancellation,
-      noiseSuppression: parsed.noiseSuppression ?? defaultVoiceProcessing.noiseSuppression,
+      noiseSuppression: true,
       voiceIsolation: parsed.voiceIsolation ?? defaultVoiceProcessing.voiceIsolation,
     }
   } catch {
