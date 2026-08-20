@@ -98,6 +98,23 @@ Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a 
 - QA: entrar em voz -> abrir preferencias de voz -> alternar supressao -> falar com ruido de fundo
   e confirmar com a outra conta.
 
+### 4.8 Tela deve levar so o audio do dispositivo
+
+- Hoje: a captura pede `audio` com `systemAudio: 'include'`, e o microfone continua sendo uma faixa
+  separada (`Track.Source.Microphone`) — o `getDisplayMedia` nao captura microfone. O que chega
+  junto e o audio que o **sistema esta tocando**, e isso inclui a chamada: as vozes das outras
+  pessoas saem pela caixa, o compartilhamento captura de volta e todo mundo se ouve duplicado,
+  o que na pratica soa como "esta indo o audio e o microfone".
+- Implementacao restante: pedir `suppressLocalAudioPlayback` (e `restrictOwnAudio`, quando o
+  navegador aceitar) na captura, para o retorno da propria chamada nao entrar na tela; conferir
+  se sobra eco quando quem transmite usa caixa em vez de fone; se o navegador ignorar as
+  constraints, avisar na interface que o fone e necessario ao transmitir com som.
+- Criterio de aceite: quem assiste ouve o som do jogo ou do video transmitido, sem ouvir a
+  propria voz nem a dos outros participantes voltando pela tela.
+- Teste: sem cobertura automatica possivel; roteiro manual com tres contas.
+- QA: A transmite com som usando caixa de som -> B e C conferem se as proprias vozes voltam;
+  repetir com A de fone.
+
 ## 5. Aplicativos nativos
 
 - Windows: Electron, instalador, atualização e áudio de sistema quando suportado.
