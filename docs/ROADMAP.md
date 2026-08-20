@@ -69,6 +69,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [ ] Oferecer reconexao ao canal de voz depois de recarregar a pagina
 - [x] Tela transmitida deve levar so o audio do dispositivo, sem o retorno da propria chamada
 - [x] Supressao de ruido, cancelamento de eco e teste de microfone nas preferencias de voz
+- [x] Modo de supressao aprimorada (RNNoise local, carregado sob demanda) com fallback automatico para WebRTC
 - [ ] Aplicar restrições de moderação também no servidor de mídia LiveKit
 
 ## Etapa 04 - Aplicativos

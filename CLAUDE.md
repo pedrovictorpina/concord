@@ -10,6 +10,7 @@ Todos rodam a partir da raiz (pnpm workspace). Node >= 22.12, pnpm 11.19.
 pnpm dev                        # vite dev do @concord/web em :5173
 pnpm check                      # tsc -b + vite build (é o "typecheck" do projeto)
 pnpm lint                       # oxlint
+pnpm test:unit                  # Vitest (lógica pura, sem DOM real — ver apps/web/vitest.config.ts)
 pnpm test:e2e                   # Playwright (sobe o dev server em 127.0.0.1:4173 sozinho)
 pnpm test:e2e:ui
 pnpm test:integration:supabase  # script Node contra o Supabase REMOTO
@@ -20,7 +21,9 @@ pnpm db:push                    # aplica migrations no projeto vinculado
 Um único teste e2e: `pnpm exec playwright test tests/e2e/identity-and-themes.spec.ts -g "alterna e persiste"`.
 Primeira execução precisa de `pnpm exec playwright install chromium`.
 
-Não existe suíte de teste unitário — a validação é `pnpm check` + `pnpm lint` + Playwright.
+A validação principal continua sendo `pnpm check` + `pnpm lint` + Playwright. `pnpm test:unit` (Vitest,
+adicionado na Etapa 03 para a lógica de preferências de voz) cobre só funções puras — não há
+ambiente de componente/DOM configurado.
 
 ### Cuidados com os comandos de banco/integração
 
