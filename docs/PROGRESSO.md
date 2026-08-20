@@ -7,7 +7,7 @@
 | 00 - Fundacao | Concluida e publicada | 2026-08-17 |
 | 01 - Identidade e temas | Concluida e publicada | 2026-08-17 |
 | 02 - Comunidades e texto | Concluida e publicada | 2026-08-19 |
-| 03 - Voz e compartilhamento | Em andamento | 2026-08-19 |
+| 03 - Voz e compartilhamento | Em andamento | 2026-08-20 |
 | 04 - Aplicativos | Nao iniciada | - |
 | 05 - Qualidade e lancamento | Nao iniciada | - |
 
@@ -180,6 +180,12 @@ Branch atual: `main`.
 - barra de identidade do usuario ganhou icones de microfone, fone e configuracoes; o de configuracoes abre as configuracoes do servidor, microfone e fone ainda sao visuais.
 - barra de envio ganhou botoes de presente, GIF e emoji (visuais) e um botao de enviar dedicado, alem do Enter.
 - validacoes: `pnpm check` e `pnpm lint` aprovados; verificacao visual com Playwright nos temas claro e escuro, incluindo busca de canais, busca de membros e alternancia do painel de membros sem sobra de coluna vazia.
+- supressao de ruido ganhou um segundo mecanismo: `NoiseSuppressionMode` (`off`/`webrtc`/`rnnoise`) substitui o antigo `suppressionLevel`/`voiceIsolation` guardados soltos, que permitiam combinacoes logicamente invalidas. Preferencias migraram de `concord.voice.v1` para `concord.voice.v2`, com leitura de compatibilidade (`v1 off` -> `off`, `v1 standard`/`high` -> `webrtc`, nunca convertendo automaticamente para `rnnoise`).
+- modo Aprimorada roda RNNoise (`@sapphi-red/web-noise-suppressor`, MIT) inteiramente no cliente via `AudioWorklet`, carregado sob demanda (`import()`) so quando o usuario escolhe o modo; o build confirma o wasm e o worklet em chunks separados do bundle principal. `apps/web/src/features/workspace/audio/rnnoise-graph.ts` cria o grafo (fonte -> RNNoise -> destino) e e reutilizado tanto pelo `TrackProcessor` do LiveKit (`RnnoiseAudioProcessor.ts`) quanto pelo teste de microfone, garantindo que os dois usem o mesmo processamento.
+- integracao com o LiveKit usa `LocalAudioTrack.setProcessor`/`stopProcessor`; confirmado no codigo instalado (`livekit-client@2.22.0`) que `restartTrack` ja re-executa `processor.restart()` sozinho, entao trocar de microfone ou ajustar outros filtros com RNNoise ativo nao exige logica extra de reanexacao.
+- falha ao iniciar o RNNoise (WASM, worklet ou `AudioContext`) cai automaticamente para WebRTC sem derrubar a chamada, com aviso nao bloqueante; a faixa de audio da tela nunca passa pelo RNNoise.
+- Vitest adicionado ao `apps/web` (antes o projeto so tinha `pnpm check`, lint e Playwright) para cobrir a logica pura de preferencias, migracao e constraints com 12 casos.
+- validacoes: `pnpm test:unit` (12/12), `pnpm check` e `pnpm lint` aprovados. Qualidade real do RNNoise (voz cortada, som metalico, latencia, CPU) e o teste em Firefox/Safari/mobile dependem do roteiro manual, ainda nao executado.
 - tela de mensagens diretas redesenhada: cabecalho mostra presenca real do amigo (reaproveitando o mesmo `statusLabel` da tela de Amigos, extraido para `presence.ts`), com espaco para chamada de voz/video/fixados (desabilitados, com dica "em breve"), busca nas mensagens carregadas e menu "Copiar identificador".
 - mensagens passaram a ser agrupadas por autor em janelas de 5 minutos (sem repetir avatar/cabecalho) e ganharam separadores reais de data (Hoje/Ontem/data completa); mensagens recebidas usam estrutura aberta (avatar + texto) e mensagens proprias continuam em bubble, seguindo a referencia aprovada sem copiar as cores da imagem.
 - composer virou textarea com crescimento automatico ate ~132px, Enter envia e Shift+Enter quebra linha; anexo, emoji e GIF ficam visiveis e desabilitados ("em breve") em vez de fingir suporte.

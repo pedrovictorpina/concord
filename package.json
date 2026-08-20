@@ -12,6 +12,7 @@
     "build": "pnpm --filter @concord/web build",
     "check": "pnpm --filter @concord/web build",
     "lint": "pnpm --filter @concord/web lint",
+    "test:unit": "pnpm --filter @concord/web test:unit",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:integration:supabase": "pnpm --filter @concord/web test:integration:supabase",
