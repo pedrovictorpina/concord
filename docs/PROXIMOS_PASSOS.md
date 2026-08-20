@@ -29,6 +29,11 @@ Esta lista é a referência operacional do Concord. Ela separa o que já está p
 
 Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a tarefa ser a lacuna real e não uma reimplementação.
 
+Entregues fora desta numeração, no mesmo dia: home no formato do Discord com presença online, entrada
+automática ao clicar no canal de voz, menu por pessoa no botão direito com volume individual, parar de
+ver uma transmissão, mutar o áudio de uma transmissão, chat do canal de voz, e a supressão de ruído
+começando sempre ligada.
+
 ### 4.1 Cargos e permissões pela lista de membros — FEITO em 19/08/2026
 
 - Hoje: `server_members.role` (`owner`/`moderator`/`member`) e `channel_permissions` já existem no banco, e a aba **Permissões** do `SettingsDialog` já permite ao dono trocar o cargo de um membro e ligar/desligar ler, escrever e falar por canal e por cargo.
@@ -98,17 +103,19 @@ Pedidos registrados em 19/08/2026. Cada item traz o que já existe hoje, para a 
 - QA: entrar em voz -> abrir preferencias de voz -> alternar supressao -> falar com ruido de fundo
   e confirmar com a outra conta.
 
-### 4.8 Tela deve levar so o audio do dispositivo
+### 4.8 Tela deve levar so o audio do dispositivo — FEITO em 19/08/2026
 
 - Hoje: a captura pede `audio` com `systemAudio: 'include'`, e o microfone continua sendo uma faixa
   separada (`Track.Source.Microphone`) — o `getDisplayMedia` nao captura microfone. O que chega
   junto e o audio que o **sistema esta tocando**, e isso inclui a chamada: as vozes das outras
   pessoas saem pela caixa, o compartilhamento captura de volta e todo mundo se ouve duplicado,
   o que na pratica soa como "esta indo o audio e o microfone".
-- Implementacao restante: pedir `suppressLocalAudioPlayback` (e `restrictOwnAudio`, quando o
-  navegador aceitar) na captura, para o retorno da propria chamada nao entrar na tela; conferir
-  se sobra eco quando quem transmite usa caixa em vez de fone; se o navegador ignorar as
-  constraints, avisar na interface que o fone e necessario ao transmitir com som.
+- Entregue: a captura pede `restrictOwnAudio` e `suppressLocalAudioPlayback` nas constraints de
+  audio, mais `selfBrowserSurface: 'exclude'`, entao o som que o proprio Concord toca fica fora da
+  tela transmitida. Quem transmite com som recebe um aviso lembrando do fone, porque navegadores
+  que ignoram as constraints continuam devolvendo as vozes pela caixa.
+- Restante: confirmar em campo se sobra retorno com caixa de som; se sobrar, capturar por aba em
+  vez de tela inteira.
 - Criterio de aceite: quem assiste ouve o som do jogo ou do video transmitido, sem ouvir a
   propria voz nem a dos outros participantes voltando pela tela.
 - Teste: sem cobertura automatica possivel; roteiro manual com tres contas.
