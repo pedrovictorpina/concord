@@ -70,13 +70,13 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
-    await expect(page.getByRole('heading', { name: /Concord\. Em sintonia\./ })).toBeVisible()
+    await expect(page.getByText('Fundacao sincronizada. O primeiro sinal da rede esta no ar.')).toBeVisible()
     await page.getByRole('textbox', { name: 'Mensagem' }).fill('Temas funcionando')
     await page.getByRole('textbox', { name: 'Mensagem' }).press('Enter')
     await expect(page.getByText('Temas funcionando')).toBeVisible()
 
     await expect(page.locator('.voice-member')).toHaveCount(0)
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'sala-da-madrugada' })).toBeVisible()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
@@ -162,7 +162,7 @@ test.describe('identidade e temas', () => {
     await expect(panel.getByText('@ari · moderador')).toBeVisible()
     await expect(panel.getByText('@rafa · membro')).toBeVisible()
 
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(panel).toHaveCount(0)
   })
 
@@ -203,7 +203,7 @@ test.describe('identidade e temas', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
 
@@ -225,7 +225,7 @@ test.describe('identidade e temas', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
@@ -276,7 +276,7 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
@@ -302,7 +302,7 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
