@@ -55,8 +55,15 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
   const canManage = server?.role === 'owner' || server?.role === 'moderator'
   const [activeNav, setActiveNav] = useState<typeof navItems[number]['id']>('inicio')
   const [channelQuery, setChannelQuery] = useState('')
+  const [usernameCopied, setUsernameCopied] = useState(false)
   const query = channelQuery.trim().toLowerCase()
   const matchesQuery = (channel: ChannelSummary) => !query || channel.name.toLowerCase().includes(query)
+
+  const copyUsername = () => {
+    void navigator.clipboard.writeText(`@${identity.username}`)
+    setUsernameCopied(true)
+    window.setTimeout(() => setUsernameCopied(false), 1500)
+  }
 
   return (
     <aside className={mobileOpen ? 'channel-panel mobile-open' : 'channel-panel'}>
@@ -156,7 +163,9 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
       <div className="channel-panel-footer">
         <footer className="identity-strip">
           <Avatar alt="Foto de perfil" initials={identity.initials} url={identity.avatarUrl} />
-          <div><strong>{identity.nickname}</strong><small>@{identity.username} · {identity.connectionLabel}</small></div>
+          <Hint label={usernameCopied ? 'Copiado!' : `@${identity.username}`}>
+            <button className="identity-strip-name" type="button" onClick={copyUsername}><strong>{identity.nickname}</strong></button>
+          </Hint>
           <span className="presence-dot" aria-label="Online" />
           <div className="identity-strip-actions">
             <Hint label="Microfone"><button type="button" aria-label="Microfone"><MicIcon /></button></Hint>

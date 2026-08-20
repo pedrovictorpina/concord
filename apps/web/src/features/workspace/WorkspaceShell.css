@@ -168,7 +168,9 @@ button { border: 0; cursor: pointer; }
 .channel.voice { margin-bottom: 7px; }
 .voice-member, .identity-strip { display: flex; align-items: center; }
 .voice-member { gap: 9px; padding: 6px 11px 6px 28px; }
-.voice-member > div, .identity-strip > div { display: grid; gap: 1px; min-width: 0; }
+.voice-member > div, .identity-strip > div:not(.identity-strip-actions) { display: grid; gap: 1px; min-width: 0; }
+.identity-strip-name { min-width: 0; padding: 0; border: 0; color: inherit; background: transparent; text-align: left; }
+.identity-strip-name:hover strong { color: var(--color-accent); }
 .voice-member strong, .identity-strip strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .voice-member small, .identity-strip small { overflow: hidden; color: var(--color-text-muted); font: 9px var(--font-mono); text-overflow: ellipsis; white-space: nowrap; }
 .voice-member i { color: var(--color-accent); font-style: normal; }
