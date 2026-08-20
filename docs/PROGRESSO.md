@@ -159,4 +159,5 @@ Branch atual: `main`.
 - a tela do canal de voz ganhou os controles que so existiam no dock (microfone, audio, tela e sair), o botao de tela virou componente unico usado nos dois lugares, e os cartoes de participante abrem o menu por pessoa com o botao direito.
 - chat do canal de voz passou a funcionar: abrir um canal de voz tambem o define como canal ativo, entao a coluna lateral carrega e envia mensagens daquele canal em tempo real, no lugar do texto fixo `O chat deste canal aparece aqui`.
 - audio da tela deixou de capturar o proprio Concord: a captura pede `restrictOwnAudio`, `suppressLocalAudioPlayback` e `selfBrowserSurface: 'exclude'`, entao as vozes da chamada nao voltam pela transmissao. Onde o navegador ignora as constraints, o aviso lembra de usar fone.
+- cada transmissao ganhou mudo proprio: o botao SOM no tile silencia so o audio daquela tela, sem mexer na voz de quem transmite nem no audio geral. Antes o unico controle era o volume da pessoa, que abrangia voz e tela juntas e nao permitia calar so a live. O estado sobrevive a novas faixas do mesmo participante e ao ligar e desligar o audio geral, e o rotulo do tile passa a mostrar `SEM SOM`.
 

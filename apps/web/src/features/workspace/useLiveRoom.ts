@@ -79,8 +79,9 @@ const withAudioFlag = (current: ScreenShareView[], participantId: string, hasAud
 export function useLiveRoom() {
   const roomRef = useRef<Room | null>(null)
   const clientRef = useRef<typeof import('livekit-client') | null>(null)
-  const audioElementsRef = useRef<Array<{ element: HTMLAudioElement; participantId: string }>>([])
+  const audioElementsRef = useRef<Array<{ element: HTMLAudioElement; participantId: string; screen: boolean }>>([])
   const volumeRef = useRef<Record<string, number>>({})
+  const screenMutedRef = useRef<Record<string, boolean>>({})
   const outputEnabledRef = useRef(true)
   const screenAudioRef = useRef(new Set<string>())
   const processingRef = useRef<VoiceProcessing>(readVoiceProcessing())
@@ -93,6 +94,7 @@ export function useLiveRoom() {
   const [outputEnabled, setOutputEnabled] = useState(true)
   const [screenShares, setScreenShares] = useState<ScreenShareView[]>([])
   const [volumeByUser, setVolumeByUser] = useState<Record<string, number>>({})
+  const [screenAudioMuted, setScreenAudioMuted] = useState<Record<string, boolean>>({})
 
   const leave = useCallback(() => {
     const room = roomRef.current
@@ -101,6 +103,8 @@ export function useLiveRoom() {
     audioElementsRef.current.forEach((item) => item.element.remove())
     audioElementsRef.current = []
     volumeRef.current = {}
+    screenMutedRef.current = {}
+    setScreenAudioMuted({})
     screenAudioRef.current.clear()
     setConnectedChannelId(null)
     setParticipants([])
@@ -171,10 +175,12 @@ export function useLiveRoom() {
       }
       if (isScreenAudio(publication)) markScreenAudio(participant, true)
       if (track.kind === Track.Kind.Audio) {
+        const fromScreen = isScreenAudio(publication)
         const audio = track.attach() as HTMLAudioElement
-        audio.muted = !outputEnabledRef.current
+        const silencedScreen = fromScreen && screenMutedRef.current[participant.identity] === true
+        audio.muted = !outputEnabledRef.current || silencedScreen
         audio.volume = volumeRef.current[participant.identity] ?? 1
-        audioElementsRef.current.push({ element: audio, participantId: participant.identity })
+        audioElementsRef.current.push({ element: audio, participantId: participant.identity, screen: fromScreen })
         document.body.append(audio)
         void audio.play().catch(() => setAudioBlocked(true))
       }
@@ -253,7 +259,9 @@ export function useLiveRoom() {
 
   const setOutput = useCallback((next: boolean) => {
     outputEnabledRef.current = next
-    audioElementsRef.current.forEach((item) => { item.element.muted = !next })
+    audioElementsRef.current.forEach((item) => {
+      item.element.muted = !next || (item.screen && screenMutedRef.current[item.participantId] === true)
+    })
     setOutputEnabled(next)
   }, [])
 
@@ -338,6 +346,15 @@ export function useLiveRoom() {
     }
   }, [])
 
+  const setScreenAudioSilenced = useCallback((participantId: string, silenced: boolean) => {
+    screenMutedRef.current = { ...screenMutedRef.current, [participantId]: silenced }
+    audioElementsRef.current.forEach((item) => {
+      if (item.participantId !== participantId || !item.screen) return
+      item.element.muted = silenced || !outputEnabledRef.current
+    })
+    setScreenAudioMuted((current) => ({ ...current, [participantId]: silenced }))
+  }, [])
+
   const setScreenShareWatched = useCallback((participantId: string, watched: boolean) => {
     const room = roomRef.current
     const client = clientRef.current
@@ -352,7 +369,7 @@ export function useLiveRoom() {
     const safe = Math.min(1, Math.max(0, volume))
     volumeRef.current = { ...volumeRef.current, [userId]: safe }
     audioElementsRef.current.forEach((item) => {
-      if (item.participantId === userId) item.element.volume = safe
+      if (item.participantId === userId && !item.screen) item.element.volume = safe
     })
     const participant = [...(roomRef.current?.remoteParticipants.values() ?? [])].find((item) => item.identity === userId)
     participant?.setVolume(safe)
@@ -388,7 +405,9 @@ export function useLiveRoom() {
     setMicrophone,
     setOutput,
     applyVoiceProcessing,
+    screenAudioMuted,
     setParticipantVolume,
+    setScreenAudioSilenced,
     setScreenShareWatched,
     startScreenShare,
     stopScreenShare,

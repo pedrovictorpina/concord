@@ -3,12 +3,14 @@ import type { ScreenShareView } from './screen-shares'
 
 type ScreenShareTileProps = {
   focused: boolean
+  muted: boolean
   onStopWatching: () => void
   onToggleFocus: () => void
+  onToggleSound: () => void
   share: ScreenShareView
 }
 
-export function ScreenShareTile({ focused, onStopWatching, onToggleFocus, share }: ScreenShareTileProps) {
+export function ScreenShareTile({ focused, muted, onStopWatching, onToggleFocus, onToggleSound, share }: ScreenShareTileProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export function ScreenShareTile({ focused, onStopWatching, onToggleFocus, share 
   return (
     <li className={focused ? 'voice-stage-share focused' : 'voice-stage-share'}>
       <video ref={videoRef} autoPlay muted playsInline />
-      <span className="capture-label">{author.toUpperCase()} · TRANSMITINDO{share.hasAudio ? ' · COM SOM' : ''}</span>
+      <span className="capture-label">{author.toUpperCase()} · TRANSMITINDO{share.hasAudio ? muted ? ' · SEM SOM' : ' · COM SOM' : ''}</span>
       <div className="voice-stage-share-actions">
         <button
           aria-label={focused ? `Voltar ${author} para a grade` : `Destacar a tela de ${author}`}
@@ -47,6 +49,17 @@ export function ScreenShareTile({ focused, onStopWatching, onToggleFocus, share 
         >
           {focused ? '❐' : '⬒'} <span>{focused ? 'GRADE' : 'DESTACAR'}</span>
         </button>
+        {share.isLocal || !share.hasAudio ? null : (
+          <button
+            aria-label={muted ? `Ativar o som da tela de ${author}` : `Mutar o som da tela de ${author}`}
+            aria-pressed={muted}
+            className="voice-stage-sound"
+            type="button"
+            onClick={onToggleSound}
+          >
+            {muted ? '🔇' : '🔊'} <span>{muted ? 'SEM SOM' : 'SOM'}</span>
+          </button>
+        )}
         {share.isLocal ? null : (
           <button
             aria-label={`Parar de ver a tela de ${author}`}
