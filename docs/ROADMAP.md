@@ -62,9 +62,11 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [ ] Audio do sistema no Windows (captura publicada junto com a tela; falta validar com duas contas)
 - [x] Seletor de qualidade automatica, alta, media e baixa antes da transmissao
 - [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS
+- [x] Parar de ver uma transmissao especifica, sem sair da chamada
+- [x] Controles de voz e chat dentro da tela do canal de voz
 - [ ] Reconexao e encerramento automatico
 - [ ] Oferecer reconexao ao canal de voz depois de recarregar a pagina
-- [ ] Tela transmitida deve levar so o audio do dispositivo, sem o retorno da propria chamada
+- [x] Tela transmitida deve levar so o audio do dispositivo, sem o retorno da propria chamada
 - [x] Supressao de ruido, cancelamento de eco e teste de microfone nas preferencias de voz
 - [ ] Aplicar restrições de moderação também no servidor de mídia LiveKit
 
