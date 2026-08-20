@@ -7,7 +7,7 @@
 | 00 - Fundacao | Concluida e publicada | 2026-08-17 |
 | 01 - Identidade e temas | Concluida e publicada | 2026-08-17 |
 | 02 - Comunidades e texto | Concluida e publicada | 2026-08-19 |
-| 03 - Voz e compartilhamento | Em andamento | 2026-08-19 |
+| 03 - Voz e compartilhamento | Em andamento | 2026-08-20 |
 | 04 - Aplicativos | Nao iniciada | - |
 | 05 - Qualidade e lancamento | Nao iniciada | - |
 
@@ -180,6 +180,27 @@ Branch atual: `main`.
 - barra de identidade do usuario ganhou icones de microfone, fone e configuracoes; o de configuracoes abre as configuracoes do servidor, microfone e fone ainda sao visuais.
 - barra de envio ganhou botoes de presente, GIF e emoji (visuais) e um botao de enviar dedicado, alem do Enter.
 - validacoes: `pnpm check` e `pnpm lint` aprovados; verificacao visual com Playwright nos temas claro e escuro, incluindo busca de canais, busca de membros e alternancia do painel de membros sem sobra de coluna vazia.
+- supressao de ruido ganhou um segundo mecanismo: `NoiseSuppressionMode` (`off`/`webrtc`/`rnnoise`) substitui o antigo `suppressionLevel`/`voiceIsolation` guardados soltos, que permitiam combinacoes logicamente invalidas. Preferencias migraram de `concord.voice.v1` para `concord.voice.v2`, com leitura de compatibilidade (`v1 off` -> `off`, `v1 standard`/`high` -> `webrtc`, nunca convertendo automaticamente para `rnnoise`).
+- modo Aprimorada roda RNNoise (`@sapphi-red/web-noise-suppressor`, MIT) inteiramente no cliente via `AudioWorklet`, carregado sob demanda (`import()`) so quando o usuario escolhe o modo; o build confirma o wasm e o worklet em chunks separados do bundle principal. `apps/web/src/features/workspace/audio/rnnoise-graph.ts` cria o grafo (fonte -> RNNoise -> destino) e e reutilizado tanto pelo `TrackProcessor` do LiveKit (`RnnoiseAudioProcessor.ts`) quanto pelo teste de microfone, garantindo que os dois usem o mesmo processamento.
+- integracao com o LiveKit usa `LocalAudioTrack.setProcessor`/`stopProcessor`; confirmado no codigo instalado (`livekit-client@2.22.0`) que `restartTrack` ja re-executa `processor.restart()` sozinho, entao trocar de microfone ou ajustar outros filtros com RNNoise ativo nao exige logica extra de reanexacao.
+- falha ao iniciar o RNNoise (WASM, worklet ou `AudioContext`) cai automaticamente para WebRTC sem derrubar a chamada, com aviso nao bloqueante; a faixa de audio da tela nunca passa pelo RNNoise.
+- Vitest adicionado ao `apps/web` (antes o projeto so tinha `pnpm check`, lint e Playwright) para cobrir a logica pura de preferencias, migracao e constraints com 12 casos.
+- validacoes: `pnpm test:unit` (12/12), `pnpm check` e `pnpm lint` aprovados. Qualidade real do RNNoise (voz cortada, som metalico, latencia, CPU) e o teste em Firefox/Safari/mobile dependem do roteiro manual, ainda nao executado.
+- tela de mensagens diretas redesenhada: cabecalho mostra presenca real do amigo (reaproveitando o mesmo `statusLabel` da tela de Amigos, extraido para `presence.ts`), com espaco para chamada de voz/video/fixados (desabilitados, com dica "em breve"), busca nas mensagens carregadas e menu "Copiar identificador".
+- mensagens passaram a ser agrupadas por autor em janelas de 5 minutos (sem repetir avatar/cabecalho) e ganharam separadores reais de data (Hoje/Ontem/data completa); mensagens recebidas usam estrutura aberta (avatar + texto) e mensagens proprias continuam em bubble, seguindo a referencia aprovada sem copiar as cores da imagem.
+- composer virou textarea com crescimento automatico ate ~132px, Enter envia e Shift+Enter quebra linha; anexo, emoji e GIF ficam visiveis e desabilitados ("em breve") em vez de fingir suporte.
+- lista de conversas na `HomeSidebar` passou a mostrar o status de presenca (Disponivel/Ausente/Em voz) no lugar do `@identificador`, e o campo de busca ganhou icone.
+- estado vazio da conversa ganhou avatar grande, nome, identificador e o texto "Este e o comeco da sua conversa com @identificador", no lugar do simbolo generico anterior; erro ao abrir a conversa passou a ocupar o centro da tela e erro de envio ganha botao "Tentar novamente".
+- scroll passou a fixar no fim da conversa e a mostrar "↓ Novas mensagens" quando o usuario esta lendo mensagens antigas e uma nova chega.
+- envio otimista e reactions ficaram fora do escopo desta etapa, como o proprio documento da etapa permite.
+- validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (26/26, com o teste de mensagem privada atualizado para o novo estado vazio) aprovados; conferencia visual manual via Playwright em desktop, mobile (390px) e tema escuro.
+- Home/Amigos redesenhada: as antigas abas Disponivel/Todos/Pendente/Adicionar viraram dois conceitos separados — filtro de presenca (Todos/Online/Ausentes/Offline, com contador por opcao) e navegacao (lista/solicitacoes/adicionar). Ocupado conta como online ate existir um filtro proprio, porque nada no app produz esse status hoje.
+- lista de amigos agrupa por presenca (Online/Ausentes/Offline) e cada linha ganhou selecao: clicar no nome abre um painel de detalhes a direita (avatar grande, status, `Mensagem`, menu e atividade em voz quando existir); clicar no icone de mensagem continua abrindo a DM direto, sem exigir selecao primeiro.
+- quando nenhum amigo esta selecionado, o painel direito volta a mostrar "Ativo agora" (recurso existente) mais um resumo das duas primeiras solicitacoes e dois primeiros convites de servidor, com "Ver todas" levando a tela cheia de Solicitacoes.
+- no mobile, onde nao ha espaco para o painel lateral, selecionar um amigo abre um overlay dedicado (mesmo componente do painel de detalhes, so reposicionado por CSS) com botao de voltar, replicando o mockup aprovado.
+- `presence.ts` criado com o mesmo `statusLabel`/`statusClass` que a tela de amigos ja usava, reaproveitado tambem pela nova logica de filtro/agrupamento por presenca.
+- sugestoes de amizade, amigos em comum, jogo atual e recusar solicitacao ficaram de fora por decisao do proprio documento da etapa: nao existem dados reais para isso hoje.
+- validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (26/26, dois testes atualizados porque as antigas abas Disponivel/Pendente/Adicionar amigo viraram botoes) aprovados; conferencia visual manual via Playwright em desktop, mobile (390px) e tema escuro, incluindo lista, painel de detalhes, solicitacoes e adicionar amigo.
 - redesign do servidor/canais/chat: navegacao Inicio/Mencoes/Threads/Explorar removida (nenhuma tinha efeito real, nem "Inicio"), o atalho `⌘K` saiu da busca de canais por nao existir de fato, e o cabecalho do servidor trocou "VOCE E O DONO"/"VOCE MODERA" por uma hierarquia mais simples (nome do servidor em destaque, cargo abaixo).
 - categorias de canais (texto/voz) ganharam cabecalho recolhivel com seta; icones Unicode (`⌄`, `◖`, `⚙`) viraram SVG no mesmo sistema (`WorkspaceIcons`); botoes de microfone/fone no rodape da sidebar de canais foram removidos por nunca terem funcionado (o controle real ja existe no VoiceDock, evitando duplicar/confundir).
 - cabecalho do chat perdeu a "descricao do canal" (que na verdade mostrava a descricao do servidor, sem relacao com o canal) e o badge fixo "REDE ESTAVEL"; notificacoes sem funcionalidade real foram removidas, fixar mensagens virou disabled + dica "em breve" em vez de parecer funcional.

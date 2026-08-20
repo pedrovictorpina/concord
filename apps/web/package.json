@@ -8,10 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "test:unit": "vitest run",
     "test:integration:supabase": "node tests/integration/supabase-auth.mjs"
   },
   "dependencies": {
     "@concord/contracts": "workspace:*",
+    "@sapphi-red/web-noise-suppressor": "^0.4.0",
     "@supabase/supabase-js": "^2.112.3",
     "livekit-client": "^2.22.0",
     "radix-ui": "^1.6.7",
@@ -26,6 +28,7 @@
     "oxlint": "^1.75.0",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
+    "vitest": "^4.1.11",
     "ws": "^8.21.3"
   }
 }

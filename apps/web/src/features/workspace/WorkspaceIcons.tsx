@@ -110,11 +110,27 @@ export function ChevronDownIcon() {
   )
 }
 
+export function MessageIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 5.5h16v11H9.5L5 20v-3.5H4z" />
+    </svg>
+  )
+}
+
 export function GearIcon() {
   return (
     <svg {...iconProps}>
       <circle cx="12" cy="12" r="3.2" />
       <path d="M12 3.5v2.4M12 18.1v2.4M20.5 12h-2.4M5.9 12H3.5M17.7 6.3l-1.7 1.7M8 16l-1.7 1.7M17.7 17.7L16 16M8 8L6.3 6.3" />
+    </svg>
+  )
+}
+
+export function PhoneIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M5 4.5c0-1 .8-1.8 1.8-1.8h1.6c.5 0 .9.3 1 .8l.9 3.1c.1.4 0 .9-.3 1.2L8.4 9.3a13 13 0 0 0 6.3 6.3l1.5-1.6c.3-.3.8-.4 1.2-.3l3.1.9c.5.1.8.5.8 1v1.6c0 1-.8 1.8-1.8 1.8h-.7C10.4 19 5 13.6 5 5.2z" />
     </svg>
   )
 }
@@ -128,10 +144,29 @@ export function SpeakerIcon() {
   )
 }
 
+export function VideoIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="3" y="6.5" width="13" height="11" rx="1.6" />
+      <path d="M16.5 10.2l4-2.6v9l-4-2.6z" />
+    </svg>
+  )
+}
+
 export function CrownIcon() {
   return (
     <svg {...iconProps}>
       <path d="M4 18h16l1-9-4.5 3-4.5-6-4.5 6L3 9z" />
+    </svg>
+  )
+}
+
+export function MoreIcon() {
+  return (
+    <svg {...iconProps}>
+      <circle cx="12" cy="5.5" r="1.4" />
+      <circle cx="12" cy="12" r="1.4" />
+      <circle cx="12" cy="18.5" r="1.4" />
     </svg>
   )
 }

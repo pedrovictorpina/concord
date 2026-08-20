@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { LocalTrack, Participant, RemoteTrack, RemoteTrackPublication, Room, TrackPublication } from 'livekit-client'
+import type { LocalAudioTrack, LocalTrack, Participant, RemoteTrack, RemoteTrackPublication, Room, TrackPublication } from 'livekit-client'
 import { supabase } from '../../lib/supabase'
+import { rnnoiseSupported } from './audio/rnnoise-support'
 import { screenShareQualities } from './screen-quality'
 import type { ScreenShareQuality } from './screen-quality'
 import type { ScreenShareView } from './screen-shares'
@@ -150,6 +151,20 @@ export function useLiveRoom() {
     setAudioBlocked(false)
   }, [])
 
+  const ensureRnnoiseProcessor = useCallback(async (track: LocalAudioTrack) => {
+    if (processingRef.current.noiseSuppressionMode !== 'rnnoise' || !rnnoiseSupported()) return
+    if (track.getProcessor()) return
+    try {
+      const { RnnoiseAudioProcessor } = await import('./audio/RnnoiseAudioProcessor')
+      await track.setProcessor(new RnnoiseAudioProcessor())
+    } catch (caught) {
+      console.error('[voz] falha ao iniciar a supressao aprimorada', caught)
+      await track.stopProcessor().catch(() => undefined)
+      await track.restartTrack(audioCaptureOptions({ ...processingRef.current, noiseSuppressionMode: 'webrtc' })).catch(() => undefined)
+      setNotice('A supressão aprimorada não pôde ser iniciada. O Concord voltou para a supressão padrão.')
+    }
+  }, [])
+
   const join = useCallback(async (channelId: string, options: { microphone: boolean }) => {
     if (!supabase) {
       setError('Conecte sua conta para entrar em um canal de voz.')
@@ -279,6 +294,8 @@ export function useLiveRoom() {
         try {
           await room.localParticipant.setMicrophoneEnabled(true, audioCaptureOptions(processingRef.current))
           setMicrophoneEnabled(true)
+          const track = room.localParticipant.getTrackPublication(Track.Source.Microphone)?.audioTrack as LocalAudioTrack | undefined
+          if (track) await ensureRnnoiseProcessor(track)
         } catch (caught) {
           console.error('[voz] falha ao publicar o microfone', caught)
           setError('Permissao de microfone negada. Voce entrou sem audio.')
@@ -288,7 +305,7 @@ export function useLiveRoom() {
     }
 
     return true
-  }, [applyVolumes, leave])
+  }, [applyVolumes, ensureRnnoiseProcessor, leave])
 
   const setOutput = useCallback((next: boolean) => {
     outputEnabledRef.current = next
@@ -298,15 +315,20 @@ export function useLiveRoom() {
 
   const setMicrophone = useCallback(async (next: boolean) => {
     const room = roomRef.current
+    const client = clientRef.current
     if (!room) return
     try {
       await room.localParticipant.setMicrophoneEnabled(next, next ? audioCaptureOptions(processingRef.current) : undefined)
       setMicrophoneEnabled(next)
+      if (next && client) {
+        const track = room.localParticipant.getTrackPublication(client.Track.Source.Microphone)?.audioTrack as LocalAudioTrack | undefined
+        if (track) await ensureRnnoiseProcessor(track)
+      }
     } catch (caught) {
       console.error('[voz] falha ao alternar o microfone', caught)
       setError('Permissao de microfone negada ou indisponivel.')
     }
-  }, [])
+  }, [ensureRnnoiseProcessor])
 
   const startScreenShare = useCallback(async (quality: ScreenShareQuality) => {
     const room = roomRef.current
@@ -387,19 +409,26 @@ export function useLiveRoom() {
     }
 
     const publication = room.localParticipant.getTrackPublication(client.Track.Source.Microphone)
-    const track = publication?.audioTrack
+    const track = publication?.audioTrack as LocalAudioTrack | undefined
     if (!track) return
 
     try {
       if (next.inputDeviceId !== previous.inputDeviceId) {
         await room.switchActiveDevice('audioinput', next.inputDeviceId || 'default')
       }
+
+      const leavingRnnoise = previous.noiseSuppressionMode === 'rnnoise' && next.noiseSuppressionMode !== 'rnnoise'
+      if (leavingRnnoise && track.getProcessor()) {
+        await track.stopProcessor()
+      }
+
       await track.restartTrack(audioCaptureOptions(next))
+      await ensureRnnoiseProcessor(track)
     } catch (caught) {
       console.error('[voz] falha ao aplicar o tratamento de audio', caught)
       setError('Nao foi possivel aplicar o tratamento de audio no microfone.')
     }
-  }, [applyVolumes])
+  }, [applyVolumes, ensureRnnoiseProcessor])
 
   const setScreenAudioSilenced = useCallback((participantId: string, silenced: boolean) => {
     screenMutedRef.current = { ...screenMutedRef.current, [participantId]: silenced }
