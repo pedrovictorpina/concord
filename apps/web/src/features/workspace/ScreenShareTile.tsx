@@ -4,13 +4,15 @@ import type { ScreenShareView } from './screen-shares'
 type ScreenShareTileProps = {
   focused: boolean
   muted: boolean
+  onSetVolume: (volume: number) => void
   onStopWatching: () => void
   onToggleFocus: () => void
   onToggleSound: () => void
   share: ScreenShareView
+  volume: number
 }
 
-export function ScreenShareTile({ focused, muted, onStopWatching, onToggleFocus, onToggleSound, share }: ScreenShareTileProps) {
+export function ScreenShareTile({ focused, muted, onSetVolume, onStopWatching, onToggleFocus, onToggleSound, share, volume }: ScreenShareTileProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -34,50 +36,59 @@ export function ScreenShareTile({ focused, muted, onStopWatching, onToggleFocus,
   }, [share.stream, share.track])
 
   const author = share.isLocal ? 'Sua tela' : share.nickname
+  const soundLabel = share.hasAudio ? muted ? ' · SEM SOM' : ' · COM SOM' : ''
 
   return (
     <li className={focused ? 'voice-stage-share focused' : 'voice-stage-share'}>
       <video ref={videoRef} autoPlay muted playsInline />
-      <span className="capture-label">{author.toUpperCase()} · TRANSMITINDO{share.hasAudio ? muted ? ' · SEM SOM' : ' · COM SOM' : ''}</span>
-      <div className="voice-stage-share-actions">
-        <button
-          aria-label={focused ? `Voltar ${author} para a grade` : `Destacar a tela de ${author}`}
-          aria-pressed={focused}
-          className="voice-stage-focus"
-          type="button"
-          onClick={onToggleFocus}
-        >
-          {focused ? '❐' : '⬒'} <span>{focused ? 'GRADE' : 'DESTACAR'}</span>
-        </button>
-        {share.isLocal || !share.hasAudio ? null : (
-          <button
-            aria-label={muted ? `Ativar o som da tela de ${author}` : `Mutar o som da tela de ${author}`}
-            aria-pressed={muted}
-            className="voice-stage-sound"
-            type="button"
-            onClick={onToggleSound}
-          >
-            {muted ? '🔇' : '🔊'} <span>{muted ? 'SEM SOM' : 'SOM'}</span>
-          </button>
+      <span className="capture-label">{author.toUpperCase()} · TRANSMITINDO{soundLabel}</span>
+
+      <div className="voice-stage-bar">
+        {share.isLocal || !share.hasAudio ? <span /> : (
+          <div className="voice-stage-volume">
+            <button
+              aria-label={muted ? `Ativar o som da tela de ${author}` : `Mutar o som da tela de ${author}`}
+              aria-pressed={muted}
+              type="button"
+              onClick={onToggleSound}
+            >
+              {muted ? '◌' : '◖'}
+            </button>
+            <input
+              aria-label={`Volume da tela de ${author}`}
+              max={2}
+              min={0}
+              step={0.05}
+              type="range"
+              value={muted ? 0 : volume}
+              onChange={(event) => onSetVolume(Number(event.target.value))}
+            />
+            <small>{muted ? 'MUDO' : `${Math.round(volume * 100)}%`}</small>
+          </div>
         )}
-        {share.isLocal ? null : (
+
+        <div className="voice-stage-bar-actions">
           <button
-            aria-label={`Parar de ver a tela de ${author}`}
-            className="voice-stage-close"
+            aria-label={focused ? `Voltar ${author} para a grade` : `Destacar a tela de ${author}`}
+            aria-pressed={focused}
             type="button"
-            onClick={onStopWatching}
+            onClick={onToggleFocus}
           >
-            ✕ <span>PARAR DE VER</span>
+            {focused ? '❐' : '⬒'} <span>{focused ? 'GRADE' : 'DESTACAR'}</span>
           </button>
-        )}
-        <button
-          aria-label={`Ver a tela de ${author} em tela cheia`}
-          className="voice-stage-fullscreen"
-          type="button"
-          onClick={() => void videoRef.current?.requestFullscreen()}
-        >
-          ⛶ <span>TELA CHEIA</span>
-        </button>
+          {share.isLocal ? null : (
+            <button aria-label={`Parar de ver a tela de ${author}`} type="button" onClick={onStopWatching}>
+              ✕ <span>PARAR DE VER</span>
+            </button>
+          )}
+          <button
+            aria-label={`Ver a tela de ${author} em tela cheia`}
+            type="button"
+            onClick={() => void videoRef.current?.requestFullscreen()}
+          >
+            ⛶ <span>TELA CHEIA</span>
+          </button>
+        </div>
       </div>
     </li>
   )

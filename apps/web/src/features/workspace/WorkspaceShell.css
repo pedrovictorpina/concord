@@ -491,20 +491,19 @@ button { border: 0; cursor: pointer; }
 .voice-stage-shares.has-focus .voice-stage-share video { max-height: min(16vh, 130px); }
 .voice-stage-shares.has-focus .voice-stage-share.focused video { max-height: min(62vh, 620px); }
 .voice-stage-share .capture-label { position: absolute; top: 8px; left: 8px; max-width: calc(100% - 16px); overflow: hidden; padding: 3px 7px; border-radius: 4px; color: var(--color-accent-contrast); background: var(--color-danger); font: 7px var(--font-mono); letter-spacing: 1px; text-overflow: ellipsis; white-space: nowrap; }
-.voice-stage-share-actions { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; }
-.voice-stage-available { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
-.voice-stage-available button { padding: 8px 12px; border: var(--border-width) solid var(--color-accent); border-radius: var(--radius-control); color: var(--color-accent); background: var(--color-accent-soft); font: 9px var(--font-mono); letter-spacing: .7px; }
-.voice-stage-available button:hover { color: var(--color-accent-contrast); background: var(--color-accent); }
-.voice-stage-sound { padding: 6px 8px; border: var(--border-width) solid var(--color-border); color: var(--color-text); background: color-mix(in srgb, var(--color-canvas) 82%, transparent); font: 8px var(--font-mono); letter-spacing: .7px; }
-.voice-stage-sound:hover { border-color: var(--color-accent); color: var(--color-accent); }
-.voice-stage-sound[aria-pressed='true'] { border-color: var(--color-danger); color: var(--color-danger); }
-.voice-stage-close { padding: 6px 8px; border: var(--border-width) solid var(--color-border); color: var(--color-text); background: color-mix(in srgb, var(--color-canvas) 82%, transparent); font: 8px var(--font-mono); letter-spacing: .7px; }
-.voice-stage-close:hover { border-color: var(--color-danger); color: var(--color-danger); }
-.voice-stage-focus, .voice-stage-fullscreen { position: static; padding: 6px 8px; border: var(--border-width) solid var(--color-border); color: var(--color-text); background: color-mix(in srgb, var(--color-canvas) 82%, transparent); font: 8px var(--font-mono); letter-spacing: .7px; }
-.voice-stage-focus:hover, .voice-stage-fullscreen:hover { border-color: var(--color-accent); color: var(--color-accent); }
-.voice-stage-focus[aria-pressed='true'] { border-color: var(--color-accent); color: var(--color-accent); }
-.voice-stage-shares.has-focus .voice-stage-share:not(.focused) .voice-stage-fullscreen { display: none; }
-.voice-stage-shares.has-focus .voice-stage-share:not(.focused) .voice-stage-focus span { display: none; }
+.voice-stage-bar { position: absolute; right: 0; bottom: 0; left: 0; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px; opacity: 0; background: linear-gradient(to top, color-mix(in srgb, var(--color-canvas) 92%, transparent), transparent); transition: opacity var(--motion-normal) ease; }
+.voice-stage-share:hover .voice-stage-bar, .voice-stage-share:focus-within .voice-stage-bar { opacity: 1; }
+.voice-stage-bar-actions { display: flex; gap: 6px; margin-left: auto; }
+.voice-stage-bar button { padding: 6px 8px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text); background: color-mix(in srgb, var(--color-canvas) 82%, transparent); font: 8px var(--font-mono); letter-spacing: .7px; }
+.voice-stage-bar button:hover { border-color: var(--color-accent); color: var(--color-accent); }
+.voice-stage-bar button[aria-pressed='true'] { border-color: var(--color-accent); color: var(--color-accent); }
+.voice-stage-volume { display: flex; align-items: center; gap: 7px; padding: 4px 8px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); background: color-mix(in srgb, var(--color-canvas) 82%, transparent); }
+.voice-stage-volume button { padding: 2px 4px; border: 0; background: transparent; font-size: 12px; }
+.voice-stage-volume button[aria-pressed='true'] { color: var(--color-danger); }
+.voice-stage-volume input { width: 88px; accent-color: var(--color-accent); }
+.voice-stage-volume small { min-width: 32px; color: var(--color-text-muted); font: 8px var(--font-mono); text-align: right; }
+.voice-stage-shares.has-focus .voice-stage-share:not(.focused) .voice-stage-volume input { display: none; }
+.voice-stage-shares.has-focus .voice-stage-share:not(.focused) .voice-stage-bar button span { display: none; }
 .voice-join { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; padding: 12px; border: var(--border-width) solid var(--color-accent); color: var(--color-accent); background: var(--color-accent-soft); font: 9px var(--font-mono); letter-spacing: .7px; }
 .voice-dock-status { display: flex; align-items: center; gap: 7px; padding: 5px 4px 10px; color: var(--color-text); }
 .voice-dock-status small { margin-left: auto; color: var(--color-text-faint); font: 7px var(--font-mono); }
@@ -588,7 +587,10 @@ button { border: 0; cursor: pointer; }
   .voice-stage-shares, .voice-stage-shares[data-count='2'], .voice-stage-shares[data-count='3'], .voice-stage-shares[data-count='4'] { width: 100%; grid-template-columns: minmax(0, 1fr); }
   .voice-stage-shares[data-count='2'] video, .voice-stage-shares[data-count='3'] video, .voice-stage-shares[data-count='4'] video { max-height: min(34vh, 260px); }
   .voice-stage-shares.has-focus { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
-  .voice-stage-focus span, .voice-stage-fullscreen span, .voice-stage-close span, .voice-stage-sound span { display: none; }
+  .voice-stage-bar { opacity: 1; }
+  .voice-stage-bar button span { display: none; }
+  .voice-stage-volume input { width: 60px; }
+  .voice-stage-volume input { width: 56px; }
   .voice-dock, .voice-dock.floating { right: 12px; bottom: 72px; left: 12px; width: auto; border: var(--border-width) solid var(--color-border); box-shadow: var(--shadow-panel); }
   .quality-picker { width: min(92vw, 300px); }
   .voice-tile { width: 116px; padding: 13px 10px; }

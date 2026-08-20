@@ -17,8 +17,10 @@ type LivePanelProps = {
   onJoin: () => void
   onSendMessage: (body: string, authorNickname: string) => Promise<{ ok: boolean; message: string }>
   onSetParticipantVolume: (userId: string, volume: number) => void
+  onSetShareVolume: (participantId: string, volume: number) => void
   onToggleShareSound: (participantId: string, muted: boolean) => void
   screenAudioMuted: Record<string, boolean>
+  screenVolumeByUser: Record<string, number>
   onWatchShare: (participantId: string, watched: boolean) => void
   participants: VoiceParticipant[]
   screenShares: ScreenShareView[]
@@ -36,7 +38,7 @@ const statusFor = (participant: VoiceParticipant) => {
   return 'conectado'
 }
 
-export function LivePanel({ channel, connected, connecting, identity, messages, onJoin, onSendMessage, onSetParticipantVolume, onToggleShareSound, screenAudioMuted, onWatchShare, participants, screenShares, userId, volumeByUser }: LivePanelProps) {
+export function LivePanel({ channel, connected, connecting, identity, messages, onJoin, onSendMessage, onSetParticipantVolume, onSetShareVolume, onToggleShareSound, screenAudioMuted, screenVolumeByUser, onWatchShare, participants, screenShares, userId, volumeByUser }: LivePanelProps) {
   const [focusedShareId, setFocusedShareId] = useState<string | null>(null)
   const [draft, setDraft] = useState('')
   const [sending, setSending] = useState(false)
@@ -87,10 +89,12 @@ export function LivePanel({ channel, connected, connecting, identity, messages, 
                   focused={share.id === focusedShare?.id}
                   key={share.id}
                   muted={screenAudioMuted[share.participantId] === true}
+                  onSetVolume={(volume) => onSetShareVolume(share.participantId, volume)}
                   onStopWatching={() => onWatchShare(share.participantId, false)}
                   onToggleSound={() => onToggleShareSound(share.participantId, !(screenAudioMuted[share.participantId] === true))}
                   onToggleFocus={() => setFocusedShareId((current) => current === share.id ? null : share.id)}
                   share={share}
+                  volume={screenVolumeByUser[share.participantId] ?? 1}
                 />
               ))}
             </ul>

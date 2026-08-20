@@ -38,7 +38,7 @@ export function MemberContextMenu({ canModerate, canSetRole, children, inVoice, 
               <span>Volume da pessoa · {Math.round(volume * 100)}%</span>
               <input
                 aria-label={`Volume de ${target.nickname}`}
-                max={1}
+                max={2}
                 min={0}
                 step={0.05}
                 type="range"

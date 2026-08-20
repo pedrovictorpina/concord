@@ -214,6 +214,35 @@ test.describe('identidade e temas', () => {
     expect(dockBox!.y + dockBox!.height).toBeLessThanOrEqual(identityBox!.y + 1)
   })
 
+  test('mostra os controles da transmissão ao passar o mouse', async ({ page }) => {
+    await page.addInitScript(() => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 640
+      canvas.height = 360
+      const stream = (canvas as HTMLCanvasElement & { captureStream: (fps: number) => MediaStream }).captureStream(5)
+      Object.defineProperty(navigator.mediaDevices, 'getDisplayMedia', { value: async () => stream, configurable: true })
+    })
+    await page.goto('/')
+    await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
+    await page.getByRole('button', { name: 'Concord', exact: true }).click()
+    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await expect(page.getByText('Você está em voz.')).toBeVisible()
+
+    const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
+    await dock.getByRole('button', { name: 'TELA' }).click()
+    await page.getByRole('button', { name: /Automatica/ }).click()
+
+    const tile = page.locator('.voice-stage-share').first()
+    const bar = tile.locator('.voice-stage-bar')
+    await expect(tile).toBeVisible()
+    expect(await bar.evaluate((element) => getComputedStyle(element).opacity)).toBe('0')
+
+    await tile.hover()
+    await expect.poll(async () => bar.evaluate((element) => getComputedStyle(element).opacity)).toBe('1')
+    await expect(bar.getByRole('button', { name: /Destacar a tela/ })).toBeVisible()
+    await expect(bar.getByRole('button', { name: /tela cheia/ })).toBeVisible()
+  })
+
   test('ajusta a supressão de ruído nas configurações de voz', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()

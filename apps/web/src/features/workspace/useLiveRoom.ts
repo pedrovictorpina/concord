@@ -79,8 +79,17 @@ const withAudioFlag = (current: ScreenShareView[], participantId: string, hasAud
 export function useLiveRoom() {
   const roomRef = useRef<Room | null>(null)
   const clientRef = useRef<typeof import('livekit-client') | null>(null)
-  const audioElementsRef = useRef<Array<{ element: HTMLAudioElement; participantId: string; screen: boolean }>>([])
+  const audioElementsRef = useRef<Array<{
+    element: HTMLAudioElement
+    participantId: string
+    screen: boolean
+    gain: GainNode | null
+    source: MediaStreamAudioSourceNode | null
+  }>>([])
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const masterGainRef = useRef<GainNode | null>(null)
   const volumeRef = useRef<Record<string, number>>({})
+  const screenVolumeRef = useRef<Record<string, number>>({})
   const screenMutedRef = useRef<Record<string, boolean>>({})
   const outputEnabledRef = useRef(true)
   const screenAudioRef = useRef(new Set<string>())
@@ -95,6 +104,45 @@ export function useLiveRoom() {
   const [screenShares, setScreenShares] = useState<ScreenShareView[]>([])
   const [volumeByUser, setVolumeByUser] = useState<Record<string, number>>({})
   const [screenAudioMuted, setScreenAudioMuted] = useState<Record<string, boolean>>({})
+  const [screenVolumeByUser, setScreenVolumeByUser] = useState<Record<string, number>>({})
+
+  const ensureAudioContext = useCallback(() => {
+    if (audioContextRef.current) return audioContextRef.current
+    const AudioContextClass = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    if (!AudioContextClass) return null
+    try {
+      const context = new AudioContextClass()
+      const master = context.createGain()
+      master.gain.value = outputEnabledRef.current ? 1 : 0
+      master.connect(context.destination)
+      audioContextRef.current = context
+      masterGainRef.current = master
+      return context
+    } catch (caught) {
+      console.error('[voz] falha ao criar o contexto de audio', caught)
+      return null
+    }
+  }, [])
+
+  const gainFor = (participantId: string, screen: boolean) => {
+    if (screen) {
+      const muted = screenMutedRef.current[participantId] === true
+      return muted ? 0 : screenVolumeRef.current[participantId] ?? 1
+    }
+    return volumeRef.current[participantId] ?? 1
+  }
+
+  const applyGains = useCallback(() => {
+    audioElementsRef.current.forEach((item) => {
+      const value = gainFor(item.participantId, item.screen)
+      if (item.gain) {
+        item.gain.gain.value = value
+        return
+      }
+      item.element.volume = Math.min(1, value)
+      item.element.muted = !outputEnabledRef.current || value === 0
+    })
+  }, [])
 
   const leave = useCallback(() => {
     const room = roomRef.current
@@ -102,9 +150,18 @@ export function useLiveRoom() {
     room?.disconnect()
     audioElementsRef.current.forEach((item) => item.element.remove())
     audioElementsRef.current = []
+    audioElementsRef.current.forEach((item) => {
+      item.source?.disconnect()
+      item.gain?.disconnect()
+    })
+    void audioContextRef.current?.close().catch(() => undefined)
+    audioContextRef.current = null
+    masterGainRef.current = null
     volumeRef.current = {}
+    screenVolumeRef.current = {}
     screenMutedRef.current = {}
     setScreenAudioMuted({})
+    setScreenVolumeByUser({})
     screenAudioRef.current.clear()
     setConnectedChannelId(null)
     setParticipants([])
@@ -177,19 +234,48 @@ export function useLiveRoom() {
       if (track.kind === Track.Kind.Audio) {
         const fromScreen = isScreenAudio(publication)
         const audio = track.attach() as HTMLAudioElement
-        const silencedScreen = fromScreen && screenMutedRef.current[participant.identity] === true
-        audio.muted = !outputEnabledRef.current || silencedScreen
-        audio.volume = volumeRef.current[participant.identity] ?? 1
-        audioElementsRef.current.push({ element: audio, participantId: participant.identity, screen: fromScreen })
+        const value = gainFor(participant.identity, fromScreen)
+        const context = ensureAudioContext()
+        const master = masterGainRef.current
+        let gain: GainNode | null = null
+        let source: MediaStreamAudioSourceNode | null = null
+
+        if (context && master && track.mediaStreamTrack) {
+          try {
+            source = context.createMediaStreamSource(new MediaStream([track.mediaStreamTrack]))
+            gain = context.createGain()
+            gain.gain.value = value
+            source.connect(gain)
+            gain.connect(master)
+            audio.muted = true
+          } catch (caught) {
+            console.error('[voz] falha ao rotear o audio pelo contexto', caught)
+            source = null
+            gain = null
+          }
+        }
+
+        if (!gain) {
+          audio.muted = !outputEnabledRef.current || value === 0
+          audio.volume = Math.min(1, value)
+        }
+
+        audioElementsRef.current.push({ element: audio, participantId: participant.identity, screen: fromScreen, gain, source })
         document.body.append(audio)
         void audio.play().catch(() => setAudioBlocked(true))
+        if (context?.state === 'suspended') setAudioBlocked(true)
       }
       sync()
     })
     room.on(RoomEvent.TrackUnsubscribed, (track, publication: RemoteTrackPublication, participant) => {
       const detached = track.detach()
       detached.forEach((element) => element.remove())
-      audioElementsRef.current = audioElementsRef.current.filter((item) => !detached.includes(item.element))
+      audioElementsRef.current = audioElementsRef.current.filter((item) => {
+        if (!detached.includes(item.element)) return true
+        item.source?.disconnect()
+        item.gain?.disconnect()
+        return false
+      })
       dropShareByTrack(track)
       if (isScreenAudio(publication)) markScreenAudio(participant, false)
       sync()
@@ -255,12 +341,14 @@ export function useLiveRoom() {
     }
 
     return true
-  }, [leave])
+  }, [ensureAudioContext, leave])
 
   const setOutput = useCallback((next: boolean) => {
     outputEnabledRef.current = next
+    if (masterGainRef.current) masterGainRef.current.gain.value = next ? 1 : 0
     audioElementsRef.current.forEach((item) => {
-      item.element.muted = !next || (item.screen && screenMutedRef.current[item.participantId] === true)
+      if (item.gain) return
+      item.element.muted = !next || gainFor(item.participantId, item.screen) === 0
     })
     setOutputEnabled(next)
   }, [])
@@ -348,12 +436,9 @@ export function useLiveRoom() {
 
   const setScreenAudioSilenced = useCallback((participantId: string, silenced: boolean) => {
     screenMutedRef.current = { ...screenMutedRef.current, [participantId]: silenced }
-    audioElementsRef.current.forEach((item) => {
-      if (item.participantId !== participantId || !item.screen) return
-      item.element.muted = silenced || !outputEnabledRef.current
-    })
+    applyGains()
     setScreenAudioMuted((current) => ({ ...current, [participantId]: silenced }))
-  }, [])
+  }, [applyGains])
 
   const setScreenShareWatched = useCallback((participantId: string, watched: boolean) => {
     const room = roomRef.current
@@ -366,23 +451,31 @@ export function useLiveRoom() {
   }, [])
 
   const setParticipantVolume = useCallback((userId: string, volume: number) => {
-    const safe = Math.min(1, Math.max(0, volume))
+    const safe = Math.min(2, Math.max(0, volume))
     volumeRef.current = { ...volumeRef.current, [userId]: safe }
-    audioElementsRef.current.forEach((item) => {
-      if (item.participantId === userId && !item.screen) item.element.volume = safe
-    })
-    const participant = [...(roomRef.current?.remoteParticipants.values() ?? [])].find((item) => item.identity === userId)
-    participant?.setVolume(safe)
+    applyGains()
     setVolumeByUser((current) => ({ ...current, [userId]: safe }))
-  }, [])
+  }, [applyGains])
+
+  const setScreenAudioVolume = useCallback((participantId: string, volume: number) => {
+    const safe = Math.min(2, Math.max(0, volume))
+    screenVolumeRef.current = { ...screenVolumeRef.current, [participantId]: safe }
+    if (safe > 0 && screenMutedRef.current[participantId]) {
+      screenMutedRef.current = { ...screenMutedRef.current, [participantId]: false }
+      setScreenAudioMuted((current) => ({ ...current, [participantId]: false }))
+    }
+    applyGains()
+    setScreenVolumeByUser((current) => ({ ...current, [participantId]: safe }))
+  }, [applyGains])
 
   const enableAudioPlayback = useCallback(async () => {
     const room = roomRef.current
     if (!room) return
     try {
       await room.startAudio()
+      await audioContextRef.current?.resume().catch(() => undefined)
       audioElementsRef.current.forEach((item) => { void item.element.play().catch(() => undefined) })
-      setAudioBlocked(!room.canPlaybackAudio)
+      setAudioBlocked(!room.canPlaybackAudio || audioContextRef.current?.state === 'suspended')
     } catch (caught) {
       console.error('[voz] falha ao liberar a reproducao de audio', caught)
     }
@@ -406,8 +499,10 @@ export function useLiveRoom() {
     setOutput,
     applyVoiceProcessing,
     screenAudioMuted,
+    screenVolumeByUser,
     setParticipantVolume,
     setScreenAudioSilenced,
+    setScreenAudioVolume,
     setScreenShareWatched,
     startScreenShare,
     stopScreenShare,
