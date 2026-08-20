@@ -102,6 +102,14 @@ export function EmojiIcon() {
   )
 }
 
+export function MessageIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 5.5h16v11H9.5L5 20v-3.5H4z" />
+    </svg>
+  )
+}
+
 export function PhoneIcon() {
   return (
     <svg {...iconProps}>

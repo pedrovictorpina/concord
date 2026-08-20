@@ -42,6 +42,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Moderacao basica: banimento, timeout e restricoes de microfone/audio
 - [ ] Edicao, exclusao e respostas
 - [x] Home de amigos no formato do Discord, com presenca online e conversas diretas
+- [x] Redesign da Home/Amigos: filtros por presenca com contadores, selecao de amigo com painel de detalhes, resumo de solicitacoes/convites e perfil mobile dedicado
 - [x] Cargos e permissoes pela lista de membros, com transferencia de propriedade
 - [x] Convidar pessoa que ainda nao e amiga, com busca de perfis no proprio dialogo
 - [x] Menu de contexto por pessoa, com volume individual e acoes de moderacao
