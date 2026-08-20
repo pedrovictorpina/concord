@@ -1,6 +1,4 @@
-import { useState } from 'react'
-import { Popover } from 'radix-ui'
-import { screenShareQualities } from './screen-quality'
+import { ScreenShareButton } from './ScreenShareButton'
 import { AudioIcon, AudioOffIcon, MicIcon, MicOffIcon } from './VoiceStateIcons'
 import type { ScreenShareQuality } from './screen-quality'
 
@@ -27,18 +25,9 @@ type VoiceDockProps = {
 }
 
 export function VoiceDock({ audioBlocked, channelName, demoMode, error, floating, microphoneDisabled, microphoneEnabled, notice, onEnableAudioPlayback, onLeave, onOpenChannel, onStartScreenShare, onStopScreenShare, onToggleMicrophone, onToggleOutput, outputDisabled, outputEnabled, serverName, sharing }: VoiceDockProps) {
-  const [qualityPickerOpen, setQualityPickerOpen] = useState(false)
-  const [quality, setQuality] = useState<ScreenShareQuality>('automatic')
   const screenShareAvailable = Boolean(navigator.mediaDevices?.getDisplayMedia)
   const microphoneOff = microphoneDisabled || !microphoneEnabled
   const outputOff = outputDisabled || !outputEnabled
-
-  const startScreenShare = (nextQuality: ScreenShareQuality) => {
-    if (!screenShareAvailable) return
-    setQuality(nextQuality)
-    setQualityPickerOpen(false)
-    onStartScreenShare(nextQuality)
-  }
 
   return (
     <aside className={floating ? 'voice-dock joined floating' : 'voice-dock joined'} aria-label="Conexao de voz">
@@ -56,20 +45,7 @@ export function VoiceDock({ audioBlocked, channelName, demoMode, error, floating
       <footer className="voice-controls">
         <button aria-label={microphoneDisabled ? 'Microfone desativado pela moderação' : microphoneOff ? 'Microfone mutado' : 'Microfone ligado'} aria-pressed={microphoneOff} className={microphoneOff ? 'disabled' : ''} disabled={microphoneDisabled} type="button" onClick={onToggleMicrophone}><span>{microphoneOff ? <MicOffIcon /> : <MicIcon />}</span>MIC</button>
         <button aria-label={outputDisabled ? 'Áudio desativado pela moderação' : outputOff ? 'Áudio mutado' : 'Áudio ligado'} aria-pressed={outputOff} className={outputOff ? 'disabled' : ''} disabled={outputDisabled} type="button" onClick={onToggleOutput}><span>{outputOff ? <AudioOffIcon /> : <AudioIcon />}</span>ÁUDIO</button>
-        <Popover.Root open={qualityPickerOpen} onOpenChange={setQualityPickerOpen}>
-          <Popover.Anchor asChild>
-            <button aria-label={screenShareAvailable ? 'TELA' : 'Tela indisponível neste dispositivo'} className={sharing || !screenShareAvailable ? 'disabled' : ''} disabled={!screenShareAvailable} title={screenShareAvailable ? undefined : 'Compartilhamento de tela indisponível nesta PWA móvel'} type="button" onClick={() => sharing ? onStopScreenShare() : setQualityPickerOpen(true)}><span>{sharing ? '■' : '▣'}</span>TELA</button>
-          </Popover.Anchor>
-          <Popover.Portal>
-            <Popover.Content align="center" aria-label="Qualidade da transmissao" className="quality-picker" side="top" sideOffset={12}>
-              <header><strong>QUALIDADE DA TELA</strong><Popover.Close aria-label="Fechar seletor de qualidade">×</Popover.Close></header>
-              <p>Escolha como quer transmitir antes de selecionar a tela.</p>
-              <div>{(Object.keys(screenShareQualities) as ScreenShareQuality[]).map((option) => (
-                <button className={quality === option ? 'active' : ''} key={option} type="button" onClick={() => startScreenShare(option)}><strong>{screenShareQualities[option].label}</strong><small>{screenShareQualities[option].detail}</small></button>
-              ))}</div>
-            </Popover.Content>
-          </Popover.Portal>
-        </Popover.Root>
+        <ScreenShareButton onStart={onStartScreenShare} onStop={onStopScreenShare} sharing={sharing} />
         <button className="leave-voice" type="button" onClick={onLeave}><span>×</span>SAIR</button>
       </footer>
     </aside>

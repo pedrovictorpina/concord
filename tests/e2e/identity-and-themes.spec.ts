@@ -91,10 +91,11 @@ test.describe('identidade e temas', () => {
     })
     expect(voiceLayout.contentHeight).toBeCloseTo(voiceLayout.appHeight, 0)
 
-    await expect(page.getByRole('button', { name: 'TELA' })).toBeEnabled()
+    const dockForShare = page.getByRole('complementary', { name: 'Conexao de voz' })
+    await expect(dockForShare.getByRole('button', { name: 'TELA' })).toBeEnabled()
     await expect(page.locator('.voice-member')).toContainText('conectado')
     await expect(page.getByText('Concord Bot')).toHaveCount(0)
-    await page.getByRole('button', { name: 'TELA' }).click()
+    await dockForShare.getByRole('button', { name: 'TELA' }).click()
     await expect(page.getByRole('dialog', { name: 'Qualidade da transmissao' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Automatica/ })).toBeVisible()
     await page.getByRole('button', { name: 'Fechar seletor de qualidade' }).click()

@@ -3,11 +3,12 @@ import type { ScreenShareView } from './screen-shares'
 
 type ScreenShareTileProps = {
   focused: boolean
+  onStopWatching: () => void
   onToggleFocus: () => void
   share: ScreenShareView
 }
 
-export function ScreenShareTile({ focused, onToggleFocus, share }: ScreenShareTileProps) {
+export function ScreenShareTile({ focused, onStopWatching, onToggleFocus, share }: ScreenShareTileProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -46,6 +47,16 @@ export function ScreenShareTile({ focused, onToggleFocus, share }: ScreenShareTi
         >
           {focused ? '❐' : '⬒'} <span>{focused ? 'GRADE' : 'DESTACAR'}</span>
         </button>
+        {share.isLocal ? null : (
+          <button
+            aria-label={`Parar de ver a tela de ${author}`}
+            className="voice-stage-close"
+            type="button"
+            onClick={onStopWatching}
+          >
+            ✕ <span>PARAR DE VER</span>
+          </button>
+        )}
         <button
           aria-label={`Ver a tela de ${author} em tela cheia`}
           className="voice-stage-fullscreen"

@@ -31,6 +31,7 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
   const [connecting, setConnecting] = useState(false)
   const [demoPreferences, setDemoPreferences] = useState({ microphoneEnabled: true, outputEnabled: true })
   const microphoneBeforeMuteRef = useRef(false)
+  const [hiddenShares, setHiddenShares] = useState<string[]>([])
 
   const microphoneEnabled = demoMode ? demoPreferences.microphoneEnabled : liveRoom.microphoneEnabled
   const outputEnabled = demoMode ? demoPreferences.outputEnabled : liveRoom.outputEnabled
@@ -38,7 +39,7 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
   const connectedChannelId = target?.channelId ?? null
 
   const screenShares = useMemo<ScreenShareView[]>(() => {
-    if (!demoMode) return liveRoom.screenShares
+    if (!demoMode) return liveRoom.screenShares.filter((share) => !hiddenShares.includes(share.participantId))
     if (!demoShare.stream) return []
     return [{
       id: 'demo-screen',
@@ -49,7 +50,7 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
       track: null,
       stream: demoShare.stream,
     }]
-  }, [demoMode, demoShare.stream, identity.nickname, liveRoom.screenShares, userId])
+  }, [demoMode, demoShare.stream, hiddenShares, identity.nickname, liveRoom.screenShares, userId])
 
   const sharing = screenShares.some((share) => share.isLocal)
 
@@ -156,6 +157,11 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
     })
   }, [applyPreferences, microphoneDisabled, microphoneEnabled, outputDisabled, outputEnabled])
 
+  const setScreenShareWatched = useCallback((participantId: string, watched: boolean) => {
+    setHiddenShares((current) => watched ? current.filter((item) => item !== participantId) : [...new Set([...current, participantId])])
+    if (!demoMode) liveRoom.setScreenShareWatched(participantId, watched)
+  }, [demoMode, liveRoom])
+
   const startScreenShare = useCallback((quality: ScreenShareQuality) => {
     if (demoMode) return demoShare.start(quality)
     return liveRoom.startScreenShare(quality)
@@ -184,6 +190,7 @@ export function useVoiceSession({ demoMode, identity, microphoneDisabled, observ
     participantsByChannel,
     screenShares,
     setParticipantVolume: liveRoom.setParticipantVolume,
+    setScreenShareWatched,
     sharing,
     startScreenShare,
     stopScreenShare,

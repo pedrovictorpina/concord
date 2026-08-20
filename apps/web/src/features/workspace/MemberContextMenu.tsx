@@ -35,10 +35,10 @@ export function MemberContextMenu({ canModerate, canSetRole, children, inVoice, 
           <ContextMenu.Item onSelect={() => void navigator.clipboard?.writeText(`@${target.username}`)}>Copiar identificador</ContextMenu.Item>
           {inVoice && !isSelf && onSetVolume ? (
             <div className="member-context-volume">
-              <span>Volume da pessoa</span>
+              <span>Volume da pessoa · {Math.round(volume * 100)}%</span>
               <input
                 aria-label={`Volume de ${target.nickname}`}
-                max={2}
+                max={1}
                 min={0}
                 step={0.05}
                 type="range"

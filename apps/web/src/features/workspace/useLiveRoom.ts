@@ -79,7 +79,8 @@ const withAudioFlag = (current: ScreenShareView[], participantId: string, hasAud
 export function useLiveRoom() {
   const roomRef = useRef<Room | null>(null)
   const clientRef = useRef<typeof import('livekit-client') | null>(null)
-  const audioElementsRef = useRef<HTMLAudioElement[]>([])
+  const audioElementsRef = useRef<Array<{ element: HTMLAudioElement; participantId: string }>>([])
+  const volumeRef = useRef<Record<string, number>>({})
   const outputEnabledRef = useRef(true)
   const screenAudioRef = useRef(new Set<string>())
   const processingRef = useRef<VoiceProcessing>(readVoiceProcessing())
@@ -97,8 +98,9 @@ export function useLiveRoom() {
     const room = roomRef.current
     roomRef.current = null
     room?.disconnect()
-    audioElementsRef.current.forEach((element) => element.remove())
+    audioElementsRef.current.forEach((item) => item.element.remove())
     audioElementsRef.current = []
+    volumeRef.current = {}
     screenAudioRef.current.clear()
     setConnectedChannelId(null)
     setParticipants([])
@@ -171,14 +173,17 @@ export function useLiveRoom() {
       if (track.kind === Track.Kind.Audio) {
         const audio = track.attach() as HTMLAudioElement
         audio.muted = !outputEnabledRef.current
-        audioElementsRef.current.push(audio)
+        audio.volume = volumeRef.current[participant.identity] ?? 1
+        audioElementsRef.current.push({ element: audio, participantId: participant.identity })
         document.body.append(audio)
         void audio.play().catch(() => setAudioBlocked(true))
       }
       sync()
     })
     room.on(RoomEvent.TrackUnsubscribed, (track, publication: RemoteTrackPublication, participant) => {
-      track.detach().forEach((element) => element.remove())
+      const detached = track.detach()
+      detached.forEach((element) => element.remove())
+      audioElementsRef.current = audioElementsRef.current.filter((item) => !detached.includes(item.element))
       dropShareByTrack(track)
       if (isScreenAudio(publication)) markScreenAudio(participant, false)
       sync()
@@ -248,7 +253,7 @@ export function useLiveRoom() {
 
   const setOutput = useCallback((next: boolean) => {
     outputEnabledRef.current = next
-    audioElementsRef.current.forEach((element) => { element.muted = !next })
+    audioElementsRef.current.forEach((item) => { item.element.muted = !next })
     setOutputEnabled(next)
   }, [])
 
@@ -274,9 +279,16 @@ export function useLiveRoom() {
       const publication = await room.localParticipant.setScreenShareEnabled(
         true,
         {
-          audio: { autoGainControl: false, echoCancellation: false, noiseSuppression: false },
+          audio: {
+            autoGainControl: false,
+            echoCancellation: false,
+            noiseSuppression: false,
+            restrictOwnAudio: true,
+            suppressLocalAudioPlayback: true,
+          } as unknown as boolean,
           contentHint: 'detail',
           resolution,
+          selfBrowserSurface: 'exclude',
           systemAudio: 'include',
           video: true,
         },
@@ -291,6 +303,7 @@ export function useLiveRoom() {
       const audioPublication = room.localParticipant.getTrackPublication(client.Track.Source.ScreenShareAudio)
       if (audioPublication) screenAudioRef.current.add(room.localParticipant.identity)
       else setNotice('Sua tela foi compartilhada sem som. Marque "Compartilhar audio" na janela do navegador para levar o audio junto.')
+      if (audioPublication) setNotice('Tela transmitindo com som. Se voce ouve a chamada pela caixa de som, use fone: o navegador pode devolver as vozes junto com o audio da tela.')
       if (publication?.track) {
         const share = describeShare(publication.track, publication, room.localParticipant, true, Boolean(audioPublication))
         setScreenShares((current) => mergeShare(current, share))
@@ -325,12 +338,25 @@ export function useLiveRoom() {
     }
   }, [])
 
-  const setParticipantVolume = useCallback((userId: string, volume: number) => {
+  const setScreenShareWatched = useCallback((participantId: string, watched: boolean) => {
     const room = roomRef.current
-    if (!room) return
-    const participant = [...room.remoteParticipants.values()].find((item) => item.identity === userId)
-    participant?.setVolume(volume)
-    setVolumeByUser((current) => ({ ...current, [userId]: volume }))
+    const client = clientRef.current
+    if (!room || !client) return
+    const participant = [...room.remoteParticipants.values()].find((item) => item.identity === participantId)
+    if (!participant) return
+    participant.getTrackPublication(client.Track.Source.ScreenShare)?.setSubscribed(watched)
+    participant.getTrackPublication(client.Track.Source.ScreenShareAudio)?.setSubscribed(watched)
+  }, [])
+
+  const setParticipantVolume = useCallback((userId: string, volume: number) => {
+    const safe = Math.min(1, Math.max(0, volume))
+    volumeRef.current = { ...volumeRef.current, [userId]: safe }
+    audioElementsRef.current.forEach((item) => {
+      if (item.participantId === userId) item.element.volume = safe
+    })
+    const participant = [...(roomRef.current?.remoteParticipants.values() ?? [])].find((item) => item.identity === userId)
+    participant?.setVolume(safe)
+    setVolumeByUser((current) => ({ ...current, [userId]: safe }))
   }, [])
 
   const enableAudioPlayback = useCallback(async () => {
@@ -338,7 +364,7 @@ export function useLiveRoom() {
     if (!room) return
     try {
       await room.startAudio()
-      audioElementsRef.current.forEach((element) => { void element.play().catch(() => undefined) })
+      audioElementsRef.current.forEach((item) => { void item.element.play().catch(() => undefined) })
       setAudioBlocked(!room.canPlaybackAudio)
     } catch (caught) {
       console.error('[voz] falha ao liberar a reproducao de audio', caught)
@@ -363,6 +389,7 @@ export function useLiveRoom() {
     setOutput,
     applyVoiceProcessing,
     setParticipantVolume,
+    setScreenShareWatched,
     startScreenShare,
     stopScreenShare,
     volumeByUser,
