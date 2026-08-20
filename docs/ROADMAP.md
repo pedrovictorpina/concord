@@ -47,6 +47,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Menu de contexto por pessoa, com volume individual e acoes de moderacao
 - [ ] Nao lidas por canal revisadas: leitura confiavel, badge por servidor e mencao sem falso positivo
 - [ ] Servidor publico ou privado, com descoberta de servidores publicos
+- [ ] Mencoes agregadas em uma tela e threads de mensagens (hoje sao apenas itens de navegacao visuais, sem funcionalidade real)
 - [x] Menu do servidor no cabecalho com cargos, notificacoes, marcar como lido e sair do servidor
 
 ## Etapa 03 - Voz e compartilhamento

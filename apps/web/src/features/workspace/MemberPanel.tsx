@@ -5,6 +5,7 @@ import { Avatar } from '../../components/ui/Avatar'
 import { Modal } from '../../components/ui/Modal'
 import { MemberContextMenu } from './MemberContextMenu'
 import { initialsFrom } from './voice-participants'
+import { SearchIcon } from './WorkspaceIcons'
 
 type ServerMember = PersonSummary & { role: ServerMemberRole }
 
@@ -47,7 +48,10 @@ const confirmCopy: Record<PendingAction['kind'], { title: string; description: s
 export function MemberPanel({ members, onModerateMember, onRemoveMember, onSetMemberRole, onTransferOwnership, server, userId, voiceParticipantsByChannel }: MemberPanelProps) {
   const [pending, setPending] = useState<PendingAction | null>(null)
   const [feedback, setFeedback] = useState('')
+  const [memberQuery, setMemberQuery] = useState('')
   const inVoice = new Set(Object.values(voiceParticipantsByChannel).flat().map((participant) => participant.userId))
+  const query = memberQuery.trim().toLowerCase()
+  const visibleMembers = query ? members.filter((member) => member.nickname.toLowerCase().includes(query) || member.username.toLowerCase().includes(query)) : members
 
   const isOwner = server.role === 'owner'
   const canModerate = (member: ServerMember) => member.id !== userId && (
@@ -72,11 +76,16 @@ export function MemberPanel({ members, onModerateMember, onRemoveMember, onSetMe
   return (
     <aside className="member-panel" aria-label="Membros do servidor">
       <header><strong>Membros</strong><small>{members.length} NO SERVIDOR</small></header>
+      <div className="member-search">
+        <SearchIcon />
+        <input aria-label="Buscar membros" placeholder="Buscar membros" type="search" value={memberQuery} onChange={(event) => setMemberQuery(event.target.value)} />
+      </div>
       {feedback ? <p className="member-feedback" role="status">{feedback}</p> : null}
-      <div>
+      <div className="member-list">
         {members.length === 0 ? <p className="member-panel-empty">Carregando membros de {server.name}…</p> : null}
+        {members.length > 0 && visibleMembers.length === 0 ? <p className="member-panel-empty">Nenhum membro encontrado.</p> : null}
         {groups.map(([role, label]) => {
-          const group = members.filter((member) => member.role === role)
+          const group = visibleMembers.filter((member) => member.role === role)
           if (group.length === 0) return null
           return (
             <section className="member-group" key={role}>

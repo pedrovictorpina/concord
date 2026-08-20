@@ -171,3 +171,13 @@ Branch atual: `main`.
 - aba Voz ganhou o formato do Discord: escolha de microfone e de saida de audio via `switchActiveDevice`, volume da chamada, perfis de entrada (Isolamento de voz, Estudio e Personalizado) e o nivel da supressao em lista, editavel so no perfil Personalizado. Antes existiam quatro interruptores soltos, sem dispositivo nem perfil.
 - volume de entrada, sensibilidade e apertar para falar ficaram fora e viraram o item 4.9: os tres exigem um `TrackProcessor` no caminho de captura, nao apenas constraints do navegador.
 
+### 2026-08-20
+
+- painel de canais e coluna de membros cresciam alem da altura da tela quando havia muitos canais, salas de voz ou membros, escondendo o rodape e as opcoes de baixo. O `.app-shell` nao tinha `grid-template-rows` explicito, entao a linha crescia pelo conteudo em vez de travar em 100vh. Corrigido travando a linha do grid em `minmax(0, 1fr)`, com `min-height: 0` nas colunas e a lista de canais isolada em area propria com scroll interno, no mesmo formato do painel de membros.
+- cabecalho da lista de canais ganhou busca por nome (`Buscar`, com dica `⌘K`) e uma navegacao Inicio/Mencoes/Threads/Explorar. Hoje so Inicio tem efeito; os demais sao visuais ("Em breve") ate existir mencao agregada, threads e descoberta de servidores publicos.
+- cabecalho do canal ganhou icones de fixados e notificacoes (visuais por enquanto), um botao que alterna de verdade a exibicao da coluna de membros (o layout ocupa o espaco liberado sem sobrar coluna vazia), e busca que filtra as mensagens ja carregadas do canal.
+- painel de membros ganhou busca por apelido ou identificador.
+- barra de identidade do usuario ganhou icones de microfone, fone e configuracoes; o de configuracoes abre as configuracoes do servidor, microfone e fone ainda sao visuais.
+- barra de envio ganhou botoes de presente, GIF e emoji (visuais) e um botao de enviar dedicado, alem do Enter.
+- validacoes: `pnpm check` e `pnpm lint` aprovados; verificacao visual com Playwright nos temas claro e escuro, incluindo busca de canais, busca de membros e alternancia do painel de membros sem sobra de coluna vazia.
+
