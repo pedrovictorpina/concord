@@ -1,0 +1,53 @@
+/* Tokens compartilhados por todos os Style Themes.
+   Cada Style Theme sobrescreve o que a sua identidade exige (fontes, radius,
+   border-width, sombras e cores); o que fica aqui é o que nao muda entre temas. */
+
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  --font-size-xs: 11px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+
+  --text-display-1: 700 32px/40px var(--font-display);
+  --text-display-2: 700 24px/32px var(--font-display);
+  --text-heading-1: 600 20px/28px var(--font-body);
+  --text-heading-2: 600 16px/24px var(--font-body);
+  --text-heading-3: 600 14px/20px var(--font-body);
+  --text-body-lg: 400 16px/24px var(--font-body);
+  --text-body: 400 14px/20px var(--font-body);
+  --text-body-sm: 400 12px/16px var(--font-body);
+  --text-caption: 400 11px/16px var(--font-body);
+
+  --control-height-sm: 32px;
+  --control-height: 40px;
+  --control-height-lg: 44px;
+
+  --avatar-xs: 24px;
+  --avatar-sm: 32px;
+  --avatar-md: 40px;
+  --avatar-lg: 56px;
+  --avatar-xl: 72px;
+  --avatar-2xl: 96px;
+
+  --z-base: 0;
+  --z-sticky: 10;
+  --z-dropdown: 100;
+  --z-popover: 200;
+  --z-modal: 500;
+  --z-toast: 600;
+  --z-tooltip: 700;
+
+  --radius-full: 999px;
+  --radius-pill: 999px;
+}

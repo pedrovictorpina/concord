@@ -76,7 +76,9 @@ O token do LiveKit vem só de `supabase/functions/livekit-token/index.ts`: valid
 
 ### Temas
 
-`ThemeProvider` grava `data-style-theme` e `data-color-mode` em `<html>` e persiste `concord.theme.v1` no `localStorage`; `system` acompanha `prefers-color-scheme`. Famílias visuais (`concord`, `ios`, `brutal`) são registradas em `theme/theme-registry.ts` e implementadas em `theme/themes/*.css` por tokens semânticos. Componentes nunca escolhem cor direta — qualquer mudança visual precisa funcionar nas três famílias, nos dois modos e no mobile. Ver `docs/decisoes/0004-arquitetura-de-temas.md`.
+`ThemeProvider` grava `data-style-theme` e `data-color-mode` em `<html>` e persiste `concord.theme.v1` no `localStorage`; `system` acompanha `prefers-color-scheme`. Famílias visuais (`concord`, `neo`, `glass`) são registradas em `theme/theme-registry.ts` e implementadas em `theme/themes/*.css` por tokens semânticos; `theme/tokens/base.css` guarda o que não muda entre temas (espaçamento, escala tipográfica, z-index, tamanhos de avatar/controle) e precisa ficar em `:root`, senão trocar de tema quebra as referências. Componentes nunca escolhem cor direta — qualquer mudança visual precisa funcionar nas três famílias, nos dois modos e no mobile. O design system de cada família está em `docs/design-system/`; em conflito entre mockup e design system, o design system manda. Ver `docs/decisoes/0004-arquitetura-de-temas.md`.
+
+Os ids antigos `ios` e `brutal` são migrados para `glass` e `neo` na leitura do `localStorage` (`legacyStyleThemeIds` em `theme-types.ts` e o bootstrap inline do `index.html`) — os dois pontos precisam andar juntos.
 
 ### Migrations
 

@@ -2,7 +2,12 @@ export const colorModes = ['system', 'light', 'dark'] as const
 
 export type ColorMode = (typeof colorModes)[number]
 export type ResolvedColorMode = Exclude<ColorMode, 'system'>
-export type StyleThemeId = 'concord' | 'ios' | 'brutal'
+export type StyleThemeId = 'concord' | 'neo' | 'glass'
+
+export const legacyStyleThemeIds: Record<string, StyleThemeId> = {
+  ios: 'glass',
+  brutal: 'neo',
+}
 
 export type StyleThemeDefinition = {
   id: StyleThemeId

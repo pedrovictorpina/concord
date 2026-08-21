@@ -1,0 +1,330 @@
+/* Style Theme: Liquid Glass
+   docs/design-system/03-liquid-glass.md
+   Leve, fluido e espacial: superficies translucidas, backdrop blur, bordas
+   luminosas de 1px, highlights internos, cantos amplos e sombras suaves.
+
+   O vidro fica nos painheis e controles. Mensagens, listas longas e tabelas
+   permanecem sobre superficie estavel: e regra do documento (secoes 25 e 145)
+   e tambem o que preserva desempenho em chamada e compartilhamento de tela. */
+
+:root[data-style-theme='glass'] {
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SFMono-Regular', 'SF Mono', 'Cascadia Code', Consolas, monospace;
+  --font-label: 600 11px/1.2 var(--font-body);
+
+  --border-width: 1px;
+  --border-width-strong: 1px;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 30px;
+  --radius-control: 12px;
+  --radius-panel: 18px;
+  --radius-modal: 24px;
+
+  --motion-fast: 160ms;
+  --motion-normal: 260ms;
+  --motion-slow: 380ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  --glass-blur: 18px;
+  --glass-blur-raised: 24px;
+  --glass-blur-strong: 32px;
+}
+
+:root[data-style-theme='glass'][data-color-mode='dark'] {
+  --color-canvas: #080b10;
+  --color-surface: rgba(24, 29, 38, .68);
+  --color-surface-raised: rgba(38, 45, 58, .72);
+  --color-surface-sunken: rgba(12, 16, 23, .78);
+
+  --color-glass: rgba(28, 34, 45, .58);
+  --color-glass-raised: rgba(46, 54, 68, .62);
+  --color-glass-strong: rgba(56, 65, 82, .72);
+
+  --color-text: #f4f5f7;
+  --color-text-strong: #ffffff;
+  --color-text-muted: #c5cad4;
+  --color-text-faint: #9199a8;
+
+  --color-border: rgba(255, 255, 255, .16);
+  --color-border-soft: rgba(255, 255, 255, .09);
+  --color-border-strong: rgba(255, 255, 255, .28);
+
+  --color-highlight: rgba(255, 255, 255, .18);
+  --color-highlight-strong: rgba(255, 255, 255, .32);
+
+  --color-accent: #22c55e;
+  --color-accent-hover: #16a34a;
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: rgba(34, 197, 94, .16);
+
+  --color-blue: #3b82f6;
+  --color-blue-soft: rgba(59, 130, 246, .18);
+  --color-purple: #a855f7;
+  --color-purple-soft: rgba(168, 85, 247, .18);
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  --color-overlay: rgba(3, 6, 12, .58);
+
+  --shadow-sm: 0 6px 18px rgba(0, 0, 0, .18);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, .26);
+  --shadow-lg: 0 18px 48px rgba(0, 0, 0, .34);
+  --shadow-panel: 0 18px 48px rgba(0, 0, 0, .34);
+  --shadow-modal: 0 28px 80px rgba(0, 0, 0, .46);
+  --shadow-button: 0 6px 18px rgba(0, 0, 0, .18);
+
+  --focus-ring: 0 0 0 3px rgba(34, 197, 94, .26);
+  --texture-opacity: 0;
+
+  --glass-fallback: rgba(24, 29, 38, .96);
+  --glass-fallback-strong: rgba(38, 45, 58, .97);
+}
+
+:root[data-style-theme='glass'][data-color-mode='light'] {
+  --color-canvas: #f3f6fb;
+  --color-surface: rgba(255, 255, 255, .68);
+  --color-surface-raised: rgba(255, 255, 255, .82);
+  --color-surface-sunken: rgba(229, 235, 244, .72);
+
+  --color-glass: rgba(255, 255, 255, .56);
+  --color-glass-raised: rgba(255, 255, 255, .74);
+  --color-glass-strong: rgba(255, 255, 255, .88);
+
+  --color-text: #20242c;
+  --color-text-strong: #101217;
+  --color-text-muted: #596273;
+  --color-text-faint: #818b9d;
+
+  --color-border: rgba(64, 76, 96, .16);
+  --color-border-soft: rgba(64, 76, 96, .09);
+  --color-border-strong: rgba(64, 76, 96, .26);
+
+  --color-highlight: rgba(255, 255, 255, .72);
+  --color-highlight-strong: rgba(255, 255, 255, .94);
+
+  --color-accent: #16a34a;
+  --color-accent-hover: #15803d;
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: rgba(22, 163, 74, .12);
+
+  --color-blue: #2563eb;
+  --color-blue-soft: rgba(37, 99, 235, .12);
+  --color-purple: #9333ea;
+  --color-purple-soft: rgba(147, 51, 234, .12);
+
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #2563eb;
+
+  --color-overlay: rgba(225, 232, 242, .58);
+
+  --shadow-sm: 0 6px 18px rgba(41, 55, 82, .08);
+  --shadow-md: 0 12px 32px rgba(41, 55, 82, .12);
+  --shadow-lg: 0 18px 48px rgba(41, 55, 82, .16);
+  --shadow-panel: 0 18px 48px rgba(41, 55, 82, .16);
+  --shadow-modal: 0 28px 80px rgba(41, 55, 82, .22);
+  --shadow-button: 0 6px 18px rgba(41, 55, 82, .08);
+
+  --focus-ring: 0 0 0 3px rgba(22, 163, 74, .20);
+  --texture-opacity: 0;
+
+  --glass-fallback: rgba(255, 255, 255, .96);
+  --glass-fallback-strong: rgba(255, 255, 255, .98);
+}
+
+/* Luz ambiental discreta atras das camadas de vidro. */
+:root[data-style-theme='glass'][data-color-mode='dark'] body {
+  background:
+    radial-gradient(circle at 20% 10%, rgba(59, 130, 246, .08), transparent 34%),
+    radial-gradient(circle at 85% 70%, rgba(168, 85, 247, .06), transparent 30%),
+    var(--color-canvas);
+}
+
+:root[data-style-theme='glass'][data-color-mode='light'] body {
+  background:
+    radial-gradient(circle at 15% 5%, rgba(37, 99, 235, .08), transparent 36%),
+    radial-gradient(circle at 90% 75%, rgba(147, 51, 234, .06), transparent 32%),
+    var(--color-canvas);
+}
+
+/* Glass — paineis e barras laterais. */
+:root[data-style-theme='glass'] .server-rail,
+:root[data-style-theme='glass'] .channel-panel,
+:root[data-style-theme='glass'] .home-sidebar,
+:root[data-style-theme='glass'] .member-panel,
+:root[data-style-theme='glass'] .settings-shell .settings-nav,
+:root[data-style-theme='glass'] .voice-chat-side {
+  background: var(--color-glass);
+  backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+}
+
+/* Glass raised — cabecalhos sticky, composer, contexto e docks. */
+:root[data-style-theme='glass'] .transmission-header,
+:root[data-style-theme='glass'] .friends-header,
+:root[data-style-theme='glass'] .voice-room > header,
+:root[data-style-theme='glass'] .direct-message > header,
+:root[data-style-theme='glass'] .member-panel > header,
+:root[data-style-theme='glass'] .settings-shell .settings-context,
+:root[data-style-theme='glass'] .composer,
+:root[data-style-theme='glass'] .direct-composer,
+:root[data-style-theme='glass'] .voice-dock,
+:root[data-style-theme='glass'] .voice-room-controls {
+  background: var(--color-glass-raised);
+  backdrop-filter: blur(var(--glass-blur-raised)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-raised)) saturate(150%);
+  box-shadow: inset 0 1px 0 var(--color-highlight), var(--shadow-sm);
+}
+
+/* Composer flutuante: o documento pede sensacao de camada solta. */
+:root[data-style-theme='glass'] .composer,
+:root[data-style-theme='glass'] .direct-composer {
+  border-radius: var(--radius-panel);
+}
+
+/* Glass strong — o que flutua sobre tudo. */
+:root[data-style-theme='glass'] .server-dialog,
+:root[data-style-theme='glass'] .choice-content,
+:root[data-style-theme='glass'] .server-menu-content,
+:root[data-style-theme='glass'] .member-context,
+:root[data-style-theme='glass'] .quality-picker {
+  background: var(--color-glass-strong);
+  backdrop-filter: blur(var(--glass-blur-strong)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--glass-blur-strong)) saturate(160%);
+  box-shadow: inset 0 1px 0 var(--color-highlight), var(--shadow-modal);
+}
+
+:root[data-style-theme='glass'] .server-dialog {
+  border-radius: var(--radius-modal);
+  border-color: var(--color-border-strong);
+}
+
+:root[data-style-theme='glass'] .server-dialog-backdrop {
+  background: var(--color-overlay);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Tooltip precisa ser mais opaco que os outros vidros: legibilidade. */
+:root[data-style-theme='glass'][data-color-mode='dark'] .hint {
+  background: rgba(32, 38, 49, .94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+:root[data-style-theme='glass'][data-color-mode='light'] .hint {
+  background: rgba(255, 255, 255, .95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Areas estaveis: mensagens e listas longas nao recebem vidro nem blur. */
+:root[data-style-theme='glass'] .messages,
+:root[data-style-theme='glass'] .direct-message-list,
+:root[data-style-theme='glass'] .member-list,
+:root[data-style-theme='glass'] .voice-room-stage {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* Movimento fluido, sem deslocamento fisico. */
+:root[data-style-theme='glass'] .settings-button,
+:root[data-style-theme='glass'] .dialog-submit,
+:root[data-style-theme='glass'] .voice-room-join {
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    background var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+:root[data-style-theme='glass'] .settings-button:hover:not(:disabled),
+:root[data-style-theme='glass'] .dialog-submit:hover:not(:disabled),
+:root[data-style-theme='glass'] .voice-room-join:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+:root[data-style-theme='glass'] .settings-button:active:not(:disabled),
+:root[data-style-theme='glass'] .dialog-submit:active:not(:disabled),
+:root[data-style-theme='glass'] .voice-room-join:active:not(:disabled) {
+  transform: scale(.97);
+}
+
+:root[data-style-theme='glass'] button:focus-visible,
+:root[data-style-theme='glass'] input:focus-visible,
+:root[data-style-theme='glass'] select:focus-visible,
+:root[data-style-theme='glass'] textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-style-theme='glass'] .settings-button:hover:not(:disabled),
+  :root[data-style-theme='glass'] .dialog-submit:hover:not(:disabled),
+  :root[data-style-theme='glass'] .settings-button:active:not(:disabled),
+  :root[data-style-theme='glass'] .dialog-submit:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Fallback obrigatorio: sem backdrop-filter o vidro vira superficie opaca. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root[data-style-theme='glass'] .server-rail,
+  :root[data-style-theme='glass'] .channel-panel,
+  :root[data-style-theme='glass'] .home-sidebar,
+  :root[data-style-theme='glass'] .member-panel,
+  :root[data-style-theme='glass'] .settings-shell .settings-nav,
+  :root[data-style-theme='glass'] .voice-chat-side,
+  :root[data-style-theme='glass'] .transmission-header,
+  :root[data-style-theme='glass'] .friends-header,
+  :root[data-style-theme='glass'] .voice-room > header,
+  :root[data-style-theme='glass'] .direct-message > header,
+  :root[data-style-theme='glass'] .member-panel > header,
+  :root[data-style-theme='glass'] .settings-shell .settings-context,
+  :root[data-style-theme='glass'] .composer,
+  :root[data-style-theme='glass'] .direct-composer,
+  :root[data-style-theme='glass'] .voice-dock,
+  :root[data-style-theme='glass'] .voice-room-controls {
+    background: var(--glass-fallback);
+  }
+
+  :root[data-style-theme='glass'] .server-dialog,
+  :root[data-style-theme='glass'] .choice-content,
+  :root[data-style-theme='glass'] .server-menu-content,
+  :root[data-style-theme='glass'] .member-context,
+  :root[data-style-theme='glass'] .quality-picker {
+    background: var(--glass-fallback-strong);
+  }
+
+  :root[data-style-theme='glass'] .server-dialog-backdrop {
+    background: var(--color-overlay);
+  }
+}
+
+/* Menos transparencia quando o sistema pede: mantem o desenho, tira o vidro. */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-style-theme='glass'] {
+    --color-glass: var(--glass-fallback);
+    --color-glass-raised: var(--glass-fallback);
+    --color-glass-strong: var(--glass-fallback-strong);
+  }
+}
+
+/* Mobile: blur mais barato para nao competir com voz e compartilhamento. */
+@media (max-width: 760px) {
+  :root[data-style-theme='glass'] {
+    --glass-blur: 12px;
+    --glass-blur-raised: 16px;
+    --glass-blur-strong: 20px;
+  }
+}
