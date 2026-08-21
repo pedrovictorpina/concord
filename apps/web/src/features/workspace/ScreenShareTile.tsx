@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import type { ScreenShareView } from './screen-shares'
+import { AudioIcon, AudioOffIcon, CloseIcon, ExpandIcon, GridIcon } from './VoiceStateIcons'
 
 type ScreenShareTileProps = {
   focused: boolean
@@ -52,7 +53,7 @@ export function ScreenShareTile({ focused, muted, onSetVolume, onStopWatching, o
               type="button"
               onClick={onToggleSound}
             >
-              {muted ? '◌' : '◖'}
+              {muted ? <AudioOffIcon /> : <AudioIcon />}
             </button>
             <input
               aria-label={`Volume da tela de ${author}`}
@@ -74,11 +75,11 @@ export function ScreenShareTile({ focused, muted, onSetVolume, onStopWatching, o
             type="button"
             onClick={onToggleFocus}
           >
-            {focused ? '❐' : '⬒'} <span>{focused ? 'GRADE' : 'DESTACAR'}</span>
+            {focused ? <GridIcon /> : <ExpandIcon />} <span>{focused ? 'GRADE' : 'DESTACAR'}</span>
           </button>
           {share.isLocal ? null : (
             <button aria-label={`Parar de ver a tela de ${author}`} type="button" onClick={onStopWatching}>
-              ✕ <span>PARAR DE VER</span>
+              <CloseIcon /> <span>PARAR DE VER</span>
             </button>
           )}
           <button
@@ -86,7 +87,7 @@ export function ScreenShareTile({ focused, muted, onSetVolume, onStopWatching, o
             type="button"
             onClick={() => void videoRef.current?.requestFullscreen()}
           >
-            ⛶ <span>TELA CHEIA</span>
+            <ExpandIcon /> <span>TELA CHEIA</span>
           </button>
         </div>
       </div>

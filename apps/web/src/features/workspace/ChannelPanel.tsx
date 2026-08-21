@@ -1,19 +1,18 @@
 import { useState } from 'react'
 import { DropdownMenu } from 'radix-ui'
-import type { ChannelSummary, ServerSummary, VoiceParticipant } from '@concord/contracts'
+import type { ChannelSummary, ServerMemberRole, ServerSummary, VoiceParticipant } from '@concord/contracts'
 import { Avatar } from '../../components/ui/Avatar'
 import { Hint } from '../../components/ui/Hint'
 import { MemberContextMenu } from './MemberContextMenu'
-import { VoiceStateFlags, MicIcon, AudioIcon } from './VoiceStateIcons'
-import { CompassIcon, HomeIcon, SearchIcon, ThreadIcon } from './WorkspaceIcons'
+import { VoiceStateFlags } from './VoiceStateIcons'
+import { ChevronDownIcon, GearIcon, SearchIcon, SpeakerIcon } from './WorkspaceIcons'
 import type { WorkspaceIdentity } from './workspace-types'
 
-const navItems = [
-  { id: 'inicio', label: 'Início', icon: <HomeIcon /> },
-  { id: 'mencoes', label: 'Menções', icon: <span className="channel-nav-glyph">@</span> },
-  { id: 'threads', label: 'Threads', icon: <ThreadIcon /> },
-  { id: 'explorar', label: 'Explorar', icon: <CompassIcon /> },
-] as const
+const roleLabel: Record<ServerMemberRole, string> = {
+  owner: 'Proprietário',
+  moderator: 'Moderador',
+  member: 'Membro',
+}
 
 const statusFor = (participant: VoiceParticipant) => {
   if (!participant.outputEnabled) return 'sem áudio'
@@ -53,11 +52,18 @@ type ChannelPanelProps = {
 
 export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, connectedVoiceChannelId, identity, mobileOpen, onCloseMobile, onChannelChange, onCreateChannel, onLeaveServer, onMarkServerRead, onModerateMember, onSetParticipantVolume, onOpenInvite, onOpenPermissions, onOpenServerSettings, onToggleMuted, onVoiceChannelChange, onOpenPeople, server, serverMuted, unreadByChannel, userId, voiceParticipantsByChannel, volumeByUser }: ChannelPanelProps) {
   const canManage = server?.role === 'owner' || server?.role === 'moderator'
-  const [activeNav, setActiveNav] = useState<typeof navItems[number]['id']>('inicio')
   const [channelQuery, setChannelQuery] = useState('')
   const [usernameCopied, setUsernameCopied] = useState(false)
+  const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<'text' | 'voice'>>(new Set())
   const query = channelQuery.trim().toLowerCase()
   const matchesQuery = (channel: ChannelSummary) => !query || channel.name.toLowerCase().includes(query)
+
+  const toggleGroup = (kind: 'text' | 'voice') => setCollapsedGroups((current) => {
+    const next = new Set(current)
+    if (next.has(kind)) next.delete(kind)
+    else next.add(kind)
+    return next
+  })
 
   const copyUsername = () => {
     void navigator.clipboard.writeText(`@${identity.username}`)
@@ -70,8 +76,8 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
       <header className="workspace-heading">
         <DropdownMenu.Root>
           <DropdownMenu.Trigger aria-label="Abrir menu do servidor" className="server-menu-trigger">
-            <span className="eyebrow">{server?.role === 'owner' ? 'VOCÊ É O DONO' : server?.role === 'moderator' ? 'VOCÊ MODERA' : 'SERVIDOR'}</span>
-            <strong>{server?.name ?? 'Concord'}<i aria-hidden="true">⌄</i></strong>
+            <strong>{server?.name ?? 'Concord'}<ChevronDownIcon /></strong>
+            <span className="eyebrow">{server ? roleLabel[server.role] : 'Servidor'}</span>
           </DropdownMenu.Trigger>
           <DropdownMenu.Portal>
             <DropdownMenu.Content align="start" className="server-menu-content" sideOffset={10}>
@@ -96,24 +102,18 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
 
       <div className="channel-search">
         <SearchIcon />
-        <input aria-label="Buscar canais" placeholder="Buscar" type="search" value={channelQuery} onChange={(event) => setChannelQuery(event.target.value)} />
-        <kbd>⌘K</kbd>
+        <input aria-label="Buscar canais" placeholder="Buscar canais" type="search" value={channelQuery} onChange={(event) => setChannelQuery(event.target.value)} />
       </div>
-
-      <nav className="channel-nav" aria-label="Navegação do servidor">
-        {navItems.map((item) => (
-          <Hint key={item.id} label={item.id === 'inicio' ? 'Início do servidor' : 'Em breve'}>
-            <button className={activeNav === item.id ? 'channel-nav-item active' : 'channel-nav-item'} type="button" onClick={() => setActiveNav(item.id)}>
-              {item.icon}{item.label}
-            </button>
-          </Hint>
-        ))}
-      </nav>
 
       <div className="channel-list">
         <section className="channel-group">
-          <p>TRANSMISSOES DE TEXTO{canManage ? <Hint label="Adicionar canal de texto"><button className="channel-add" type="button" aria-label="Adicionar canal de texto" onClick={() => onCreateChannel('text')}>+</button></Hint> : null}</p>
-          {channels.filter((channel) => channel.kind === 'text' && matchesQuery(channel)).map((channel) => (
+          <div className="channel-group-header">
+            <button aria-expanded={!collapsedGroups.has('text')} className="channel-group-toggle" type="button" onClick={() => toggleGroup('text')}>
+              <ChevronDownIcon />TRANSMISSÕES DE TEXTO
+            </button>
+            {canManage ? <Hint label="Adicionar canal de texto"><button className="channel-add" type="button" aria-label="Adicionar canal de texto" onClick={() => onCreateChannel('text')}>+</button></Hint> : null}
+          </div>
+          {collapsedGroups.has('text') ? null : channels.filter((channel) => channel.kind === 'text' && matchesQuery(channel)).map((channel) => (
             <button
               className={activeChannelId === channel.id ? 'channel active' : 'channel'}
               key={channel.id}
@@ -126,15 +126,20 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
         </section>
 
         <section className="channel-group voice-group">
-          <p>FREQUENCIAS DE VOZ{canManage ? <Hint label="Adicionar canal de voz"><button className="channel-add" type="button" aria-label="Adicionar canal de voz" onClick={() => onCreateChannel('voice')}>+</button></Hint> : null}</p>
-          {channels.filter((channel) => channel.kind === 'voice' && matchesQuery(channel)).map((channel) => {
+          <div className="channel-group-header">
+            <button aria-expanded={!collapsedGroups.has('voice')} className="channel-group-toggle" type="button" onClick={() => toggleGroup('voice')}>
+              <ChevronDownIcon />FREQUÊNCIAS DE VOZ
+            </button>
+            {canManage ? <Hint label="Adicionar canal de voz"><button className="channel-add" type="button" aria-label="Adicionar canal de voz" onClick={() => onCreateChannel('voice')}>+</button></Hint> : null}
+          </div>
+          {collapsedGroups.has('voice') ? null : channels.filter((channel) => channel.kind === 'voice' && matchesQuery(channel)).map((channel) => {
             const participants = voiceParticipantsByChannel[channel.id] ?? []
             const channelClasses = ['channel', 'voice']
             if (activeVoiceChannelId === channel.id) channelClasses.push('active')
             if (connectedVoiceChannelId === channel.id) channelClasses.push('connected')
             return (
               <div className="voice-channel" key={channel.id}>
-                <button className={channelClasses.join(' ')} type="button" onClick={() => onVoiceChannelChange(channel.id)}><span>◖</span>{channel.name}{participants.length > 0 ? <i className="voice-count">{participants.length}</i> : null}</button>
+                <button className={channelClasses.join(' ')} type="button" onClick={() => onVoiceChannelChange(channel.id)}><SpeakerIcon />{channel.name}{participants.length > 0 ? <i className="voice-count">{participants.length}</i> : null}</button>
                 {participants.map((participant) => (
                   <MemberContextMenu
                     canModerate={canManage && participant.userId !== userId}
@@ -168,9 +173,7 @@ export function ChannelPanel({ activeChannelId, activeVoiceChannelId, channels, 
           </Hint>
           <span className="presence-dot" aria-label="Online" />
           <div className="identity-strip-actions">
-            <Hint label="Microfone"><button type="button" aria-label="Microfone"><MicIcon /></button></Hint>
-            <Hint label="Fone de ouvido"><button type="button" aria-label="Fone de ouvido"><AudioIcon /></button></Hint>
-            <Hint label="Configurações"><button type="button" aria-label="Configurações" onClick={onOpenServerSettings}>⚙</button></Hint>
+            <Hint label="Configurações"><button type="button" aria-label="Configurações" onClick={onOpenServerSettings}><GearIcon /></button></Hint>
           </div>
         </footer>
       </div>

@@ -70,13 +70,13 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
-    await expect(page.getByRole('heading', { name: /Concord\. Em sintonia\./ })).toBeVisible()
+    await expect(page.getByText('Fundacao sincronizada. O primeiro sinal da rede esta no ar.')).toBeVisible()
     await page.getByRole('textbox', { name: 'Mensagem' }).fill('Temas funcionando')
     await page.getByRole('textbox', { name: 'Mensagem' }).press('Enter')
     await expect(page.getByText('Temas funcionando')).toBeVisible()
 
     await expect(page.locator('.voice-member')).toHaveCount(0)
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByRole('heading', { name: 'sala-da-madrugada' })).toBeVisible()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
@@ -91,11 +91,11 @@ test.describe('identidade e temas', () => {
     })
     expect(voiceLayout.contentHeight).toBeCloseTo(voiceLayout.appHeight, 0)
 
-    const dockForShare = page.getByRole('complementary', { name: 'Conexao de voz' })
-    await expect(dockForShare.getByRole('button', { name: 'TELA' })).toBeEnabled()
+    const roomControls = page.locator('.voice-room-controls')
+    await expect(roomControls.getByRole('button', { name: 'TELA' })).toBeEnabled()
     await expect(page.locator('.voice-member')).toContainText('conectado')
     await expect(page.getByText('Concord Bot')).toHaveCount(0)
-    await dockForShare.getByRole('button', { name: 'TELA' }).click()
+    await roomControls.getByRole('button', { name: 'TELA' }).click()
     await expect(page.getByRole('dialog', { name: 'Qualidade da transmissao' })).toBeVisible()
     await expect(page.getByRole('button', { name: /Automatica/ })).toBeVisible()
     await page.getByRole('button', { name: 'Fechar seletor de qualidade' }).click()
@@ -113,7 +113,8 @@ test.describe('identidade e temas', () => {
 
     await page.getByRole('button', { name: 'Abrir configurações' }).click()
     const dialog = page.getByRole('dialog', { name: 'Configurações.' })
-    await expect(dialog.getByRole('heading', { name: 'Sessão' })).toBeVisible()
+    await dialog.getByRole('tab', { name: 'Sair da conta' }).click()
+    await expect(dialog.getByRole('heading', { name: 'Sessão', level: 1 })).toBeVisible()
     await dialog.getByRole('button', { name: 'SAIR DA DEMONSTRAÇÃO' }).click()
 
     await expect(page.getByRole('button', { name: 'Explorar demonstração local' })).toBeVisible()
@@ -162,7 +163,7 @@ test.describe('identidade e temas', () => {
     await expect(panel.getByText('@ari · moderador')).toBeVisible()
     await expect(panel.getByText('@rafa · membro')).toBeVisible()
 
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(panel).toHaveCount(0)
   })
 
@@ -203,7 +204,7 @@ test.describe('identidade e temas', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
 
@@ -225,11 +226,11 @@ test.describe('identidade e temas', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
-    const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
-    await dock.getByRole('button', { name: 'TELA' }).click()
+    const roomControls = page.locator('.voice-room-controls')
+    await roomControls.getByRole('button', { name: 'TELA' }).click()
     await page.getByRole('button', { name: /Automatica/ }).click()
 
     const tile = page.locator('.voice-stage-share').first()
@@ -247,10 +248,10 @@ test.describe('identidade e temas', () => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('navigation', { name: 'Servidores' }).getByRole('button', { name: 'Abrir configurações' }).click()
-    await page.getByRole('tab', { name: 'Voz' }).click()
+    await page.getByRole('tab', { name: 'Voz e áudio' }).click()
 
     const suppression = page.getByLabel('Supressão de ruído')
-    await expect(page.getByRole('radio', { name: /Isolamento de voz/ })).toHaveAttribute('aria-checked', 'true')
+    await expect(page.getByRole('radio', { name: /^Voz/ })).toHaveAttribute('aria-checked', 'true')
     await expect(suppression).toBeDisabled()
 
     await page.getByRole('radio', { name: /Personalizado/ }).click()
@@ -265,9 +266,9 @@ test.describe('identidade e temas', () => {
     await page.reload()
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('navigation', { name: 'Servidores' }).getByRole('button', { name: 'Abrir configurações' }).click()
-    await page.getByRole('tab', { name: 'Voz' }).click()
+    await page.getByRole('tab', { name: 'Voz e áudio' }).click()
 
-    await expect(page.getByLabel('Supressão de ruído')).toHaveValue('standard')
+    await expect(page.getByLabel('Supressão de ruído')).toHaveValue('webrtc')
     await expect(page.getByRole('checkbox', { name: 'Ganho automático' })).not.toBeChecked()
   })
 
@@ -276,11 +277,11 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
     const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
-    await expect(dock).toContainText('sala-da-madrugada')
+    await expect(page.locator('.voice-room > header')).toContainText('sala-da-madrugada')
     await expect(page.locator('.voice-member')).toHaveCount(1)
 
     await page.getByRole('button', { name: '# geral', exact: true }).click()
@@ -302,19 +303,19 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Concord', exact: true }).click()
 
-    await page.getByRole('button', { name: '◖ sala-da-madrugada', exact: true }).click()
+    await page.getByRole('button', { name: 'sala-da-madrugada', exact: true }).click()
     await expect(page.getByText('Você está em voz.')).toBeVisible()
 
-    const dock = page.getByRole('complementary', { name: 'Conexao de voz' })
-    await dock.getByRole('button', { name: 'Áudio ligado' }).click()
+    const roomControls = page.locator('.voice-room-controls')
+    await roomControls.getByRole('button', { name: 'Áudio ligado' }).click()
 
-    await expect(dock.getByRole('button', { name: 'Microfone mutado' })).toBeVisible()
+    await expect(roomControls.getByRole('button', { name: 'Microfone mutado' })).toBeVisible()
     await expect(page.locator('.voice-member')).toContainText('sem áudio')
     await expect(page.locator('.voice-member .voice-flag[aria-label="Áudio mutado"]')).toBeVisible()
     await expect(page.locator('.voice-member .voice-flag[aria-label="Microfone mutado"]')).toBeVisible()
 
-    await dock.getByRole('button', { name: 'Áudio mutado' }).click()
-    await expect(dock.getByRole('button', { name: 'Microfone ligado' })).toBeVisible()
+    await roomControls.getByRole('button', { name: 'Áudio mutado' }).click()
+    await expect(roomControls.getByRole('button', { name: 'Microfone ligado' })).toBeVisible()
     await expect(page.locator('.voice-member')).toContainText('conectado')
   })
 
@@ -324,12 +325,12 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
 
     await expect(page.getByRole('heading', { name: 'Amigos' })).toBeVisible()
-    await expect(page.getByRole('tab', { name: 'Disponível' })).toBeVisible()
-    await page.getByRole('tab', { name: /Pendente/ }).click()
+    await expect(page.getByRole('button', { name: /Todos/ })).toBeVisible()
+    await page.getByRole('button', { name: /Solicitações/ }).click()
     await expect(page.getByText('Nenhum convite de servidor pendente.')).toBeVisible()
-    await page.getByRole('tab', { name: 'Disponível' }).click()
+    await page.getByRole('button', { name: 'Amigos', exact: true }).click()
     await expect(page.getByRole('button', { name: 'Enviar mensagem para Ari' })).toBeVisible()
-    await page.getByRole('tab', { name: 'Adicionar amigo' }).click()
+    await page.getByRole('button', { name: 'Adicionar amigo' }).click()
     await expect(page.getByRole('heading', { name: 'Adicionar amigo' })).toBeVisible()
     await expect(page.getByLabel('Identificador')).toBeVisible()
     await page.getByRole('button', { name: 'Encontre ou comece uma conversa' }).click()
@@ -341,7 +342,7 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: 'Inicio do Concord' }).click()
     await page.getByRole('button', { name: 'Enviar mensagem para Ari' }).click()
-    await expect(page.getByText('Conversa com Ari')).toBeVisible()
+    await expect(page.getByText('Este é o começo da sua conversa com @ari.')).toBeVisible()
     await page.getByLabel('Mensagem privada').fill('Sinal privado')
     await page.getByLabel('Mensagem privada').press('Enter')
     await expect(page.getByText('Sinal privado')).toBeVisible()
@@ -354,26 +355,27 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Abrir configurações' }).click()
 
     await expect(page.getByRole('heading', { name: 'Configurações.' })).toBeVisible()
-    await page.getByRole('tab', { name: 'Servidores', exact: true }).click()
-    await expect(page.getByRole('heading', { name: 'Gerenciar servidores' })).toBeVisible()
-    await page.getByRole('button', { name: 'GERENCIAR' }).click()
-    await expect(page.getByRole('heading', { name: 'Informações do servidor' })).toBeVisible()
-    await page.getByRole('tab', { name: 'Tema', exact: true }).click()
-    await page.getByRole('combobox', { name: 'Estilo' }).click()
+    const settingsDialog = page.getByRole('dialog', { name: 'Configurações.' })
+    await settingsDialog.getByRole('tab', { name: 'Meus servidores', exact: true }).click()
+    await expect(settingsDialog.getByRole('heading', { name: 'Meus servidores' })).toBeVisible()
+    await settingsDialog.getByRole('button', { name: 'Gerenciar' }).click()
+    await expect(settingsDialog.getByRole('heading', { name: 'Informações do servidor' })).toBeVisible()
+    await settingsDialog.getByRole('tab', { name: 'Aparência', exact: true }).click()
+    await settingsDialog.getByRole('combobox', { name: 'Estilo' }).click()
     await page.getByRole('option', { name: 'iOS Glass' }).click()
     await expect(page.locator('html')).toHaveAttribute('data-style-theme', 'ios')
 
-    await page.getByRole('tab', { name: 'Canais' }).click()
-    await page.getByLabel('Nome do canal').fill('planejamento')
-    await page.getByRole('combobox', { name: 'Tipo' }).click()
+    await settingsDialog.getByRole('tab', { name: 'Canais' }).click()
+    await settingsDialog.getByLabel('Nome do canal').fill('planejamento')
+    await settingsDialog.getByRole('combobox', { name: 'Tipo' }).click()
     await page.getByRole('option', { name: 'Voz' }).click()
-    await page.getByRole('button', { name: 'CRIAR CANAL' }).click()
-    await expect(page.getByText('◖ planejamento')).toBeVisible()
+    await settingsDialog.getByRole('button', { name: 'Criar canal' }).click()
+    await expect(settingsDialog.getByText('planejamento')).toBeVisible()
 
-    await page.getByRole('tab', { name: 'Notificações' }).click()
-    await page.getByLabel('Silenciar servidor').check()
-    await expect(page.getByText('Servidor silenciado.')).toBeVisible()
-    await page.getByRole('button', { name: 'Fechar configurações' }).click()
+    await settingsDialog.getByRole('tab', { name: 'Notificações' }).click()
+    await settingsDialog.getByLabel('Silenciar servidor').check()
+    await expect(settingsDialog.getByText('Servidor silenciado.')).toBeVisible()
+    await settingsDialog.getByRole('button', { name: 'Fechar configurações' }).click()
   })
 
   test('mantém a autenticação utilizável em viewport móvel', async ({ page }) => {
@@ -437,7 +439,7 @@ test.describe('identidade e temas', () => {
     await page.getByRole('button', { name: 'Explorar demonstração local' }).click()
     await page.getByRole('button', { name: /Mensagens/ }).click()
     await expect(page.getByRole('heading', { name: 'Amigos' })).toBeVisible()
-    await page.getByRole('tab', { name: 'Adicionar amigo' }).click()
+    await page.getByRole('button', { name: 'Adicionar amigo' }).click()
     await expect(page.getByRole('heading', { name: 'Adicionar amigo' })).toBeVisible()
     await expect(page.getByPlaceholder('@identificador')).toBeVisible()
     await page.getByPlaceholder('@identificador').fill('@amiga')

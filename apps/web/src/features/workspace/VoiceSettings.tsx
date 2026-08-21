@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { Toggle } from '../../components/ui/Toggle'
-import { audioCaptureOptions, outputDeviceSupported, profilePreset, voiceIsolationSupported, withSuppressionLevel } from './voice-preferences'
-import type { NoiseSuppressionLevel, VoiceProcessing, VoiceProfile } from './voice-preferences'
+import { rnnoiseSupported } from './audio/rnnoise-support'
+import type { RnnoiseGraph } from './audio/rnnoise-graph'
+import { audioCaptureOptions, outputDeviceSupported, profilePreset, withNoiseSuppressionMode } from './voice-preferences'
+import type { NoiseSuppressionMode, VoiceProcessing, VoiceProfile } from './voice-preferences'
 
 type VoiceSettingsProps = {
   onChange: (value: VoiceProcessing) => void
@@ -9,15 +11,15 @@ type VoiceSettingsProps = {
 }
 
 const profiles: ReadonlyArray<readonly [VoiceProfile, string, string]> = [
-  ['voice', 'Isolamento de voz', 'Só a sua voz: o navegador equaliza e corta o resto.'],
+  ['voice', 'Voz', 'Só a sua voz: o navegador equaliza e corta o resto.'],
   ['studio', 'Estúdio', 'Áudio puro: microfone aberto e sem processamento.'],
   ['custom', 'Personalizado', 'Modo avançado: cada filtro no controle separado.'],
 ]
 
-const levels: ReadonlyArray<readonly [NoiseSuppressionLevel, string]> = [
-  ['off', 'Desligada'],
-  ['standard', 'Padrão do navegador'],
-  ['high', 'Alta (isolamento de voz)'],
+const modes: ReadonlyArray<readonly [NoiseSuppressionMode, string]> = [
+  ['off', 'Desativada'],
+  ['webrtc', 'Padrão (navegador)'],
+  ['rnnoise', 'Aprimorada (Beta)'],
 ]
 
 export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
@@ -28,12 +30,15 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
   const [outputs, setOutputs] = useState<MediaDeviceInfo[]>([])
   const streamRef = useRef<MediaStream | null>(null)
   const contextRef = useRef<AudioContext | null>(null)
+  const rnnoiseGraphRef = useRef<RnnoiseGraph | null>(null)
   const frameRef = useRef(0)
-  const isolationSupported = voiceIsolationSupported()
+  const rnnoiseAvailable = rnnoiseSupported()
   const sinkSupported = outputDeviceSupported()
 
   const stopTest = () => {
     window.cancelAnimationFrame(frameRef.current)
+    rnnoiseGraphRef.current?.destroy()
+    rnnoiseGraphRef.current = null
     streamRef.current?.getTracks().forEach((track) => track.stop())
     streamRef.current = null
     void contextRef.current?.close()
@@ -74,7 +79,24 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
       contextRef.current = context
       const analyser = context.createAnalyser()
       analyser.fftSize = 1024
-      context.createMediaStreamSource(stream).connect(analyser)
+
+      let analyserSource: AudioNode
+      if (value.noiseSuppressionMode === 'rnnoise' && rnnoiseAvailable) {
+        try {
+          const { createRnnoiseGraph } = await import('./audio/rnnoise-graph')
+          const [inputTrack] = stream.getAudioTracks()
+          const graph = await createRnnoiseGraph(context, inputTrack)
+          rnnoiseGraphRef.current = graph
+          analyserSource = context.createMediaStreamSource(new MediaStream([graph.outputTrack]))
+        } catch (caught) {
+          console.error('[voz] falha ao testar com a supressao aprimorada', caught)
+          setError('Não foi possível usar a supressão aprimorada no teste. Mostrando o áudio sem esse processamento.')
+          analyserSource = context.createMediaStreamSource(stream)
+        }
+      } else {
+        analyserSource = context.createMediaStreamSource(stream)
+      }
+      analyserSource.connect(analyser)
       const samples = new Uint8Array(analyser.frequencyBinCount)
       setTesting(true)
       const tick = () => {
@@ -102,96 +124,107 @@ export function VoiceSettings({ onChange, value }: VoiceSettingsProps) {
   const patch = (changes: Partial<VoiceProcessing>) => update({ ...value, ...changes })
 
   return (
-    <section>
-      <h3>Voz e microfone</h3>
+    <section className="voice-settings">
+      <h1>Voz e áudio</h1>
       <p>O tratamento é o do próprio navegador e vale para toda chamada, inclusive as próximas.</p>
 
-      <div className="voice-device-grid">
-        <label>
-          <span>Microfone</span>
-          <select value={value.inputDeviceId} onChange={(event) => patch({ inputDeviceId: event.target.value })}>
-            <option value="">Padrão do sistema</option>
-            {inputs.map((device) => <option key={device.deviceId} value={device.deviceId}>{device.label || 'Microfone sem nome'}</option>)}
-          </select>
-        </label>
-        <label>
-          <span>Alto-falante</span>
-          <select disabled={!sinkSupported} value={value.outputDeviceId} onChange={(event) => patch({ outputDeviceId: event.target.value })}>
-            <option value="">Padrão do sistema</option>
-            {outputs.map((device) => <option key={device.deviceId} value={device.deviceId}>{device.label || 'Saída sem nome'}</option>)}
-          </select>
+      <div className="settings-card">
+        <h2>Dispositivos</h2>
+        <div className="voice-device-grid">
+          <label>
+            <span>Microfone</span>
+            <select value={value.inputDeviceId} onChange={(event) => patch({ inputDeviceId: event.target.value })}>
+              <option value="">Padrão do sistema</option>
+              {inputs.map((device) => <option key={device.deviceId} value={device.deviceId}>{device.label || 'Microfone sem nome'}</option>)}
+            </select>
+          </label>
+          <label>
+            <span>Saída</span>
+            <select disabled={!sinkSupported} value={value.outputDeviceId} onChange={(event) => patch({ outputDeviceId: event.target.value })}>
+              <option value="">Padrão do sistema</option>
+              {outputs.map((device) => <option key={device.deviceId} value={device.deviceId}>{device.label || 'Saída sem nome'}</option>)}
+            </select>
+          </label>
+        </div>
+        {!sinkSupported ? <p className="mic-test-hint">Este navegador não deixa escolher a saída de áudio: use o padrão do sistema.</p> : null}
+
+        <label className="voice-output-volume">
+          <span>Volume da chamada · {Math.round(value.outputVolume * 100)}%</span>
+          <input max={1} min={0} step={0.02} type="range" value={value.outputVolume} onChange={(event) => patch({ outputVolume: Number(event.target.value) })} />
         </label>
       </div>
-      {!sinkSupported ? <p className="mic-test-hint">Este navegador não deixa escolher a saída de áudio: use o padrão do sistema.</p> : null}
 
-      <label className="voice-output-volume">
-        <span>Volume da chamada · {Math.round(value.outputVolume * 100)}%</span>
-        <input max={1} min={0} step={0.02} type="range" value={value.outputVolume} onChange={(event) => patch({ outputVolume: Number(event.target.value) })} />
-      </label>
-
-      <h4 className="settings-subtitle">Perfil de entrada</h4>
-      <div className="voice-profile-list" role="radiogroup" aria-label="Perfil de entrada">
-        {profiles.map(([id, label, detail]) => (
-          <button
-            aria-checked={value.profile === id}
-            className={value.profile === id ? 'voice-profile active' : 'voice-profile'}
-            key={id}
-            role="radio"
-            type="button"
-            onClick={() => update(profilePreset(id, value))}
-          >
-            <strong>{label}</strong>
-            <small>{detail}</small>
-          </button>
-        ))}
-      </div>
-
-      <label className="voice-suppression">
-        <span>Supressão de ruído</span>
-        <select
-          disabled={value.profile !== 'custom'}
-          value={value.suppressionLevel}
-          onChange={(event) => update(withSuppressionLevel(value, event.target.value as NoiseSuppressionLevel))}
-        >
-          {levels.map(([id, label]) => (
-            <option disabled={id === 'high' && !isolationSupported} key={id} value={id}>{label}</option>
+      <div className="settings-card">
+        <h2>Processamento</h2>
+        <h3 className="settings-subtitle">Perfil de entrada</h3>
+        <div className="voice-profile-list" role="radiogroup" aria-label="Perfil de entrada">
+          {profiles.map(([id, label, detail]) => (
+            <button
+              aria-checked={value.profile === id}
+              className={value.profile === id ? 'voice-profile active' : 'voice-profile'}
+              key={id}
+              role="radio"
+              type="button"
+              onClick={() => update(profilePreset(id, value))}
+            >
+              <strong>{label}{id === 'voice' ? <em>Recomendado</em> : null}</strong>
+              <small>{detail}</small>
+            </button>
           ))}
-        </select>
-      </label>
-      <p className="mic-test-hint">
-        {value.profile === 'custom'
-          ? 'A supressão é a do navegador. O nível alto usa o isolamento de voz, quando o navegador oferece.'
-          : 'Escolha o perfil Personalizado para mudar o nível da supressão.'}
-      </p>
+        </div>
 
-      {value.profile === 'custom' ? (
-        <>
-          <Toggle
-            checked={value.echoCancellation}
-            className="settings-toggle"
-            description="Evita que o som das caixas volte pelo microfone."
-            label="Cancelamento de eco"
-            onChange={(checked) => patch({ echoCancellation: checked })}
-          />
-          <Toggle
-            checked={value.autoGainControl}
-            className="settings-toggle"
-            description="Equilibra o volume quando você fala mais perto ou mais longe."
-            label="Ganho automático"
-            onChange={(checked) => patch({ autoGainControl: checked })}
-          />
-        </>
-      ) : null}
+        <h3 className="settings-subtitle">Supressão de ruído</h3>
+        <label className="voice-suppression">
+          <span>Supressão de ruído</span>
+          <select
+            disabled={value.profile !== 'custom'}
+            value={value.noiseSuppressionMode}
+            onChange={(event) => update(withNoiseSuppressionMode(value, event.target.value as NoiseSuppressionMode))}
+          >
+            {modes.map(([id, label]) => (
+              <option disabled={id === 'rnnoise' && !rnnoiseAvailable} key={id} value={id}>
+                {id === 'rnnoise' && !rnnoiseAvailable ? `${label} — indisponível neste navegador` : label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <p className="mic-test-hint">
+          {value.profile === 'custom'
+            ? 'Padrão usa o processamento do navegador. Aprimorada roda RNNoise localmente e usa mais CPU.'
+            : 'Escolha o perfil Personalizado para mudar o modo de supressão.'}
+        </p>
 
-      <h4 className="settings-subtitle">Testar microfone</h4>
-      <div className="mic-test">
-        <button className="dialog-submit subdued" type="button" onClick={() => testing ? stopTest() : void startTest()}>
-          {testing ? 'PARAR TESTE' : 'TESTAR MICROFONE'}
-        </button>
-        <div aria-hidden="true" className="mic-test-meter"><span style={{ transform: `scaleX(${level})` }} /></div>
+        {value.profile === 'custom' ? (
+          <>
+            <Toggle
+              checked={value.echoCancellation}
+              className="settings-toggle"
+              description="Evita que o som das caixas volte pelo microfone."
+              label="Cancelamento de eco"
+              onChange={(checked) => patch({ echoCancellation: checked })}
+            />
+            <Toggle
+              checked={value.autoGainControl}
+              className="settings-toggle"
+              description="Equilibra o volume quando você fala mais perto ou mais longe."
+              label="Ganho automático"
+              onChange={(checked) => patch({ autoGainControl: checked })}
+            />
+          </>
+        ) : null}
       </div>
-      <p className="mic-test-hint">{testing ? 'Fale ou faça barulho: a barra acompanha o que o microfone captura depois do tratamento.' : 'O teste usa o mesmo microfone e os mesmos filtros da chamada.'}</p>
-      {error ? <p className="dialog-feedback" role="status">{error}</p> : null}
+
+      <div className="settings-card">
+        <h2>Testar microfone</h2>
+        <div className="mic-test">
+          <button className="settings-button subdued" type="button" onClick={() => testing ? stopTest() : void startTest()}>
+            {testing ? 'Parar teste' : 'Testar microfone'}
+          </button>
+          <div aria-hidden="true" className="mic-test-meter"><span style={{ transform: `scaleX(${level})` }} /></div>
+        </div>
+        <p className="mic-test-hint">{testing ? 'Testando seu microfone... fale ou faça barulho: a barra acompanha o que o microfone captura depois do tratamento.' : 'O teste usa o mesmo microfone e os mesmos filtros da chamada.'}</p>
+        {error ? <p className="settings-feedback" role="status">{error}</p> : null}
+      </div>
     </section>
   )
 }
