@@ -52,6 +52,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [x] Menu do servidor no cabecalho com cargos, notificacoes, marcar como lido e sair do servidor
 - [x] Redesign da tela de mensagens diretas: cabecalho com presenca, agrupamento visual, separadores de data e novo composer
 - [x] Redesign do servidor/canais/chat: grupos colapsaveis, cabecalho e mensagens do chat com hierarquia real, membros com coroa do dono e overlay mobile dedicado
+- [x] Redesign da central de configuracoes: navegacao agrupada por categoria, layout em tres colunas com painel contextual, componentizacao do `SettingsDialog` e navegacao mobile por indice/subpagina
 
 ## Etapa 03 - Voz e compartilhamento
 

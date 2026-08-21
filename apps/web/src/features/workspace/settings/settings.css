@@ -1,0 +1,196 @@
+/* Central de configurações — Etapa 16 */
+
+.server-dialog.settings-dialog {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1200px, calc(100vw - 64px));
+  height: min(820px, calc(100dvh - 64px));
+  padding: 0;
+  overflow: hidden;
+}
+.server-dialog.settings-dialog::after { display: none; }
+.server-dialog.settings-dialog > .dialog-close { z-index: 6; }
+.server-dialog.settings-dialog > .eyebrow,
+.server-dialog.settings-dialog > h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.settings-shell { display: grid; flex: 1; min-height: 0; grid-template-columns: 232px minmax(0, 1fr) 280px; }
+
+/* Navegação */
+.settings-shell .settings-nav { display: flex; flex-direction: column; min-height: 0; padding: var(--space-5) var(--space-3); border-right: var(--border-width) solid var(--color-border-soft); background: var(--color-surface-sunken); overflow-y: auto; }
+.settings-shell .settings-search { display: flex; align-items: center; gap: var(--space-2); flex: 0 0 auto; margin-bottom: var(--space-4); padding: var(--space-2) var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text-faint); background: var(--color-surface-sunken); }
+.settings-shell .settings-search input { flex: 1; min-width: 0; border: 0; outline: 0; color: var(--color-text); background: transparent; font-size: var(--font-size-sm); }
+.settings-shell .settings-search input::placeholder { color: var(--color-text-faint); }
+.settings-shell .settings-search:focus-within { border-color: var(--color-accent); }
+.settings-shell .settings-nav-groups { display: flex; flex-direction: column; gap: var(--space-5); min-height: 0; overflow-y: auto; }
+.settings-shell .settings-nav-group h4 { margin: 0 0 var(--space-2) var(--space-2); color: var(--color-text-faint); font: var(--font-label); letter-spacing: .12em; text-transform: uppercase; }
+.settings-shell .settings-nav-list { display: grid; gap: 2px; }
+.settings-shell .settings-nav-item { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-control); color: var(--color-text-muted); background: transparent; text-align: left; font-size: var(--font-size-sm); }
+.settings-shell .settings-nav-item svg { flex: 0 0 auto; }
+.settings-shell .settings-nav-item:hover { color: var(--color-text); background: var(--color-surface-raised); }
+.settings-shell .settings-nav-item[data-state="active"] { position: relative; color: var(--color-text-strong); background: var(--color-accent-soft); font-weight: 600; }
+.settings-shell .settings-nav-item[data-state="active"]::before { position: absolute; top: 6px; bottom: 6px; left: -2px; width: 3px; border-radius: 2px; background: var(--color-accent); content: ''; }
+.settings-shell .settings-nav-item:focus-visible { outline: none; box-shadow: inset 0 0 0 1px var(--color-accent); }
+.settings-shell .settings-nav-chevron { display: none; margin-left: auto; color: var(--color-text-faint); }
+.settings-shell .settings-nav-chevron svg { width: 12px; height: 12px; transform: rotate(-90deg); }
+.settings-shell .settings-nav-empty { margin: var(--space-4) var(--space-2); color: var(--color-text-faint); font-size: var(--font-size-xs); }
+
+/* Conteúdo */
+.settings-shell .settings-content { position: relative; min-width: 0; min-height: 0; padding: var(--space-8) 36px; overflow-y: auto; }
+.settings-shell .settings-mobile-back { display: none; }
+.settings-shell .settings-content h1 { margin: 0 0 var(--space-1); color: var(--color-text-strong); font-size: 22px; font-family: var(--font-body); letter-spacing: 0; text-transform: none; }
+.settings-shell .settings-content > [role="tabpanel"] > p:first-of-type,
+.settings-shell .settings-content h1 + p { margin: 0 0 var(--space-6); color: var(--color-text-muted); font-size: var(--font-size-sm); line-height: 1.55; }
+
+/* Painel contextual */
+.settings-shell .settings-context { display: flex; flex-direction: column; gap: var(--space-4); min-height: 0; padding: var(--space-6) var(--space-5); border-left: var(--border-width) solid var(--color-border-soft); background: var(--color-surface-sunken); overflow-y: auto; }
+.settings-shell .settings-context h4 { margin: 0; color: var(--color-text-faint); font: var(--font-label); letter-spacing: .12em; text-transform: uppercase; }
+.settings-shell .settings-context-identity { display: grid; justify-items: center; gap: var(--space-1); text-align: center; }
+.settings-shell .settings-context-identity .avatar { width: 64px; height: 64px; flex: 0 0 64px; margin-bottom: var(--space-2); font-size: 18px; }
+.settings-shell .settings-context-identity strong { color: var(--color-text-strong); font-size: 14px; }
+.settings-shell .settings-context-identity small { color: var(--color-text-faint); font: 9px var(--font-mono); }
+.settings-shell .settings-context-card { display: grid; gap: 2px; padding: var(--space-3); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-control); background: var(--color-surface-raised); }
+.settings-shell .settings-context-card span { color: var(--color-text-faint); font: var(--font-label); letter-spacing: .06em; }
+.settings-shell .settings-context-card strong { color: var(--color-text); font-size: var(--font-size-sm); }
+
+/* Primitivas compartilhadas */
+.settings-shell .settings-card { padding: var(--space-5); margin-bottom: var(--space-5); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-panel); background: var(--color-surface-raised); }
+.settings-shell .settings-card h2 { margin: 0 0 var(--space-1); color: var(--color-text-strong); font-size: var(--font-size-md); font-family: var(--font-body); letter-spacing: 0; text-transform: none; }
+.settings-shell .settings-card-hint { margin: 0 0 var(--space-4); color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.settings-shell .settings-card-actions { display: flex; gap: var(--space-3); margin-top: var(--space-3); }
+.settings-shell .settings-field { display: grid; gap: var(--space-2); margin-bottom: var(--space-3); color: var(--color-text-muted); font: var(--font-label); letter-spacing: .06em; }
+.settings-shell .settings-field input, .settings-shell .settings-field textarea, .settings-shell .settings-field select { width: 100%; height: auto; padding: var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); outline: none; color: var(--color-text); background: var(--color-surface-sunken); font: var(--font-size-sm) var(--font-body); }
+.settings-shell .settings-field textarea { min-height: 76px; resize: vertical; }
+.settings-shell .settings-field input:focus, .settings-shell .settings-field textarea:focus, .settings-shell .settings-field select:focus { border-color: var(--color-accent); box-shadow: none; }
+.settings-shell .settings-field input:disabled, .settings-shell .settings-field textarea:disabled { cursor: default; opacity: .6; }
+.settings-shell .settings-button { padding: var(--space-3) var(--space-4); border: var(--border-width) solid var(--color-accent); border-radius: var(--radius-control); color: var(--color-accent-contrast); background: var(--color-accent); font-size: var(--font-size-sm); font-weight: 600; }
+.settings-shell .settings-button:hover { background: var(--color-accent-hover); }
+.settings-shell .settings-button:disabled { cursor: wait; opacity: .65; }
+.settings-shell .settings-button.subdued { color: var(--color-accent); background: var(--color-accent-soft); border-color: transparent; }
+.settings-shell .settings-button.subdued:hover { background: var(--color-accent-soft); opacity: .85; }
+.settings-shell .settings-button.danger { color: var(--color-accent-contrast); background: var(--color-danger); border-color: var(--color-danger); }
+.settings-shell .settings-button.danger:hover { opacity: .85; }
+.settings-shell .settings-button.subdued.danger { color: var(--color-danger); background: transparent; border-color: var(--color-danger); }
+.settings-shell .settings-link-button { display: inline-block; margin: 0 0 var(--space-6); padding: 0; color: var(--color-text-muted); background: transparent; font-size: var(--font-size-xs); text-decoration: underline; text-underline-offset: 3px; }
+.settings-shell .settings-link-button:hover { color: var(--color-accent); }
+.settings-shell .settings-feedback { margin: var(--space-2) 0 0; color: var(--color-accent); font-size: var(--font-size-xs); }
+.settings-shell .settings-empty-hint { color: var(--color-text-faint); font-size: var(--font-size-xs); }
+.settings-shell .settings-danger-zone { padding: var(--space-5); border: var(--border-width) solid var(--color-danger); border-radius: var(--radius-panel); background: color-mix(in srgb, var(--color-danger) 8%, transparent); }
+.settings-shell .settings-danger-zone h2 { margin: 0 0 var(--space-3); color: var(--color-danger); font-size: var(--font-size-md); font-family: var(--font-body); letter-spacing: 0; text-transform: none; }
+.settings-shell .settings-subtitle { margin: 0 0 var(--space-3); color: var(--color-text-faint); font: var(--font-label); letter-spacing: .08em; text-transform: uppercase; }
+
+/* Minha conta */
+.settings-shell .account-card { display: grid; gap: var(--space-5); padding: var(--space-6); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-panel); background: var(--color-surface-raised); }
+.settings-shell .account-card-identity { display: flex; align-items: center; gap: var(--space-4); }
+.settings-shell .account-card-identity .avatar { width: 64px; height: 64px; flex: 0 0 64px; font-size: 18px; }
+.settings-shell .account-avatar-edit { display: grid; gap: var(--space-2); }
+.settings-shell .account-avatar-url { display: grid; gap: 4px; color: var(--color-text-faint); font: var(--font-label); letter-spacing: .06em; }
+.settings-shell .account-avatar-url input { width: 100%; height: auto; padding: var(--space-2) var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text); background: var(--color-surface-sunken); font-size: var(--font-size-xs); }
+.settings-shell .account-card-fields { display: grid; gap: var(--space-4); }
+.settings-shell .account-field { display: grid; gap: 4px; color: var(--color-text-faint); font: var(--font-label); letter-spacing: .06em; }
+.settings-shell .account-field-value { color: var(--color-text); font: var(--font-size-sm) var(--font-body); letter-spacing: 0; text-transform: none; }
+.settings-shell .account-field input { width: 100%; height: auto; padding: var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text); background: var(--color-surface-sunken); font: var(--font-size-sm) var(--font-body); letter-spacing: 0; text-transform: none; }
+.settings-shell .account-card-actions { display: flex; gap: var(--space-3); }
+.settings-shell .account-session { display: grid; gap: var(--space-3); align-content: start; padding: var(--space-6); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-panel); background: var(--color-surface-raised); }
+.settings-shell .account-session h1 { margin: 0; }
+.settings-shell .account-session p { margin: 0 0 var(--space-2); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.settings-shell .account-session .settings-button { justify-self: start; }
+
+/* Aparência */
+.settings-shell .appearance-preview { display: grid; gap: var(--space-3); width: min(320px, 100%); margin-bottom: var(--space-6); padding: var(--space-4); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-panel); background: var(--color-canvas); }
+.settings-shell .appearance-preview-brand { color: var(--color-accent); font: var(--font-label); letter-spacing: .1em; }
+.settings-shell .appearance-preview-message { display: grid; gap: 4px; padding: var(--space-3); border-radius: var(--radius-control); background: var(--color-surface-raised); }
+.settings-shell .appearance-preview-message span { color: var(--color-text-faint); font: var(--font-label); }
+.settings-shell .appearance-preview-message p { margin: 0; color: var(--color-text); font-size: var(--font-size-sm); }
+
+/* Meus servidores */
+.settings-shell .server-list-cards { display: grid; gap: var(--space-3); }
+.settings-shell .server-list-card { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-panel); background: var(--color-surface-raised); }
+.settings-shell .server-list-card strong { display: block; color: var(--color-text); font-size: var(--font-size-sm); }
+.settings-shell .server-role-badge { display: inline-block; margin-top: 3px; color: var(--color-text-faint); font: 9px var(--font-mono); letter-spacing: .06em; }
+
+/* Servidor atual */
+.settings-shell .invite-link-list { display: grid; gap: var(--space-2); margin-bottom: var(--space-3); }
+.settings-shell .invite-link-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-control); background: var(--color-surface-sunken); }
+.settings-shell .invite-link-row span { display: grid; gap: 2px; color: var(--color-text); font: var(--font-size-xs) var(--font-mono); }
+.settings-shell .invite-link-row small { color: var(--color-text-faint); }
+.settings-shell .invite-link-created { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-3); padding: var(--space-3); border: var(--border-width) solid var(--color-accent); border-radius: var(--radius-control); background: var(--color-accent-soft); }
+.settings-shell .invite-link-created span { flex: 0 0 auto; color: var(--color-text-faint); font: var(--font-label); }
+.settings-shell .invite-link-created input { flex: 1; min-width: 0; width: auto; height: auto; padding: var(--space-2); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text); background: var(--color-surface-sunken); font-size: var(--font-size-xs); }
+.settings-shell .invite-link-created .settings-button { display: inline-flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.settings-shell .invite-link-created .settings-button svg { width: 14px; height: 14px; }
+
+/* Canais */
+.settings-shell .channel-settings-list { display: grid; gap: var(--space-5); }
+.settings-shell .channel-settings-group h3 { margin: 0 0 var(--space-2); color: var(--color-text-faint); font: var(--font-label); letter-spacing: .08em; text-transform: uppercase; }
+.settings-shell .channel-settings-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-control); background: var(--color-surface-raised); }
+.settings-shell .channel-settings-row + .channel-settings-row { margin-top: var(--space-2); }
+.settings-shell .channel-settings-row span { display: flex; align-items: center; gap: var(--space-2); min-width: 0; color: var(--color-text); font-size: var(--font-size-sm); }
+.settings-shell .channel-settings-row span svg { flex: 0 0 auto; color: var(--color-text-faint); }
+.settings-shell .channel-settings-row-actions { display: flex; flex: 0 0 auto; gap: var(--space-3); }
+.settings-shell .channel-settings-row-actions button { color: var(--color-accent); background: transparent; font-size: var(--font-size-xs); }
+.settings-shell .channel-settings-row-actions button.danger { color: var(--color-danger); }
+
+/* Permissões */
+.settings-shell .permission-card { display: grid; gap: 4px; padding: var(--space-3); margin-bottom: var(--space-2); border-left: 3px solid var(--color-accent); background: var(--color-accent-soft); }
+.settings-shell .permission-card:last-child { margin-bottom: 0; }
+.settings-shell .permission-card strong { font: var(--font-label); letter-spacing: .06em; }
+.settings-shell .permission-card span { color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.settings-shell .channel-permission-row { display: grid; gap: var(--space-2); padding: var(--space-3); border: var(--border-width) solid var(--color-border-soft); border-radius: var(--radius-control); }
+.settings-shell .channel-permission-row + .channel-permission-row { margin-top: var(--space-2); }
+.settings-shell .channel-permission-row > strong { display: flex; align-items: center; gap: 6px; font: var(--font-label); letter-spacing: .06em; }
+.settings-shell .channel-permission-row > div { display: flex; align-items: center; gap: var(--space-3); color: var(--color-text-muted); font-size: var(--font-size-xs); }
+.settings-shell .permission-toggle { flex-direction: row-reverse; gap: 4px; }
+.settings-shell .permission-toggle strong { color: var(--color-text-muted); font-size: var(--font-size-xs); font-weight: 400; }
+.settings-shell .permission-toggle .toggle-box { width: 13px; height: 13px; flex-basis: 13px; }
+.settings-shell .permission-toggle .toggle-mark { font-size: 8px; }
+.settings-shell .role-row { display: flex !important; align-items: center; justify-content: space-between; padding: var(--space-2) 0; border-bottom: var(--border-width) solid var(--color-border-soft); }
+.settings-shell .role-row:last-child { border-bottom: 0; }
+.settings-shell .role-row span { display: grid; color: var(--color-text); font-size: var(--font-size-sm); }
+.settings-shell .role-row small { color: var(--color-text-faint); font: 9px var(--font-mono); }
+.settings-shell .role-row .choice { width: 140px; }
+.settings-shell .role-row .choice-trigger { padding: var(--space-2); font-size: var(--font-size-xs); }
+.settings-shell .member-moderation-row { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: var(--border-width) solid var(--color-border-soft); }
+.settings-shell .member-moderation-row:last-child { border-bottom: 0; }
+.settings-shell .member-moderation-row > span { display: grid; min-width: 0; flex: 1; }
+.settings-shell .member-moderation-row small { color: var(--color-text-faint); font: 9px var(--font-mono); }
+.settings-shell .member-moderation-row button { padding: 6px 8px; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text-muted); background: var(--color-surface-sunken); font-size: var(--font-size-xs); }
+.settings-shell .member-moderation-row button:hover { color: var(--color-accent); border-color: var(--color-accent); }
+.settings-shell .member-moderation-row button.danger { color: var(--color-danger); border-color: var(--color-danger); }
+.settings-shell .member-moderation-row button.danger:hover { opacity: .8; }
+
+/* Voz e áudio */
+.settings-shell .voice-device-grid { display: grid; gap: var(--space-3); margin-bottom: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.settings-shell .voice-device-grid label, .settings-shell .voice-suppression, .settings-shell .voice-output-volume { display: grid; gap: 6px; }
+.settings-shell .voice-device-grid span, .settings-shell .voice-suppression span, .settings-shell .voice-output-volume span { color: var(--color-text-faint); font: var(--font-label); letter-spacing: .06em; }
+.settings-shell .voice-device-grid select, .settings-shell .voice-suppression select { width: 100%; height: auto; padding: var(--space-2) var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text); background: var(--color-surface-sunken); font-size: var(--font-size-sm); }
+.settings-shell .voice-device-grid select:disabled, .settings-shell .voice-suppression select:disabled { cursor: default; opacity: .55; }
+.settings-shell .voice-output-volume { margin-bottom: 0; }
+.settings-shell .voice-output-volume input { accent-color: var(--color-accent); }
+.settings-shell .voice-profile-list { display: grid; gap: var(--space-2); margin-bottom: var(--space-4); }
+.settings-shell .voice-profile { display: grid; gap: 3px; padding: var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text); background: var(--color-surface-sunken); text-align: left; }
+.settings-shell .voice-profile:hover { border-color: var(--color-accent); }
+.settings-shell .voice-profile.active { border-color: var(--color-accent); background: var(--color-accent-soft); }
+.settings-shell .voice-profile strong { display: flex; align-items: center; gap: 8px; font-size: var(--font-size-sm); }
+.settings-shell .voice-profile strong em { color: var(--color-accent); font: 8px var(--font-mono); font-style: normal; letter-spacing: .06em; text-transform: uppercase; }
+.settings-shell .voice-profile small { color: var(--color-text-muted); font-size: var(--font-size-xs); line-height: 1.45; }
+.settings-shell .mic-test { display: flex; align-items: center; gap: var(--space-3); }
+.settings-shell .mic-test-meter { position: relative; flex: 1; height: 10px; overflow: hidden; border: var(--border-width) solid var(--color-border); border-radius: 999px; background: var(--color-surface-sunken); }
+.settings-shell .mic-test-meter span { display: block; width: 100%; height: 100%; transform: scaleX(0); transform-origin: left; background: var(--color-accent); transition: transform 90ms linear; }
+.settings-shell .mic-test-hint { margin: var(--space-2) 0 0; color: var(--color-text-muted); font-size: var(--font-size-xs); line-height: 1.5; }
+
+/* Breakpoints */
+@media (max-width: 1249px) {
+  .settings-shell { grid-template-columns: 216px minmax(0, 1fr); }
+  .settings-shell .settings-context { display: none; }
+}
+
+@media (max-width: 760px) {
+  .server-dialog.settings-dialog { box-sizing: border-box; width: 100%; height: 100dvh; min-height: 100dvh; max-height: none; border: 0; }
+  .settings-shell { grid-template-columns: 1fr; }
+  .settings-shell .settings-nav { border-right: 0; padding: var(--space-4); }
+  .settings-shell .settings-content { padding: var(--space-5) var(--space-4) var(--space-8); }
+  .server-dialog.settings-dialog:not(.settings-index-open) .settings-nav { display: none; }
+  .server-dialog.settings-dialog.settings-index-open .settings-content { display: none; }
+  .settings-shell .settings-mobile-back { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; margin-bottom: var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-control); color: var(--color-text-muted); background: var(--color-surface-raised); }
+}

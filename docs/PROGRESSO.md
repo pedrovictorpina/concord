@@ -15,7 +15,7 @@
 
 Configurar o projeto LiveKit Cloud e os segredos da Edge Function para validar voz multiusuário real com duas contas autenticadas. A lista priorizada, critérios de aceite e caminhos de QA estão em `docs/PROXIMOS_PASSOS.md`.
 
-Branch atual: `main`.
+Branch atual: `codex/etapa-16-redesign-configuracoes`.
 
 ## Historico
 
@@ -214,3 +214,10 @@ Branch atual: `main`.
 - icones Unicode do compartilhamento de tela e da sala (◖, ◌, ⬒, ❐, ✕, ⛶, ▣) viraram SVG no mesmo sistema (`VoiceStateIcons`); composer do chat de voz trocou o input por textarea com Enter/Shift+Enter, seguindo o mesmo padrao das Etapas 12 e 14.
 - a arquitetura de multiplas transmissoes simultaneas, foco local por usuario, bandeja de "assistir tela", volume/mudo por transmissao e tela cheia por tile ja existiam antes desta etapa e foram preservadas sem mudanca de comportamento — o trabalho aqui foi hierarquia visual e remocao de duplicidade, nao reconstrucao.
 - validacoes: `pnpm check`, `pnpm lint` e `pnpm test:e2e` (26/26, 5 testes atualizados para interagir com os controles novos da sala em vez do dock, que fica oculto quando redundante) aprovados; conferencia visual manual via Playwright com grade de participantes, compartilhamento de tela, chat recolhido, tema escuro e mobile.
+- `SettingsDialog.tsx` deixou de ser um formulario unico com abas planas: navegacao agrupada em Conta/Preferencias/Servidores/Sessao (`SettingsNavigation.tsx`), layout amplo em tres colunas (navegacao/conteudo/painel contextual) que se adapta para duas colunas e depois para tela cheia com indice + subpagina no mobile, seguindo o mockup aprovado da etapa.
+- oito responsabilidades que viviam dentro do mesmo componente viraram arquivos proprios em `apps/web/src/features/workspace/settings/`: `AccountSettings`, `AppearanceSettings`, `NotificationSettings`, `ServerListSettings`, `ServerSettings`, `ChannelSettings`, `PermissionSettings` e `SessionSettings`; `VoiceSettings.tsx` e `ThemeControls.tsx` continuam separados e so ganharam nova apresentacao, sem duplicar logica.
+- painel contextual direito mostra resumo real por secao (avatar/nome na conta, cargo e silenciamento no servidor atual, dispositivos/volume/perfil na voz) e some sozinho quando a secao nao tem contexto relevante, sem inventar dado que o app nao possui (sem e-mail, sem "online" fabricado).
+- acao de sair da conta saiu de dentro do perfil e virou uma secao propria (Sessao) no fim da navegacao, com botao de estilo destrutivo; confirmacoes de exclusao de servidor e banimento de membro trocaram `window.confirm` pelo componente `Modal` do proprio design system.
+- textos de botao perderam o uppercase generico ("SALVAR PERFIL", "GERENCIAR") em favor de frases normais ("Salvar alteracoes", "Gerenciar"), e os identificadores internos das abas (`profile`, `server`, `channels`...) foram mantidos como o documento da etapa permite, evitando mudanca de contrato sem necessidade.
+- nenhum recurso do mockup sem dado real foi implementado: e-mail, senha, 2FA, sessoes ativas, idioma, Premium, faturamento, densidade de interface e cores de destaque customizadas ficaram de fora por decisao explicita do proprio documento da etapa.
+- validacoes: `pnpm check`, `pnpm lint`, `pnpm test:unit` (14/14) e `pnpm test:e2e` (26/26, com testes atualizados para os novos rotulos de aba e o novo local do botao de sair) aprovados; conferencia visual manual via Playwright em desktop (1280px), claro/escuro e mobile (390px, fluxo indice → subpagina → voltar).
