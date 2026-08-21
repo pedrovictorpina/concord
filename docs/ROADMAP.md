@@ -68,6 +68,7 @@ O roadmap representa ordem de implementacao, nao datas prometidas. Cada etapa de
 - [ ] Ajuste dinamico de qualidade e perfis 720p/1080p com 15/30 FPS
 - [x] Parar de ver uma transmissao especifica, sem sair da chamada
 - [x] Controles de voz e chat dentro da tela do canal de voz
+- [x] Redesign da sala de voz: cabecalho com contagem real de participantes, barra de controles propria na sala (mic/audio/tela/sair), chat de voz recolhivel e VoiceDock reduzido quando a sala ja mostra os mesmos controles
 - [ ] Reconexao e encerramento automatico
 - [ ] Oferecer reconexao ao canal de voz depois de recarregar a pagina
 - [x] Tela transmitida deve levar so o audio do dispositivo, sem o retorno da propria chamada

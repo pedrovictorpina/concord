@@ -62,6 +62,53 @@ export function ScreenIcon() {
   )
 }
 
+export function SpeakerIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M5 9.5h3.2L13 6v12l-4.8-3.5H5z" />
+      <path d="M16 9.3a4 4 0 0 1 0 5.4" />
+    </svg>
+  )
+}
+
+export function ExpandIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M9 4H5a1 1 0 0 0-1 1v4" />
+      <path d="M15 4h4a1 1 0 0 1 1 1v4" />
+      <path d="M9 20H5a1 1 0 0 1-1-1v-4" />
+      <path d="M15 20h4a1 1 0 0 0 1-1v-4" />
+    </svg>
+  )
+}
+
+export function GridIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="3.5" y="3.5" width="7.5" height="7.5" rx="1.2" />
+      <rect x="13" y="3.5" width="7.5" height="7.5" rx="1.2" />
+      <rect x="3.5" y="13" width="7.5" height="7.5" rx="1.2" />
+      <rect x="13" y="13" width="7.5" height="7.5" rx="1.2" />
+    </svg>
+  )
+}
+
+export function CloseIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M5 5l14 14M19 5L5 19" />
+    </svg>
+  )
+}
+
+export function ChatIcon() {
+  return (
+    <svg {...iconProps}>
+      <path d="M4 5.5h16v11H9.5L5 20v-3.5H4z" />
+    </svg>
+  )
+}
+
 type VoiceStateFlagsProps = {
   microphoneEnabled: boolean
   outputEnabled: boolean
