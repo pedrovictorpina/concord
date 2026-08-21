@@ -19,7 +19,9 @@
         const resolved = colorMode === 'system'
           ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
           : colorMode
-        document.documentElement.dataset.styleTheme = ['concord', 'ios', 'brutal'].includes(stored.styleTheme) ? stored.styleTheme : 'concord'
+        const legacy = { ios: 'glass', brutal: 'neo' }
+        const styleTheme = legacy[stored.styleTheme] || stored.styleTheme
+        document.documentElement.dataset.styleTheme = ['concord', 'neo', 'glass'].includes(styleTheme) ? styleTheme : 'concord'
         document.documentElement.dataset.colorMode = resolved
         document.documentElement.style.colorScheme = resolved
       })()

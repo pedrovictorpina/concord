@@ -2,6 +2,8 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { ThemeControls } from '../../components/theme/ThemeControls'
 import { Toggle } from '../../components/ui/Toggle'
+import { styleThemes } from '../../theme/theme-registry'
+import { useTheme } from '../../theme/useTheme'
 import { useAuth } from './useAuth'
 import './AuthScreen.css'
 
@@ -45,6 +47,8 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
     signUp,
     updatePassword,
   } = useAuth()
+  const { styleTheme } = useTheme()
+  const activeThemeLabel = styleThemes.find((theme) => theme.id === styleTheme)?.label ?? 'Concord'
   const [mode, setMode] = useState<EntryMode>('sign-in')
   const [nickname, setNickname] = useState('')
   const [email, setEmail] = useState('')
@@ -256,7 +260,7 @@ export function AuthScreen({ onExplore }: AuthScreenProps) {
 
           <footer className="auth-theme-note">
             <span>ESTILO ATIVO</span>
-            <strong>Concord Neo</strong>
+            <strong>{activeThemeLabel}</strong>
             <small>O modo do dispositivo continua ativo; novos estilos entram pelo registro de temas.</small>
           </footer>
         </div>

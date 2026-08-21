@@ -362,8 +362,8 @@ test.describe('identidade e temas', () => {
     await expect(settingsDialog.getByRole('heading', { name: 'Informações do servidor' })).toBeVisible()
     await settingsDialog.getByRole('tab', { name: 'Aparência', exact: true }).click()
     await settingsDialog.getByRole('combobox', { name: 'Estilo' }).click()
-    await page.getByRole('option', { name: 'iOS Glass' }).click()
-    await expect(page.locator('html')).toHaveAttribute('data-style-theme', 'ios')
+    await page.getByRole('option', { name: 'Liquid Glass' }).click()
+    await expect(page.locator('html')).toHaveAttribute('data-style-theme', 'glass')
 
     await settingsDialog.getByRole('tab', { name: 'Canais' }).click()
     await settingsDialog.getByLabel('Nome do canal').fill('planejamento')

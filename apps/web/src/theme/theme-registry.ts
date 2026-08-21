@@ -5,20 +5,20 @@ export const defaultStyleTheme: StyleThemeId = 'concord'
 export const styleThemes: readonly StyleThemeDefinition[] = [
   {
     id: 'concord',
-    label: 'Concord Neo',
-    description: 'Neo-brutalismo em indigo, amarelo e alto contraste.',
+    label: 'Concord',
+    description: 'Fundos azulados escuros, verde da marca e superfícies em camadas.',
     available: true,
   },
   {
-    id: 'ios',
-    label: 'iOS Glass',
-    description: 'Superfícies translúcidas, cantos suaves e acentos azuis.',
+    id: 'neo',
+    label: 'Neo Brutalism',
+    description: 'Bordas fortes, sombras duras e alto contraste.',
     available: true,
   },
   {
-    id: 'brutal',
-    label: 'Brutal Signal',
-    description: 'Blocos fortes, bordas retas e amarelo de alta energia.',
+    id: 'glass',
+    label: 'Liquid Glass',
+    description: 'Transparência, profundidade, blur e movimento fluido.',
     available: true,
   },
 ]
