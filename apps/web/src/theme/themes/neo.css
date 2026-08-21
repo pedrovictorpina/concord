@@ -1,0 +1,183 @@
+/* Style Theme: Neo Brutalism
+   docs/design-system/02-neo-brutalism.md
+   Forte, direto e tatil: bordas grossas, sombras solidas sem blur,
+   cantos quase retos, alto contraste e movimento fisico nos controles. */
+
+:root[data-style-theme='neo'] {
+  --font-body: 'Space Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'Arial Black', sans-serif;
+  --font-mono: 'IBM Plex Mono', Consolas, monospace;
+  --font-label: 600 10px/1.2 var(--font-mono);
+
+  --border-width-thin: 1px;
+  --border-width: 2px;
+  --border-width-strong: 3px;
+
+  --radius-none: 0;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-control: 4px;
+  --radius-panel: 6px;
+  --radius-modal: 6px;
+
+  --motion-fast: 140ms;
+  --motion-normal: 200ms;
+  --motion-slow: 260ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+:root[data-style-theme='neo'][data-color-mode='dark'] {
+  --color-canvas: #090b10;
+  --color-surface: #171c25;
+  --color-surface-raised: #222936;
+  --color-surface-sunken: #10141b;
+
+  --color-text: #f7f2e8;
+  --color-text-strong: #ffffff;
+  --color-text-muted: #d6d8e0;
+  --color-text-faint: #969dac;
+
+  --color-border: #020306;
+  --color-border-soft: #303846;
+  --color-border-strong: #020306;
+
+  --color-accent: #00ff33;
+  --color-accent-hover: #00d92b;
+  --color-accent-contrast: #090b10;
+  --color-accent-soft: #0d3a19;
+
+  --color-secondary: #bb00ff;
+  --color-secondary-soft: #321040;
+
+  --color-success: #13a86b;
+  --color-warning: #ffb84d;
+  --color-danger: #e84545;
+  --color-info: #00ff33;
+
+  --color-overlay: rgba(9, 11, 16, .88);
+
+  --shadow-sm: 4px 4px 0 #05060a;
+  --shadow-md: 8px 8px 0 #05060a;
+  --shadow-lg: 12px 12px 0 #05060a;
+  --shadow-panel: 8px 8px 0 #05060a;
+  --shadow-modal: 12px 12px 0 #05060a;
+  --shadow-button: 4px 4px 0 #05060a;
+
+  --focus-ring: 0 0 0 3px #bb00ff;
+  --texture-opacity: .024;
+}
+
+:root[data-style-theme='neo'][data-color-mode='light'] {
+  --color-canvas: #f4f1e8;
+  --color-surface: #fffdf7;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #e8edf7;
+
+  --color-text: #111827;
+  --color-text-strong: #05070a;
+  --color-text-muted: #374151;
+  --color-text-faint: #6b7280;
+
+  --color-border: #111111;
+  --color-border-soft: #374151;
+  --color-border-strong: #000000;
+
+  --color-accent: #315bea;
+  --color-accent-hover: #2448bd;
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: #dfe7ff;
+
+  --color-secondary: #d946ef;
+  --color-secondary-soft: #f8ddff;
+
+  --color-success: #109861;
+  --color-warning: #f59e0b;
+  --color-danger: #e54848;
+  --color-info: #2563eb;
+
+  --color-overlay: rgba(244, 241, 232, .88);
+
+  --shadow-sm: 4px 4px 0 #111111;
+  --shadow-md: 8px 8px 0 #111111;
+  --shadow-lg: 12px 12px 0 #111111;
+  --shadow-panel: 8px 8px 0 #111111;
+  --shadow-modal: 12px 12px 0 #111111;
+  --shadow-button: 4px 4px 0 #111111;
+
+  --focus-ring: 0 0 0 3px #d946ef;
+  --texture-opacity: .025;
+}
+
+/* Movimento fisico: o controle se desloca contra a propria sombra.
+   Fica restrito ao Neo Brutalism e some com prefers-reduced-motion. */
+:root[data-style-theme='neo'] .settings-button,
+:root[data-style-theme='neo'] .dialog-submit,
+:root[data-style-theme='neo'] .server-list-card button,
+:root[data-style-theme='neo'] .friend-detail-message {
+  box-shadow: var(--shadow-button);
+  transition:
+    transform var(--motion-fast) var(--ease-standard),
+    box-shadow var(--motion-fast) var(--ease-standard);
+}
+
+:root[data-style-theme='neo'] .settings-button:hover:not(:disabled),
+:root[data-style-theme='neo'] .dialog-submit:hover:not(:disabled),
+:root[data-style-theme='neo'] .server-list-card button:hover:not(:disabled),
+:root[data-style-theme='neo'] .friend-detail-message:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-md);
+}
+
+:root[data-style-theme='neo'] .settings-button:active:not(:disabled),
+:root[data-style-theme='neo'] .dialog-submit:active:not(:disabled),
+:root[data-style-theme='neo'] .server-list-card button:active:not(:disabled),
+:root[data-style-theme='neo'] .friend-detail-message:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--color-border);
+}
+
+:root[data-style-theme='neo'] .settings-button:disabled,
+:root[data-style-theme='neo'] .dialog-submit:disabled {
+  box-shadow: 2px 2px 0 var(--color-border);
+  transform: none;
+}
+
+/* Focus roxo, exigido pelo documento: precisa ser inconfundivel. */
+:root[data-style-theme='neo'] button:focus-visible,
+:root[data-style-theme='neo'] input:focus-visible,
+:root[data-style-theme='neo'] select:focus-visible,
+:root[data-style-theme='neo'] textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-style-theme='neo'] .settings-button:hover:not(:disabled),
+  :root[data-style-theme='neo'] .dialog-submit:hover:not(:disabled),
+  :root[data-style-theme='neo'] .settings-button:active:not(:disabled),
+  :root[data-style-theme='neo'] .dialog-submit:active:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* Sombras solidas grandes empurram conteudo no mobile: reduz o offset. */
+@media (max-width: 760px) {
+  :root[data-style-theme='neo'][data-color-mode='dark'] {
+    --shadow-panel: 4px 4px 0 #05060a;
+    --shadow-modal: 4px 4px 0 #05060a;
+    --shadow-md: 4px 4px 0 #05060a;
+    --shadow-lg: 4px 4px 0 #05060a;
+    --shadow-button: 3px 3px 0 #05060a;
+  }
+
+  :root[data-style-theme='neo'][data-color-mode='light'] {
+    --shadow-panel: 4px 4px 0 #111111;
+    --shadow-modal: 4px 4px 0 #111111;
+    --shadow-md: 4px 4px 0 #111111;
+    --shadow-lg: 4px 4px 0 #111111;
+    --shadow-button: 3px 3px 0 #111111;
+  }
+}
